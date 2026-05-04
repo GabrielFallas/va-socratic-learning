@@ -1,44 +1,65 @@
+**UNIVERSIDAD DE COSTA RICA**  
+**SISTEMA DE ESTUDIOS DE POSGRADO**
+
 **Implementación de un Agente Virtual de Tutoría Socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM**
 
-Estudiante: Gabriel Isaías Fallas López
+**Temas Especiales de Ingeniería de Sistemas de Información: Agentes Virtuales Inteligentes**  
+**Código:** PF-3311  
+**Grupo: G1**  
+**Profesor:**   
+Prof. Alexander Barquero Elizondo 
 
-[**Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea	2**](#heading=)
+**Nombre completo:**   
+Gabriel Fallas López
 
-[**Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs	3**](#heading=)
+**Centro Universitario:** San José
 
-[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales	3](#heading=)
+**Fecha:** 4 Mayo  
+**PRIMER SEMESTRE 2026**
 
-[Desafíos de la Educación en Computación (Computing Education) ante la GenAI	4](#heading=)
+[Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea	3](#heading=)
 
-[Síntesis de Investigaciones Académicas Relevantes	5](#heading=)
+[Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs	4](#heading=)
 
-[Brechas Identificadas y Oportunidades de Contribución	7](#heading=)
+[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales	4](#heading=)
 
-[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs	7](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
+[Desafíos de la Educación en Computación (Computing Education) ante la GenAI	5](#heading=)
 
-[Personalización Adaptativa y Memoria a Largo Plazo	8](#personalización-adaptativa-y-memoria-a-largo-plazo)
+[Síntesis de Investigaciones Académicas Relevantes	6](#heading=)
 
-[Integridad Académica y el Desafío Ético de la GenAI en Programación	8](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
+[Brechas Identificadas y Oportunidades de Contribución	8](#heading=)
 
-[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual	8](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
+[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs	8](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
 
-[**Preguntas de Investigación (RQs)	9**](#heading=)
+[Personalización Adaptativa y Memoria a Largo Plazo	9](#personalización-adaptativa-y-memoria-a-largo-plazo)
 
-[**Objetivos del Agente: Rol, Comportamiento y Contexto de Uso	9**](#heading=)
+[Integridad Académica y el Desafío Ético de la GenAI en Programación	9](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
 
-[Rol del Agente	9](#heading=)
+[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual	9](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
 
-[Contexto de Uso y Usuario Objetivo	12](#heading=)
+[Preguntas de Investigación (RQs)	10](#heading=)
 
-[Objetivos Específicos de Comportamiento	12](#heading=)
+[Objetivos del Agente: Rol, Comportamiento y Contexto de Uso	10](#heading=)
 
-[**Arquitectura Técnica Preliminar	13**](#heading=)
+[Rol del Agente	10](#heading=)
 
-[Stack Tecnológico y Justificación	13](#heading=)
+[Contexto de Uso y Usuario Objetivo	13](#heading=)
 
-[Flujo de Interacción y Orquestación de Baja Latencia	14](#heading=)
+[Objetivos Específicos de Comportamiento	13](#heading=)
 
-[**Referencias Bibliográficas (APA 7\)	15**](#referencias-bibliográficas-\(apa-7\))
+[Arquitectura Técnica Preliminar	14](#heading=)
+
+[Stack Tecnológico y Justificación	14](#heading=)
+
+[Flujo de Interacción y Orquestación de Baja Latencia	15](#heading=)
+
+[Referencias Bibliográficas	16](#referencias-bibliográficas)
+
+## 
+
+## 
+
+## 
 
 ## 
 
@@ -212,7 +233,7 @@ El cerebro del agente opera bajo un sistema de *Prompt Engineering* y *system pr
 
 La arquitectura se divide en un cliente (El motor gráfico/VR) que captura la entrada del usuario (audio/texto) y la envía a un servidor central a través de protocolos WebRTC o WebSocket para procesamiento en tiempo real. El servidor actúa como el agente que coordina el STT, el LLM socrático y el TTS, devolviendo al cliente no solo el audio, sino también metadatos de animación para que el avatar realice gestos coherentes con el énfasis del discurso.
 
-## **Referencias Bibliográficas (APA 7\)** {#referencias-bibliográficas-(apa-7)}
+## **Referencias Bibliográficas** {#referencias-bibliográficas}
 
 1. Ali, S. R., et al. (2026). From Tool to Tutor: Socratic AI Tutoring, Metacognitive Engagement, and Prior Knowledge as Determinants of Learning Gains in Gateway STEM Courses. *Regional Lens*. [https://regionallens.com/index.php/rl/article/view/184](https://regionallens.com/index.php/rl/article/view/184)  
 2. Dong, Z., et al. (2026). Learning from Long-Term Engagement: Adaptive Tutoring Dialogue Planning for Personalized Education. *Proceedings of the AAAI Conference on Artificial Intelligence*. [https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946](https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946)  
