@@ -2,43 +2,43 @@
 
 Estudiante: Gabriel Isaías Fallas López
 
-[Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea](#heading=)
+[**Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea	2**](#heading=)
 
-[Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs](#heading=)
+[**Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs	3**](#heading=)
 
-[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales](#heading=)
+[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales	3](#heading=)
 
-[Desafíos de la Educación en Computación (Computing Education) ante la GenAI](#heading=)
+[Desafíos de la Educación en Computación (Computing Education) ante la GenAI	4](#heading=)
 
-[Síntesis de Investigaciones Académicas Relevantes](#heading=)
+[Síntesis de Investigaciones Académicas Relevantes	5](#heading=)
 
-[Brechas Identificadas y Oportunidades de Contribución](#heading=)
+[Brechas Identificadas y Oportunidades de Contribución	7](#heading=)
 
-[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
+[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs	7](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
 
-[Personalización Adaptativa y Memoria a Largo Plazo](#personalización-adaptativa-y-memoria-a-largo-plazo)
+[Personalización Adaptativa y Memoria a Largo Plazo	8](#personalización-adaptativa-y-memoria-a-largo-plazo)
 
-[Integridad Académica y el Desafío Ético de la GenAI en Programación](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
+[Integridad Académica y el Desafío Ético de la GenAI en Programación	8](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
 
-[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
+[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual	8](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
 
-[Preguntas de Investigación (RQs)](#heading=)
+[**Preguntas de Investigación (RQs)	9**](#heading=)
 
-[Objetivos del Agente: Rol, Comportamiento y Contexto de Uso](#heading=)
+[**Objetivos del Agente: Rol, Comportamiento y Contexto de Uso	9**](#heading=)
 
-[Rol del Agente](#heading=)
+[Rol del Agente	9](#heading=)
 
-[Contexto de Uso y Usuario Objetivo](#heading=)
+[Contexto de Uso y Usuario Objetivo	12](#heading=)
 
-[Objetivos Específicos de Comportamiento](#heading=)
+[Objetivos Específicos de Comportamiento	12](#heading=)
 
-[Arquitectura Técnica Preliminar](#heading=)
+[**Arquitectura Técnica Preliminar	13**](#heading=)
 
-[Stack Tecnológico y Justificación](#heading=)
+[Stack Tecnológico y Justificación	13](#heading=)
 
-[Flujo de Interacción y Orquestación de Baja Latencia](#heading=)
+[Flujo de Interacción y Orquestación de Baja Latencia	14](#heading=)
 
-[Referencias Bibliográficas (APA 7\)](#referencias-bibliográficas-\(apa-7\))
+[**Referencias Bibliográficas (APA 7\)	15**](#referencias-bibliográficas-\(apa-7\))
 
 ## 
 
