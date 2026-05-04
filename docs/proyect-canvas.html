@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Sesión Presencial #1 - Agente Virtual Corporizado STEM</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+		/>
+		<style>
+			/* 1. SETUP & CORE DESIGN */
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				background-color: #0f172a;
+				display: grid;
+				gap: 40px;
+				grid-template-columns: 1fr;
+				margin: 0;
+				padding: 40px 0;
+				place-items: center;
+				font-family: "Lato", sans-serif;
+				color: #f1f5f9;
+			}
+
+			.slide-container {
+				width: 1280px;
+				height: 720px;
+				background-color: #1e293b;
+				border-radius: 12px;
+				box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+				position: relative;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				padding: 60px;
+			}
+
+			.slide-container::before {
+				content: "";
+				position: absolute;
+				top: -100px;
+				right: -100px;
+				width: 400px;
+				height: 400px;
+				background: radial-gradient(
+					circle,
+					rgba(14, 165, 233, 0.15) 0%,
+					transparent 70%
+				);
+				z-index: 0;
+			}
+
+			.slide-container::after {
+				content: "";
+				position: absolute;
+				bottom: -50px;
+				left: -50px;
+				width: 300px;
+				height: 300px;
+				background: radial-gradient(
+					circle,
+					rgba(45, 212, 191, 0.1) 0%,
+					transparent 70%
+				);
+				z-index: 0;
+			}
+
+			.slide-container > * {
+				z-index: 1;
+			}
+
+			/* 2. TYPOGRAPHY */
+			h1,
+			h2,
+			h3 {
+				font-family: "Poppins", sans-serif;
+				margin: 0;
+				line-height: 1.2;
+			}
+
+			h1 {
+				font-size: 54px;
+				color: #38bdf8;
+				font-weight: 700;
+				text-align: center;
+			}
+			.slide-title {
+				font-size: 42px;
+				color: #2dd4bf;
+				margin-bottom: 40px;
+				font-weight: 600;
+				border-left: 6px solid #38bdf8;
+				padding-left: 20px;
+			}
+			p,
+			li {
+				font-size: 20px;
+				color: #cbd5e1;
+				line-height: 1.6;
+			}
+
+			.content-area {
+				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				width: 100%;
+			}
+
+			/* 3. LAYOUT SPECIFICS */
+			.title-layout {
+				text-align: center;
+				justify-content: center;
+				height: 100%;
+			}
+			.subtitle {
+				font-size: 28px;
+				color: #94a3b8;
+				margin-top: 30px;
+				font-weight: 300;
+			}
+			.author {
+				font-size: 22px;
+				color: #38bdf8;
+				margin-top: 50px;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+			}
+
+			.two-column {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 40px;
+				width: 100%;
+			}
+			.two-column.tiled > div {
+				background: rgba(255, 255, 255, 0.05);
+				padding: 40px;
+				border-radius: 16px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+			}
+			.two-column.tiled h3 {
+				color: #38bdf8;
+				margin-bottom: 20px;
+				font-size: 28px;
+			}
+
+			.image-wrapper {
+				border-radius: 20px;
+				overflow: hidden;
+				height: 320px;
+				border: 4px solid #334155;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+			}
+			.image-wrapper img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+
+			.bullet-list ul {
+				list-style: none;
+				padding: 0;
+			}
+			.bullet-list li {
+				position: relative;
+				padding-left: 50px;
+				margin-bottom: 30px;
+			}
+			.bullet-list i {
+				position: absolute;
+				left: 0;
+				top: 5px;
+				font-size: 28px;
+				color: #38bdf8;
+			}
+
+			/* Sample Slide Specifics */
+			.sample-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 15px;
+			}
+			.sample-card {
+				background: rgba(56, 189, 248, 0.05);
+				border: 1px solid rgba(56, 189, 248, 0.2);
+				border-radius: 12px;
+				padding: 15px 20px;
+				display: flex;
+				align-items: center;
+				gap: 20px;
+				transition: transform 0.3s ease;
+			}
+			.sample-card:hover {
+				transform: translateX(10px);
+				background: rgba(56, 189, 248, 0.1);
+			}
+			.sample-card i {
+				font-size: 28px;
+				color: #38bdf8;
+				min-width: 45px;
+				text-align: center;
+			}
+			.sample-card h4 {
+				color: #2dd4bf;
+				margin: 0 0 2px 0;
+				font-size: 18px;
+				font-family: "Poppins", sans-serif;
+			}
+			.sample-card p {
+				margin: 0;
+				font-size: 15px;
+				color: #cbd5e1;
+				line-height: 1.4;
+			}
+
+			.tag {
+				display: inline-block;
+				background: #38bdf8;
+				color: #0f172a;
+				padding: 4px 12px;
+				border-radius: 20px;
+				font-size: 14px;
+				font-weight: 700;
+				margin-bottom: 10px;
+				text-transform: uppercase;
+			}
+
+			.timeline-layout {
+				position: relative;
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				margin-top: 60px;
+			}
+			.timeline-line {
+				position: absolute;
+				top: 30px;
+				left: 0;
+				width: 100%;
+				height: 4px;
+				background: #334155;
+				z-index: 0;
+			}
+			.timeline-item {
+				width: 30%;
+				position: relative;
+				z-index: 1;
+				text-align: center;
+			}
+			.timeline-item::before {
+				content: "";
+				width: 24px;
+				height: 24px;
+				background: #38bdf8;
+				border-radius: 50%;
+				display: inline-block;
+				margin-bottom: 20px;
+				box-shadow: 0 0 15px #38bdf8;
+			}
+			.timeline-item h3 {
+				color: #2dd4bf;
+				margin-bottom: 10px;
+				font-size: 22px;
+			}
+			.timeline-item .dialogue {
+				font-size: 16px;
+				text-align: left;
+				background: rgba(15, 23, 42, 0.4);
+				padding: 15px;
+				border-radius: 10px;
+				border: 1px dashed #475569;
+			}
+
+			.table-layout table {
+				width: 100%;
+				border-collapse: collapse;
+				background: rgba(255, 255, 255, 0.03);
+			}
+			.table-layout th {
+				background: #334155;
+				color: #38bdf8;
+				text-align: left;
+				padding: 20px;
+				font-size: 20px;
+			}
+			.table-layout td {
+				padding: 18px;
+				border-bottom: 1px solid #334155;
+				font-size: 16px;
+			}
+
+			.bleed-image-layout {
+				padding: 0;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				align-items: start;
+			}
+			.bleed-image-layout .content-container {
+				padding: 60px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				height: 100%;
+			}
+			.bleed-image-layout .image-container {
+				height: 720px;
+				width: 100%;
+			}
+			.bleed-image-layout img.bleed-image-side {
+				height: 720px;
+				width: 100%;
+				object-fit: cover;
+			}
+
+			.qa-layout {
+				text-align: center;
+			}
+			.qa-layout h2 {
+				font-size: 100px;
+				color: #38bdf8;
+				margin-bottom: 20px;
+			}
+
+			.metrics-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 24px;
+				width: 100%;
+			}
+
+			.metric-card {
+				background: rgba(255, 255, 255, 0.05);
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				border-radius: 18px;
+				padding: 28px;
+				min-height: 240px;
+			}
+
+			.metric-card .metric-value {
+				font-family: "Poppins", sans-serif;
+				font-size: 54px;
+				line-height: 1;
+				color: #38bdf8;
+				margin-bottom: 14px;
+				font-weight: 700;
+			}
+
+			.metric-card h3 {
+				color: #2dd4bf;
+				font-size: 22px;
+				margin-bottom: 12px;
+			}
+
+			.metric-card p {
+				font-size: 16px;
+				line-height: 1.5;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- SLIDE 1: Portada -->
+		<div class="slide-container" id="slide1">
+			<div class="title-layout">
+				<div class="author">Sesión Presencial #1</div>
+				<h1>Agente Virtual Corporizado de Tutoría Socrática</h1>
+				<p class="subtitle">
+					Evaluación de factibilidad técnica y pedagógica mediante piloto con
+					expertos
+				</p>
+				<div class="author">Gabriel Fallas</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 2: Abstract -->
+		<div class="slide-container" id="slide3">
+			<h2 class="slide-title">Abstract del Proyecto</h2>
+			<div class="content-area">
+				<div class="two-column tiled">
+					<div>
+						<h3>Enfoque</h3>
+						<p>
+							Desarrollo de un <strong>agente virtual corporizado</strong> en
+							Unity con
+							<strong>avatar, voz, lip sync y gestos básicos</strong> para guiar
+							a estudiantes de programación mediante el método socrático y una
+							interacción multimodal natural.
+						</p>
+					</div>
+					<div>
+						<h3>Metodología</h3>
+						<p>
+							Validación mediante un
+							<strong>piloto acotado al curso</strong> con evaluación por
+							expertos, recolección de métricas objetivas y subjetivas, y
+							observación del desempeño del agente en tareas de depuración sin
+							entregar código directo.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 3: RQs -->
+		<div class="slide-container" id="slide4">
+			<h2 class="slide-title">Preguntas de Investigación (RQs)</h2>
+			<div class="content-area">
+				<div class="bullet-list">
+					<ul>
+						<li>
+							<i class="fa-solid fa-user-astronaut"></i>
+							<strong>RQ1:</strong> ¿Cómo afecta la presencia de un
+							<strong>avatar corporizado con voz, lip sync y gestos</strong> la
+							percepción de naturalidad, presencia y fluidez pedagógica durante
+							la tutoría? <strong>Métricas:</strong> escala Likert, observación
+							experta y notas de interacción.
+						</li>
+						<li>
+							<i class="fa-solid fa-brain"></i> <strong>RQ2:</strong> ¿En qué
+							medida la tutoría socrática del agente permite que la persona
+							evaluada
+							<strong
+								>identifique y corrija errores lógicos sin recibir código
+								directo</strong
+							>? <strong>Métricas:</strong> porcentaje de resolución autónoma,
+							tiempo por tarea y calidad de la pista.
+						</li>
+						<li>
+							<i class="fa-solid fa-gauge-high"></i> <strong>RQ3:</strong> ¿Qué
+							relación existe entre la
+							<strong>latencia total de respuesta multimodal</strong> y la
+							percepción de continuidad conversacional en el piloto?
+							<strong>Métricas:</strong> tiempo de respuesta extremo a extremo,
+							tasa de fallos de audio y satisfacción reportada.
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 4: Perfil de la Muestra (Rediseñado para Factibilidad Real) -->
+		<div class="slide-container" id="slide7">
+			<h2 class="slide-title">5.1. Piloto y Evaluación con Expertos</h2>
+			<div class="content-area">
+				<div
+					class="two-column"
+					style="grid-template-columns: 0.9fr 1.1fr; align-items: stretch"
+				>
+					<!-- Columna Izquierda: El Grupo de Control Proximidad -->
+					<div style="display: flex; flex-direction: column">
+						<div class="tag">Panel de Evaluación Experta</div>
+						<div class="sample-grid">
+							<div class="sample-card">
+								<i class="fa-solid fa-user-tie"></i>
+								<div>
+									<h4>Docentes de Facultad (Expertos)</h4>
+									<p>
+										3 evaluadores internos con experiencia en lógica de
+										programación, algoritmos y acompañamiento pedagógico.
+									</p>
+								</div>
+							</div>
+							<div class="sample-card">
+								<i class="fa-solid fa-laptop-code"></i>
+								<div>
+									<h4>Asistentes de Docencia (Senior)</h4>
+									<p>
+										Estudiantes avanzados que ya ejercen mentoría y pueden
+										valorar utilidad, naturalidad y claridad de las pistas.
+									</p>
+								</div>
+							</div>
+							<div class="sample-card">
+								<i class="fa-solid fa-microscope"></i>
+								<div>
+									<h4>Enfoque Heurístico</h4>
+									<p>
+										Validación del comportamiento del agente bajo estrés técnico
+										y observación de la interacción multimodal corporizada.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="image-wrapper" style="margin-top: 20px; height: 180px">
+							<img
+								src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000&auto=format&fit=crop"
+								alt="Colaboración universitaria ágil"
+							/>
+						</div>
+					</div>
+
+					<!-- Columna Derecha: Ejecución en Semana 11 -->
+					<div
+						style="
+							background: rgba(15, 23, 42, 0.3);
+							padding: 30px;
+							border-radius: 20px;
+							border: 1px solid rgba(255, 255, 255, 0.05);
+						"
+					>
+						<div class="tag" style="background: #eab308; color: #000">
+							Ejecución del Piloto - Semana 11
+						</div>
+						<h3 style="color: #38bdf8; margin-bottom: 20px">
+							Reclutamiento por Proximidad
+						</h3>
+						<div class="bullet-list">
+							<ul>
+								<li style="font-size: 18px; margin-bottom: 20px">
+									<i class="fa-solid fa-users"></i>
+									<strong>Convocatoria Interna:</strong> Selección de
+									evaluadores del entorno académico inmediato (Facultad de
+									Ingeniería).
+								</li>
+								<li style="font-size: 18px; margin-bottom: 20px">
+									<i class="fa-solid fa-vial-circle-check"></i>
+									<strong>Test Rápido:</strong> Sesiones de 15-20 min enfocadas
+									en naturalidad de la interacción, utilidad de la guía
+									socrática y robustez técnica.
+								</li>
+								<li style="font-size: 18px; margin-bottom: 20px">
+									<i class="fa-solid fa-clipboard-list"></i>
+									<strong>Instrumento:</strong> Cuestionario corto de 5
+									preguntas, rúbrica experta y registro de métricas de latencia,
+									éxito por tarea y errores de audio.
+								</li>
+								<li style="font-size: 18px; margin-bottom: 0">
+									<i class="fa-solid fa-forward-step"></i>
+									<strong>Alcance del Proyecto:</strong> Presentar un
+									<strong>MVP funcional del curso</strong> listo para un piloto
+									con expertos, no una validación a escala industrial.
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 5: Stack Tecnológico (Google Suite + Unity) -->
+		<div class="slide-container bleed-image-layout" id="slide8">
+			<div class="content-container">
+				<h2 class="slide-title">5.2. Stack Tecnológico</h2>
+				<div class="content-area">
+					<div class="bullet-list">
+						<ul>
+							<li>
+								<i class="fa-brands fa-unity"></i>
+								<strong>Sistema y rendering:</strong> Unity 3D para escena,
+								gestión de estados, UI y renderizado del avatar.
+							</li>
+							<li>
+								<i class="fa-solid fa-user"></i>
+								<strong>Embodiment:</strong> Avatar corporizado con animación
+								facial, <strong>lip sync</strong>, expresiones y gestos básicos
+								sincronizados con la respuesta.
+							</li>
+							<li>
+								<i class="fa-solid fa-bolt-lightning"></i>
+								<strong>Motor cognitivo:</strong> LLM conversacional para
+								tutoría socrática y razonamiento sobre errores de programación.
+							</li>
+							<li>
+								<i class="fa-solid fa-wave-square"></i>
+								<strong>TTS / STT:</strong> Entrada por voz a texto y salida de
+								texto a voz para sostener la interacción natural multimodal.
+							</li>
+							<li>
+								<i class="fa-solid fa-chart-line"></i>
+								<strong>Telemetría:</strong> Registro de latencia, turnos, tasa
+								de error, satisfacción y resolución de tareas durante el piloto.
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="image-container">
+				<img
+					class="bleed-image-side"
+					src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop"
+					alt="Infraestructura de Google Cloud"
+				/>
+			</div>
+		</div>
+
+		<!-- SLIDE 6: El "Camino Feliz" (Storyboarding Gemini) -->
+		<div class="slide-container" id="slide9">
+			<h2 class="slide-title">5.3. El "Camino Feliz" (Storyboarding)</h2>
+			<div class="content-area">
+				<p style="margin-bottom: 20px; color: #38bdf8; font-weight: bold">
+					Flujo multimodal con voz, avatar y baja latencia
+				</p>
+				<div class="timeline-layout">
+					<div class="timeline-line"></div>
+					<div class="timeline-item">
+						<h3>Paso 1: Input</h3>
+						<div class="dialogue">
+							<strong>H:</strong> "Mi algoritmo de ordenamiento falla".<br />
+							<strong>A:</strong> (Procesando en &lt; 500ms) El avatar mira al
+							usuario y responde con voz sincronizada: "¿Estás comparando el
+							elemento actual con el siguiente o con el anterior?".
+						</div>
+					</div>
+					<div class="timeline-item">
+						<h3>Paso 2: Guía</h3>
+						<div class="dialogue">
+							<strong>H:</strong> "Con el anterior, pero el índice me da
+							error".<br />
+							<strong>A:</strong> El avatar enfatiza la pista con gesto de duda:
+							"¿Qué sucede con el índice cuando intentas acceder a la posición
+							-1 en el primer ciclo?".
+						</div>
+					</div>
+					<div class="timeline-item">
+						<h3>Paso 3: Cierre</h3>
+						<div class="dialogue">
+							<strong>H:</strong> "¡Debería empezar el ciclo en 1!".<br />
+							<strong>A:</strong> El avatar sonríe y asiente: "Excelente
+							deducción. Lo resolviste sin que yo te diera el código".
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 7: El "Camino Difícil" (Manejo de Errores Gemini) -->
+		<div class="slide-container" id="slide10">
+			<h2 class="slide-title">5.4. El "Camino Difícil" (Manejo de Errores)</h2>
+			<div class="content-area">
+				<div class="table-layout">
+					<table>
+						<thead>
+							<tr>
+								<th>Riesgo del Agente</th>
+								<th>¿Qué puede salir mal?</th>
+								<th>Mitigación / Manejo</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><strong>Límite de Cuota (Rate Limit)</strong></td>
+								<td>Exceso de peticiones simultáneas del panel de expertos.</td>
+								<td>
+									Configurar <strong>manejo de errores 429</strong> con
+									reintentos automáticos (Backoff).
+								</td>
+							</tr>
+							<tr>
+								<td><strong>Falla en Audio (TTS)</strong></td>
+								<td>
+									El modelo genera texto pero el flujo de audio se corrompe.
+								</td>
+								<td>
+									Implementar <strong>descompresión de PCM a WAV</strong> en
+									Unity con buffer de seguridad.
+								</td>
+							</tr>
+							<tr>
+								<td><strong>Desincronización del Avatar</strong></td>
+								<td>
+									La voz responde, pero el lip sync o los gestos no coinciden
+									con la salida.
+								</td>
+								<td>
+									Separar animación base y visemas, con fallback visual si el
+									sincronizador falla.
+								</td>
+							</tr>
+							<tr>
+								<td><strong>Inconsistencia Socrática</strong></td>
+								<td>El modelo alucina y da la respuesta por error.</td>
+								<td>
+									Uso estricto de <strong>System Instructions</strong> en Google
+									AI Studio (Top-P bajo).
+								</td>
+							</tr>
+							<tr>
+								<td><strong>Corte de API Key</strong></td>
+								<td>La llave expira o se bloquea durante la evaluación.</td>
+								<td>
+									Sistema de <strong>Key de Respaldo</strong> cargada
+									dinámicamente en el ScriptableObject de Unity.
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 8: Resultados Esperados -->
+		<div class="slide-container" id="slide11">
+			<h2 class="slide-title">5.5. Resultados Esperados del Piloto</h2>
+			<div class="content-area">
+				<div class="metrics-grid">
+					<div class="metric-card">
+						<div class="metric-value">80%</div>
+						<h3>Resolución Autónoma</h3>
+						<p>
+							Meta de tareas resueltas por la persona usuaria sin recibir código
+							directo, solo pistas socráticas.
+						</p>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">&lt;1.5s</div>
+						<h3>Latencia Total</h3>
+						<p>
+							Respuesta extremo a extremo esperada para sostener continuidad
+							conversacional percibida como natural.
+						</p>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">4.2/5</div>
+						<h3>Naturalidad</h3>
+						<p>
+							Puntaje esperado en presencia, claridad de voz y coherencia entre
+							avatar, gesto y contenido de la respuesta.
+						</p>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">90%</div>
+						<h3>Estabilidad Técnica</h3>
+						<p>
+							Meta de interacciones sin errores críticos de audio, animación o
+							conexión durante la sesión piloto.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SLIDE 9: Q&A -->
+		<div class="slide-container" id="slide12">
+			<div class="content-area">
+				<div class="qa-layout">
+					<h2>¿Preguntas?</h2>
+					<p>
+						Agente corporizado, interacción multimodal y piloto con expertos
+					</p>
+					<p style="margin-top: 50px; color: #38bdf8; font-weight: 700">
+						Gracias por su atención
+					</p>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
