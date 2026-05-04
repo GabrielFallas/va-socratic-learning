@@ -17,6 +17,8 @@ Gabriel Fallas López
 **Fecha:** 4 Mayo  
 **PRIMER SEMESTRE 2026**
 
+Tabla de contenidos
+
 [Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea	3](#heading=)
 
 [Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs	4](#heading=)
