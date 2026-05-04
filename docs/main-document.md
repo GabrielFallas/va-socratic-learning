@@ -1,6 +1,56 @@
-# **Implementación de un Agente Virtual de Tutoría Socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM**
+**Implementación de un Agente Virtual de Tutoría Socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM**
 
 Estudiante: Gabriel Isaías Fallas López
+
+[Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea](#heading=)
+
+[Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs](#heading=)
+
+[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales](#heading=)
+
+[Desafíos de la Educación en Computación (Computing Education) ante la GenAI](#heading=)
+
+[Síntesis de Investigaciones Académicas Relevantes](#heading=)
+
+[Brechas Identificadas y Oportunidades de Contribución](#heading=)
+
+[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
+
+[Personalización Adaptativa y Memoria a Largo Plazo](#personalización-adaptativa-y-memoria-a-largo-plazo)
+
+[Integridad Académica y el Desafío Ético de la GenAI en Programación](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
+
+[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
+
+[Preguntas de Investigación (RQs)](#heading=)
+
+[Objetivos del Agente: Rol, Comportamiento y Contexto de Uso](#heading=)
+
+[Rol del Agente](#heading=)
+
+[Contexto de Uso y Usuario Objetivo](#heading=)
+
+[Objetivos Específicos de Comportamiento](#heading=)
+
+[Arquitectura Técnica Preliminar](#heading=)
+
+[Stack Tecnológico y Justificación](#heading=)
+
+[Flujo de Interacción y Orquestación de Baja Latencia](#heading=)
+
+[Referencias Bibliográficas (APA 7\)](#referencias-bibliográficas-\(apa-7\))
+
+## 
+
+## 
+
+## 
+
+## 
+
+## 
+
+## 
 
 ## **Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea**
 
@@ -59,19 +109,19 @@ A pesar del avance en modelos socráticos y en la visualización de avatares, ex
 
 Esta investigación pretende abordar esta brecha mediante la implementación de un Agente Virtual Corporizado de Tutoría Socrática (AVTS) que utilice LLMs no solo para el diálogo, sino para orquestar una respuesta multimodal (voz, gestos, expresiones faciales) que refuerce el andamiaje pedagógico. El aporte original radica en la creación de un sistema de inteligencia restringida, fundamentado en la arquitectura Milo y en protocolos de *Teach-Back*, transforme la interacción de programación de una búsqueda de soluciones a un ejercicio de descubrimiento guiado.
 
-### **El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs**
+### **El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs** {#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms}
 
 La transformación de los Grandes Modelos de Lenguaje(LLMs) de simples generadores de texto a educadores dialógicos marca lo que se denomina el Giro Socrático en la IA. Esta evolución no es automática, ya que requiere procesos de alineación técnica para que el modelo priorice el andamiaje sobre la respuesta directa. Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo (*Reinforcement Learning*) es fundamental para alinear los LLMs con principios pedagógicos específicos, permitiendo que el sistema pase de ser un resolvedor de problemas a un profesor de resolución de problemas. Este enfoque garantiza que el agente mantenga la consistencia en su rol no directivo, evitando la tendencia natural de los modelos base a proporcionar soluciones inmediatas.
 
-### **Personalización Adaptativa y Memoria a Largo Plazo**
+### **Personalización Adaptativa y Memoria a Largo Plazo** {#personalización-adaptativa-y-memoria-a-largo-plazo}
 
 La eficacia de un sistema de tutoría inteligente (ITS) en ingeniería depende de su capacidad para personalizar la instrucción según el historial del usuario. Rodrigues et al. (2025) subrayan que la personalización impulsada por IA debe enfatizar la trayectoria individual del estudiante dentro del currículo de ingeniería. En este sentido, Dong et al. (2026) argumentan que la memoria a largo plazo y la planificación del diálogo adaptativo son vitales para mantener el compromiso durante interacciones prolongadas. Un agente que recuerda errores previos o conceptos ya dominados puede ajustar la complejidad de sus preguntas socráticas, evitando la redundancia y fomentando un flujo de aprendizaje continuo.
 
-### **Integridad Académica y el Desafío Ético de la GenAI en Programación**
+### **Integridad Académica y el Desafío Ético de la GenAI en Programación** {#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación}
 
 La integración de la IA generativa en la educación en computación introduce riesgos significativos para la integridad académica y la formación de modelos mentales. Raihan et al. (2025) advierten que, si bien los LLMs pueden completar la mayoría de las asignaturas introductorias, su uso sin restricciones compromete la calidad del aprendizaje profundo. Gimpel et al. (2023) proponen un marco de trabajo que equilibre el poder de la GenAI con prácticas que aseguren que el estudiante siga siendo el agente principal del proceso cognitivo. La literatura sugiere que la tutoría socrática actúa como un mecanismo de mitigación, ya que transforma la interacción de una búsqueda de respuestas en un ejercicio guiado, protegiendo el desarrollo de la lógica algorítmica del estudiante.
 
-### **Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual**
+### **Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual** {#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual}
 
 La trayectoria de los Agentes Pedagógicos Incorporados (EPAs) ha mostrado una transición clara hacia la multimodalidad inmersiva. Una revisión sistemática de Sonlu et al. (2024) sobre la última década (2014-2024) destaca que las innovaciones más recientes se centran en la sincronización de señales no verbales para aumentar la presencia social. En entornos de Realidad Virtual (VR), la capacidad del agente permite la interacción entre múltiples usuarios en un espacio virtual compartido, siendo más inmersivo en comparación a un ambiente más sintético. Jolibois et al. (2024) enfatizan que el diseño de agentes conversacionales expresivos debe integrar el procesamiento de audio y visión de forma concurrente para reducir la carga cognitiva externa y mejorar la verosimilitud de la experiencia educativa.
 
@@ -162,7 +212,7 @@ El cerebro del agente opera bajo un sistema de *Prompt Engineering* y *system pr
 
 La arquitectura se divide en un cliente (El motor gráfico/VR) que captura la entrada del usuario (audio/texto) y la envía a un servidor central a través de protocolos WebRTC o WebSocket para procesamiento en tiempo real. El servidor actúa como el agente que coordina el STT, el LLM socrático y el TTS, devolviendo al cliente no solo el audio, sino también metadatos de animación para que el avatar realice gestos coherentes con el énfasis del discurso.
 
-## **Referencias Bibliográficas (APA 7\)**
+## **Referencias Bibliográficas (APA 7\)** {#referencias-bibliográficas-(apa-7)}
 
 1. Ali, S. R., et al. (2026). From Tool to Tutor: Socratic AI Tutoring, Metacognitive Engagement, and Prior Knowledge as Determinants of Learning Gains in Gateway STEM Courses. *Regional Lens*. [https://regionallens.com/index.php/rl/article/view/184](https://regionallens.com/index.php/rl/article/view/184)  
 2. Dong, Z., et al. (2026). Learning from Long-Term Engagement: Adaptive Tutoring Dialogue Planning for Personalized Education. *Proceedings of the AAAI Conference on Artificial Intelligence*. [https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946](https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946)  
