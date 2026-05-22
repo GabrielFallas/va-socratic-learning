@@ -1,1 +1,6 @@
 /context
+.next
+node_modules
+.env.local
+test-results
+playwright-report
