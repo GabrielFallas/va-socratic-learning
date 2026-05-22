@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo Experimental — Ada AVTS | PF-3311</title>
+    <style>
+        :root {
+            --primary: #0F3B82;
+            --primary-light: #2A5BAA;
+            --accent: #7C3AED;
+            --accent-light: #A78BFA;
+            --success: #059669;
+            --warning: #D97706;
+            --danger: #DC2626;
+            --bg-body: #F4F7F6;
+            --bg-card: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --radius: 10px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.07);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container { max-width: 860px; width: 100%; }
+
+        /* Header institucional */
+        .header-institucional {
+            background: linear-gradient(135deg, #0F3B82, #1e4db0);
+            color: white;
+            border-radius: var(--radius);
+            padding: 32px 36px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+        .header-institucional .ucr-label {
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 6px;
+        }
+        .header-institucional h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .header-institucional .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 18px 20px;
+        }
+        .metadata-grid .meta-item { font-size: 0.88rem; line-height: 1.5; }
+        .metadata-grid .meta-item strong { opacity: 0.7; display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px 36px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 .step-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        h3 {
+            color: var(--primary-light);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+        p { margin-bottom: 12px; color: var(--text-main); font-size: 0.95rem; }
+
+        /* Cita del investigador */
+        .quote {
+            background: linear-gradient(135deg, #EFF6FF, #F0F9FF);
+            border-left: 4px solid var(--primary-light);
+            padding: 14px 18px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin: 14px 0;
+            font-style: italic;
+            color: #1E3A5F;
+            font-size: 0.93rem;
+            line-height: 1.6;
+        }
+        .quote strong { font-style: normal; color: var(--primary); }
+
+        /* Checklist */
+        .checkbox-list { list-style: none; padding-left: 0; margin-bottom: 12px; }
+        .checkbox-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+        .checkbox-list li::before {
+            content: '☐';
+            font-size: 1.2rem;
+            margin-right: 12px;
+            color: var(--primary-light);
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        /* Alerta / Warning */
+        .alert {
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .alert.warning { background: #FEF3C7; border: 1px solid #FCD34D; color: #78350F; }
+        .alert.danger  { background: #FEE2E2; border: 1px solid #FCA5A5; color: #7F1D1D; }
+        .alert.success { background: #D1FAE5; border: 1px solid #6EE7B7; color: #064E3B; }
+        .alert.info    { background: #DBEAFE; border: 1px solid #93C5FD; color: #1E3A5F; }
+        .alert .icon { font-size: 1.2rem; flex-shrink: 0; }
+        .alert .content strong { display: block; margin-bottom: 4px; }
+
+        /* Tabla */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+        th { background: var(--primary); color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        tr:nth-child(even) td { background: #F8FAFC; }
+        td strong { color: var(--primary); }
+
+        /* Condición Grupo */
+        .group-box {
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin: 12px 0;
+        }
+        .group-box.group-a { background: #EDE9FE; border: 2px solid var(--accent-light); }
+        .group-box.group-b { background: #F0FDF4; border: 2px solid #86EFAC; }
+        .group-box .group-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-box.group-a .group-title { color: #5B21B6; }
+        .group-box.group-b .group-title { color: #166534; }
+        .group-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .badge-a { background: var(--accent); color: white; }
+        .badge-b { background: #16A34A; color: white; }
+
+        /* Consentimiento */
+        .consent-section { background: #FAFAFA; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; margin: 16px 0; }
+        .consent-section h4 { font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .consent-section p { font-size: 0.88rem; }
+
+        /* Cuestionarios lista */
+        .questionnaire-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 14px 0;
+        }
+        .q-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+        }
+        .q-item .q-name { font-weight: 700; color: var(--primary); font-size: 0.9rem; margin-bottom: 4px; }
+        .q-item .q-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+        .q-item .q-time { font-size: 0.78rem; color: var(--success); font-weight: 600; margin-top: 6px; }
+
+        /* Tareas */
+        .task-box {
+            background: #FAFAFA;
+            border-left: 4px solid var(--primary-light);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 16px 20px;
+            margin: 14px 0;
+        }
+        .task-box .task-title { font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 0.95rem; }
+        .task-box .task-code {
+            background: #1E293B;
+            color: #E2E8F0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            margin: 10px 0;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        .task-box .task-obj { font-size: 0.88rem; color: var(--text-muted); margin-top: 8px; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .footer strong { color: var(--primary); }
+
+        /* Anonimización */
+        .anon-table td:first-child { font-weight: 600; color: var(--primary); white-space: nowrap; }
+
+        @media (max-width: 600px) {
+            .metadata-grid { grid-template-columns: 1fr; }
+            .questionnaire-grid { grid-template-columns: 1fr; }
+            .card { padding: 20px; }
+            .header-institucional { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER INSTITUCIONAL -->
+    <div class="header-institucional">
+        <div class="ucr-label">Universidad de Costa Rica · Sistema de Estudios de Posgrado · ECCI</div>
+        <h1>Guía de Procedimiento del Investigador</h1>
+        <p class="subtitle">Estudio AVTS — Ada: Tutora Socrática Corporeizada · Sesión de Laboratorio Controlada</p>
+        <div class="metadata-grid">
+            <div class="meta-item">
+                <strong>Código de Proyecto</strong>
+                PF-3311-G1-2026
+            </div>
+            <div class="meta-item">
+                <strong>Código de Estudio</strong>
+                AVTS-POC-2026-01
+            </div>
+            <div class="meta-item">
+                <strong>Investigador Principal</strong>
+                Gabriel Isaías Fallas López, Bachillerato
+            </div>
+            <div class="meta-item">
+                <strong>Tutor Académico</strong>
+                Prof. Alexander Barquero Elizondo, M.Sc.
+            </div>
+            <div class="meta-item">
+                <strong>Unidad Ejecutora</strong>
+                Escuela de Ciencias de la Computación e Informática (ECCI) — UCR
+            </div>
+            <div class="meta-item">
+                <strong>Período de Recolección</strong>
+                Semana 11 — I Semestre 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- RESUMEN DEL ESTUDIO -->
+    <div class="card">
+        <h2><span class="step-badge">i</span> Resumen del Estudio y Objetivo</h2>
+        <p>Esta guía detalla el protocolo paso a paso para evaluar la interacción de los participantes con <strong>Ada</strong>, un Agente Virtual de Tutoría Socrática (AVTS), en sesión única y controlada de laboratorio. El estudio compara dos condiciones:</p>
+        <div class="group-box group-a">
+            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental</div>
+            <p style="margin:0; font-size:0.9rem;">Ada como agente corporizado completo: <strong>avatar VRM animado</strong> (Three.js), voz TTS (Gemini Flash), lip-sync mediante visemas VRM, y gestos deícticos. Interacción mediante voz y/o texto.</p>
+        </div>
+        <div class="group-box group-b">
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control (Baseline)</div>
+            <p style="margin:0; font-size:0.9rem;">Ada como <strong>interfaz de chat en texto plano</strong>. Mismo LLM socrático idéntico, sin representación visual, sin voz, sin animaciones. Input solo por teclado.</p>
+        </div>
+
+        <div class="alert info" style="margin-top:16px;">
+            <span class="icon">🎯</span>
+            <div class="content">
+                <strong>Objetivo científico (NO revelar al participante)</strong>
+                Medir si la presencia del embodiment multimodal (avatar + voz + gestos) mejora la presencia social percibida, el perceived pedagogical support, la usabilidad y el estado afectivo en comparación con la interfaz de texto puro, manteniendo constante el contenido de la tutoría socrática.
+            </div>
+        </div>
+
+        <h3>Checklist de Materiales — Antes de Iniciar Cada Sesión</h3>
+        <ul class="checkbox-list">
+            <li>Formulario de Consentimiento Informado impreso (2 copias por participante).</li>
+            <li>Computadora de laboratorio configurada: plataforma Ada cargada en la URL correspondiente, audio probado, micrófono funcional.</li>
+            <li>Audífonos con micrófono desinfectados y cargados.</li>
+            <li>Tabla de asignación aleatoria impresa (sobre cerrado por participante: Grupo A / Grupo B).</li>
+            <li>Tablet o segunda computadora con enlaces a cuestionarios (PANAS-SF pre, Demográfico).</li>
+            <li>Bitácora del investigador con hoja de registro por participante.</li>
+            <li>AMPO o carpeta física para guardar los consentimientos firmados.</li>
+            <li>Cronómetro o temporizador para controlar el tiempo de cada tarea (15 min máx. por tarea).</li>
+            <li>Verificar que el backend del agente está activo y registra logs correctamente bajo el ID del participante.</li>
+        </ul>
+    </div>
+
+    <!-- PASO 1: BIENVENIDA Y CONSENTIMIENTO -->
+    <div class="card">
+        <h2><span class="step-badge">1</span> Inducción, Bienvenida y Consentimiento Informado</h2>
+
+        <h3>1.1 Saludo Inicial</h3>
+        <div class="quote">
+            <strong>Investigador:</strong> "Hola [nombre del participante], muchas gracias por venir. Mi nombre es Gabriel Fallas. Seré el investigador encargado del estudio el día de hoy. Antes de comenzar, te voy a explicar de qué se trata la sesión y necesitaré que leas y firmes este documento."
+        </div>
+
+        <h3>1.2 Consentimiento Informado</h3>
+        <div class="consent-section">
+            <h4>Formulario de Consentimiento Informado — Estudio AVTS-POC-2026-01</h4>
+            <p><strong>Título del estudio:</strong> Evaluación de un Agente Virtual de Tutoría Socrática para el aprendizaje de lógica de programación.</p>
+            <p><strong>Investigador Principal:</strong> Gabriel Isaías Fallas López — ECCI, Universidad de Costa Rica.</p>
+            <p><strong>Propósito:</strong> Este estudio busca evaluar la experiencia de interactuar con un sistema de tutoría socrática basado en inteligencia artificial. El agente le guiará mediante preguntas reflexivas en la resolución de tareas de programación, sin proporcionarle soluciones directas.</p>
+            <p><strong>Procedimiento:</strong> La sesión tendrá una duración aproximada de 45 a 60 minutos e incluye: (1) completar cuestionarios iniciales, (2) interactuar con el agente de tutoría durante dos tareas de programación de 15 minutos cada una, y (3) completar cuestionarios finales sobre su experiencia.</p>
+            <p><strong>Riesgos:</strong> El estudio no implica riesgos físicos, psicológicos ni legales. La única incomodidad posible es leve frustración ante las tareas de programación, similar a la experimentada en cualquier sesión de estudio.</p>
+            <p><strong>Beneficios:</strong> Su participación contribuirá al avance científico en el campo de la tutoría inteligente. No hay beneficio económico directo para los participantes.</p>
+            <p><strong>Confidencialidad:</strong> Toda la información recolectada será anonimizada. Sus respuestas y los logs de conversación quedarán vinculados únicamente a un código numérico (ej. P-001), sin nombre ni información de identificación personal. Los datos se almacenarán en un servidor cifrado de acceso restringido.</p>
+            <p><strong>Voluntariedad:</strong> Su participación es completamente voluntaria. Puede retirarse del estudio en cualquier momento, sin consecuencia alguna para su situación académica o profesional.</p>
+            <p><strong>Contacto:</strong> Para preguntas, puede contactar al investigador: gabrielfallas0803@gmail.com</p>
+        </div>
+
+        <div class="alert warning">
+            <span class="icon">⚠️</span>
+            <div class="content">
+                <strong>MUY IMPORTANTE — Leer textualmente al participante al terminar:</strong>
+                "Después de leer el consentimiento, ¿todavía desea participar del estudio?"
+            </div>
+        </div>
+
+        <p>Si la respuesta es <strong>afirmativa</strong>: solicite un documento de identidad para verificar mayoría de edad. Ambos firman las dos copias. Entregue una copia al participante. Registre el ID del participante (P-0XX) en su bitácora.</p>
+        <p>Si la respuesta es <strong>negativa</strong>: agradezca su tiempo con cortesía y finalice la sesión sin registrar ningún dato.</p>
+
+        <h3>1.3 Cuestionarios Iniciales (Antes de Cualquier Exposición al Agente)</h3>
+        <p>Solicite al participante completar en el tablet/segunda computadora:</p>
+        <ul>
+            <li><strong>Cuestionario Demográfico</strong>: edad, carrera, años de experiencia en programación, frecuencia de uso de herramientas de IA.</li>
+            <li><strong>PANAS-SF (Pre-interacción)</strong>: medición del estado afectivo basal antes de cualquier exposición.</li>
+        </ul>
+        <div class="alert info">
+            <span class="icon">📋</span>
+            <div class="content">Registre la hora exacta de inicio de la sesión en la bitácora bajo el ID del participante.</div>
+        </div>
+    </div>
+
+    <!-- PASO 2: ASIGNACIÓN AL GRUPO -->
+    <div class="card">
+        <h2><span class="step-badge">2</span> Asignación al Grupo de Estudio</h2>
+
+        <p>Abra el sobre sellado correspondiente al participante (pre-asignados aleatoriamente) y cargue <strong>silenciosamente</strong> la condición correspondiente. <strong>No mencione al participante que existen dos versiones del sistema.</strong></p>
+
+        <div class="group-box group-a">
+            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental — Avatar Corporizado</div>
+            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/ada-embodied</code><br>
+            Verifique: avatar VRM visible, audio activo, micrófono habilitado, lip-sync funcionando.<br>
+            Confirme latencia de primer mensaje (debe ser &lt; 1.5 s).</p>
+        </div>
+
+        <div class="group-box group-b">
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control — Chat de Texto</div>
+            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/ada-text</code><br>
+            Verifique: interfaz de chat activa, campo de texto habilitado, sin elementos visuales del avatar.<br>
+            Asegúrese de que el nombre "Ada" aparece como remitente en la interfaz de mensajes.</p>
+        </div>
+
+        <div class="alert danger">
+            <span class="icon">🚫</span>
+            <div class="content">
+                <strong>Prohibido revelar el objetivo del estudio o la existencia de la otra condición.</strong>
+                No use palabras como "avatar", "animación", "embodiment" o "condición de control" frente al participante. Esto induciría un sesgo de demanda (demand characteristics) que contaminaría los datos.
+            </div>
+        </div>
+    </div>
+
+    <!-- PASO 3: INSTRUCCIONES Y TAREAS -->
+    <div class="card">
+        <h2><span class="step-badge">3</span> Fase de Interacción en Laboratorio</h2>
+
+        <h3>3.1 Instrucciones Neutras al Participante</h3>
+        <div class="quote">
+            <strong>Investigador (leer textualmente, sin improvisación):</strong><br>
+            "A continuación, vas a interactuar con un sistema de tutoría llamado Ada. Ada te ayudará a resolver dos tareas de programación. Importante: Ada no te va a dar el código directamente. En su lugar, te va a hacer preguntas para guiarte hacia la solución. Trata de actuar con naturalidad y expresar en voz alta lo que piensas mientras trabajas en el problema. Tienes hasta 15 minutos por tarea. Cuando estés listo o cuando se acabe el tiempo, yo te indicaré el siguiente paso. Por favor, colócate los audífonos. ¿Tienes alguna pregunta antes de comenzar?"
+        </div>
+
+        <div class="alert warning">
+            <span class="icon">⚠️</span>
+            <div class="content">
+                <strong>Instrucciones de neutralidad para el investigador:</strong>
+                Una vez iniciada la sesión, retírese de la vista del participante (detrás de un biombo o a un costado fuera de su campo visual). No haga comentarios sobre el desempeño del participante. Si el participante pregunta "¿estoy bien?", responda únicamente: "Tú decides cómo continuar." No intervenga en la interacción con el agente bajo ninguna circunstancia.
+            </div>
+        </div>
+
+        <h3>3.2 Tarea 1 — Depuración de Bucle Infinito (15 minutos)</h3>
+        <div class="task-box">
+            <div class="task-title">🐛 Escenario: Error lógico en un bucle</div>
+            <p style="font-size:0.88rem; margin-bottom:8px;">Instrucción al participante (mostrar en pantalla, no leer en voz alta para evitar priming):</p>
+            <div class="task-code">Tienes el siguiente código en Python.
+Cuando lo ejecutas, el programa nunca termina.
+Usa a Ada para identificar y corregir el error
+lógico sin pedir que te dé el código correcto.
+
+i = 0
+total = 0
+while i < 10:
+    total = total + i
+    # aquí hay un error
+print("Total:", total)</div>
+            <div class="task-obj">
+                <strong>Variable medida:</strong> Eficacia pedagógica autónoma (RQ2). El sistema registra automáticamente: número de turnos, tiempo hasta resolución (o tiempo agotado), si el participante identificó el error sin código directo.
+            </div>
+        </div>
+
+        <p>Transcurridos 15 minutos o cuando el participante resuelva la tarea, indique:</p>
+        <div class="quote">
+            "Muy bien, vamos a pasar a la siguiente tarea."
+        </div>
+
+        <h3>3.3 Tarea 2 — Optimización Algorítmica (15 minutos)</h3>
+        <div class="task-box">
+            <div class="task-title">⚡ Escenario: Complejidad temporal y estructuras de datos</div>
+            <p style="font-size:0.88rem; margin-bottom:8px;">Instrucción al participante (mostrar en pantalla):</p>
+            <div class="task-code">El siguiente código busca si un número
+está en una lista de 10,000 elementos.
+Es muy lento. Usa a Ada para entender
+por qué es lento y cómo podrías mejorarlo.
+No le pidas el código a Ada.
+
+datos = list(range(10000))
+objetivo = 9999
+encontrado = False
+for elemento in datos:
+    if elemento == objetivo:
+        encontrado = True
+print("Encontrado:", encontrado)</div>
+            <div class="task-obj">
+                <strong>Variable medida:</strong> Eficacia pedagógica (RQ2), specifically razonamiento sobre complejidad O(n) vs O(1) y elección de estructura de datos (set/dict). El agente guía mediante preguntas sin revelar "usa un set".
+            </div>
+        </div>
+
+        <div class="alert info">
+            <span class="icon">⏱️</span>
+            <div class="content">Registre en la bitácora los timestamps de inicio y fin de cada tarea por participante bajo su ID (P-0XX).</div>
+        </div>
+    </div>
+
+    <!-- PASO 4: CUESTIONARIOS POST-INTERACCIÓN -->
+    <div class="card">
+        <h2><span class="step-badge">4</span> Cuestionarios Post-Interacción</h2>
+
+        <p>Una vez concluidas ambas tareas, el investigador regresa al lado del participante y le pide retirarse los audífonos.</p>
+
+        <div class="quote">
+            <strong>Investigador:</strong> "¡Excelente trabajo! Ahora te pido que completes esta serie de cuestionarios cortos sobre tu experiencia con el sistema. No hay respuestas correctas o incorrectas; nos interesa genuinamente tu percepción. Cada cuestionario tiene un enlace individual."
+        </div>
+
+        <p>Administrar los cuestionarios en el siguiente orden para minimizar el efecto de fatiga y sesgo de recencia:</p>
+
+        <div class="questionnaire-grid">
+            <div class="q-item">
+                <div class="q-name">1. PANAS-SF (Post)</div>
+                <div class="q-desc">Estado afectivo positivo y negativo tras la interacción. Permite calcular delta afectivo vs. línea base pre.</div>
+                <div class="q-time">⏱ ~2 min · 10 ítems</div>
+            </div>
+            <div class="q-item">
+                <div class="q-name">2. Godspeed Questionnaire</div>
+                <div class="q-desc">Anthropomorphism, Animacy, Likeability, Perceived Intelligence. Estándar HRI/HCI para agentes virtuales.</div>
+                <div class="q-time">⏱ ~4 min · 24 ítems semánticos</div>
+            </div>
+            <div class="q-item">
+                <div class="q-name">3. SUS — System Usability Scale</div>
+                <div class="q-desc">Usabilidad general del sistema. Puntaje 0-100; ≥68 = usabilidad aceptable.</div>
+                <div class="q-time">⏱ ~2 min · 10 ítems Likert</div>
+            </div>
+            <div class="q-item">
+                <div class="q-name">4. NASA-TLX</div>
+                <div class="q-desc">Carga cognitiva: demanda mental, temporal, esfuerzo, frustración, rendimiento. Raw TLX (sin pesaje).</div>
+                <div class="q-time">⏱ ~4 min · 6 dimensiones</div>
+            </div>
+            <div class="q-item">
+                <div class="q-name">5. SIMS — Motivación Situacional</div>
+                <div class="q-desc">Motivación intrínseca situacional, interés/placer, percepción de competencia durante la tarea.</div>
+                <div class="q-time">⏱ ~3 min · 16 ítems</div>
+            </div>
+            <div class="q-item">
+                <div class="q-name">6. Perceived Pedagogical Support</div>
+                <div class="q-desc">Escala Likert ad-hoc (5 ítems) sobre utilidad percibida de las pistas socráticas y sensación de guía.</div>
+                <div class="q-time">⏱ ~2 min · 5 ítems</div>
+            </div>
+        </div>
+
+        <h3>4.1 Ítems del Perceived Pedagogical Support (Escala Ad-hoc)</h3>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Escala de respuesta: 1 = Totalmente en desacuerdo → 5 = Totalmente de acuerdo</p>
+        <table>
+            <thead><tr><th>#</th><th>Ítem</th></tr></thead>
+            <tbody>
+                <tr><td>PPS1</td><td>Las preguntas del agente me ayudaron a identificar la causa real del problema.</td></tr>
+                <tr><td>PPS2</td><td>Sentí que el agente me guiaba progresivamente hacia la solución en lugar de dármela directamente.</td></tr>
+                <tr><td>PPS3</td><td>Las pistas del agente estaban adaptadas al punto donde yo me encontraba en la tarea.</td></tr>
+                <tr><td>PPS4</td><td>La interacción con el agente me ayudó a comprender mejor el concepto de programación involucrado.</td></tr>
+                <tr><td>PPS5</td><td>Volvería a usar este sistema para practicar resolución de problemas de programación.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>4.2 Entrevista Cualitativa Breve (5-7 minutos)</h3>
+        <p>Para profundizar en la percepción del usuario, realice una entrevista estructurada breve. Solicite permiso para grabar el audio, exclusivamente para transcripción.</p>
+
+        <div class="alert info">
+            <span class="icon">🎙️</span>
+            <div class="content">
+                <strong>Preguntas guía (formular en este orden):</strong>
+                <ul style="margin-top:8px; padding-left:18px; font-size:0.9rem;">
+                    <li>"En términos generales, ¿cómo describirías tu experiencia hablando con Ada hoy?"</li>
+                    <li>"¿Hubo algún momento de la interacción que te gustara especialmente o que te pareciera particularmente útil?"</li>
+                    <li>"¿Hubo algún aspecto de Ada que te pareciera extraño, incómodo o frustrante?"</li>
+                    <li>"¿Notaste alguna característica particular en la forma en que Ada se comunicó contigo?" <em>(para explorar percepción de la condición sin revelar el objetivo)</em></li>
+                    <li>"¿Qué le cambiarías o mejorarías a este sistema?"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASO 5: CIERRE Y GESTIÓN DE DATOS -->
+    <div class="card">
+        <h2><span class="step-badge">5</span> Cierre y Gestión de Datos</h2>
+
+        <h3>5.1 Despedida</h3>
+        <p>Detenga la grabación (si aplica). Agradezca al participante.</p>
+        <div class="quote">
+            <strong>Investigador:</strong> "Muchas gracias por participar y por ayudarnos a generar conocimiento en esta área. Tu aporte es sumamente valioso para comprender cómo la inteligencia artificial puede apoyar el aprendizaje. ¡Que tengas un excelente día!"
+        </div>
+
+        <h3>5.2 Plan de Anonimización y Resguardo de Logs</h3>
+        <p>Inmediatamente después de que el participante abandone el laboratorio, ejecute el siguiente protocolo:</p>
+
+        <table class="anon-table">
+            <thead><tr><th>Tipo de Dato</th><th>Identificador</th><th>Almacenamiento</th><th>Acceso</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Formulario de Consentimiento</td>
+                    <td>Nombre legal + firma (físico)</td>
+                    <td>AMPO físico bajo llave en ECCI</td>
+                    <td>Solo investigador principal</td>
+                </tr>
+                <tr>
+                    <td>Respuestas de cuestionarios</td>
+                    <td>Código P-0XX únicamente</td>
+                    <td>Google Forms cifrado / servidor UCR</td>
+                    <td>Investigador + tutor</td>
+                </tr>
+                <tr>
+                    <td>Logs de conversación con Ada</td>
+                    <td>Código P-0XX (backend automático)</td>
+                    <td>Servidor backend cifrado (HTTPS)</td>
+                    <td>Solo investigador principal</td>
+                </tr>
+                <tr>
+                    <td>Audio de entrevista cualitativa</td>
+                    <td>Código P-0XX + fecha</td>
+                    <td>Carpeta cifrada local (BitLocker/VeraCrypt)</td>
+                    <td>Solo investigador para transcripción</td>
+                </tr>
+                <tr>
+                    <td>Métricas de latencia y logs técnicos</td>
+                    <td>Código P-0XX + timestamp</td>
+                    <td>Servidor backend (Condición A únicamente)</td>
+                    <td>Investigador principal</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert danger">
+            <span class="icon">🔒</span>
+            <div class="content">
+                <strong>Regla de anonimización absoluta:</strong>
+                La tabla de correspondencia Nombre ↔ Código P-0XX se guarda en un único documento físico en el AMPO. Ningún archivo digital debe contener nombres legales de participantes. Los datos digitales solo viajan con el código P-0XX.
+            </div>
+        </div>
+
+        <h3>5.3 Verificación Post-Sesión</h3>
+        <ul class="checkbox-list">
+            <li>Confirmar que el log de conversación del participante está guardado en el backend bajo P-0XX.</li>
+            <li>Verificar que los cuestionarios en línea registraron la respuesta con el código correcto.</li>
+            <li>Si hubo grabación de audio: moverla a la carpeta cifrada y renombrarla como <code>entrevista_P-0XX_YYYYMMDD.m4a</code>.</li>
+            <li>Desinfectar teclado, ratón y audífonos para el siguiente participante.</li>
+            <li>Recargar la URL del agente en la condición correspondiente al siguiente participante de la lista.</li>
+            <li>Registrar observaciones del investigador en la bitácora (comportamientos notables, incidencias técnicas, tiempos).</li>
+        </ul>
+
+        <div class="alert success">
+            <span class="icon">✅</span>
+            <div class="content">
+                <strong>Cierre de Jornada:</strong>
+                Al finalizar todas las sesiones del día, realice una copia de seguridad cifrada de todos los datos digitales en un segundo almacenamiento (nube cifrada / disco externo).
+            </div>
+        </div>
+    </div>
+
+    <!-- APÉNDICE: INSTRUMENTOS -->
+    <div class="card">
+        <h2><span class="step-badge">A</span> Apéndice: Referencia Rápida de Instrumentos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Instrumento</th>
+                    <th>Constructo</th>
+                    <th>RQ Asociado</th>
+                    <th>Momento</th>
+                    <th>Referencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Cuestionario Demográfico</strong></td>
+                    <td>Perfil participante, experiencia previa</td>
+                    <td>Control</td>
+                    <td>Inicio sesión</td>
+                    <td>Ad-hoc</td>
+                </tr>
+                <tr>
+                    <td><strong>PANAS-SF (Pre)</strong></td>
+                    <td>Estado afectivo basal</td>
+                    <td>RQ3</td>
+                    <td>Antes de interacción</td>
+                    <td>Thompson (2007)</td>
+                </tr>
+                <tr>
+                    <td><strong>PANAS-SF (Post)</strong></td>
+                    <td>Estado afectivo post-interacción</td>
+                    <td>RQ3</td>
+                    <td>Después de tareas</td>
+                    <td>Thompson (2007)</td>
+                </tr>
+                <tr>
+                    <td><strong>Godspeed</strong></td>
+                    <td>Anthropomorphism, Animacy, Likeability, Perceived Intelligence, Safety</td>
+                    <td>RQ1</td>
+                    <td>Post-sesión</td>
+                    <td>Bartneck et al. (2009)</td>
+                </tr>
+                <tr>
+                    <td><strong>SUS</strong></td>
+                    <td>Usabilidad del sistema</td>
+                    <td>RQ1</td>
+                    <td>Post-sesión</td>
+                    <td>Brooke (1996)</td>
+                </tr>
+                <tr>
+                    <td><strong>NASA-TLX (Raw)</strong></td>
+                    <td>Carga cognitiva (6 dimensiones)</td>
+                    <td>RQ3</td>
+                    <td>Post-sesión</td>
+                    <td>Hart & Staveland (1988)</td>
+                </tr>
+                <tr>
+                    <td><strong>SIMS</strong></td>
+                    <td>Motivación intrínseca situacional</td>
+                    <td>RQ2</td>
+                    <td>Post-sesión</td>
+                    <td>Guay et al. (2000)</td>
+                </tr>
+                <tr>
+                    <td><strong>Perceived Pedagogical Support</strong></td>
+                    <td>Utilidad percibida de las pistas socráticas</td>
+                    <td>RQ1 / RQ2</td>
+                    <td>Post-sesión</td>
+                    <td>Essel et al. (2024) — ad-hoc adaptado</td>
+                </tr>
+                <tr>
+                    <td><strong>Métricas Log-Based</strong></td>
+                    <td>% resolución autónoma, N° turnos, latencia (ms)</td>
+                    <td>RQ2 / RQ3</td>
+                    <td>Automático durante sesión</td>
+                    <td>Backend AVTS</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <strong>Estudio AVTS-POC-2026-01</strong> · Tarea #10: Diseño del Protocolo de Evaluación<br>
+        PF-3311 — Agentes Virtuales Inteligentes · I Ciclo 2026<br>
+        Universidad de Costa Rica · ECCI · Prof. Alexander Barquero Elizondo<br>
+        Investigador: Gabriel Isaías Fallas López
+    </div>
+
+</div>
+</body>
+</html>
