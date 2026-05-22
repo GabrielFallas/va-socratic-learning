@@ -1,4 +1,4 @@
-# Tarea #10: Diseño del Protocolo de Evaluación y Matriz de Consistencia
+# Diseño del Protocolo de Evaluación y Matriz de Consistencia
 
 **Universidad de Costa Rica — Sistema de Estudios de Posgrado**  
 **Temas Especiales en Ingeniería de Sistemas: Agentes Virtuales Inteligentes (PF-3311)**  
@@ -7,38 +7,23 @@
 **Fecha de entrega:** 25 de mayo de 2026  
 **Ciclo:** I Semestre 2026
 
----
-
-## Nota Preliminar: Respuesta al Feedback del Entregable 1
-
-Antes de presentar el protocolo, se atienden las observaciones del profesor Barquero (E1: 89/100):
-
-| Observación Recibida | Acción Correctiva Aplicada |
-|---|---|
-| Ready Player Me descontinuado (ene. 2026) | Migración completada a modelos **VRM** renderizados con **Three.js + @pixiv/three-vrm**. Los avatares VRM son estándar abierto compatible con VRoid Hub y exportables desde Blender. |
-| Cambiar "fluidez pedagógica" por métrica estándar | Todas las referencias se actualizan a **"perceived pedagogical support"** (Essel et al., 2024). |
-| Agregar condición de control "sin avatar" | **Condición B** (Baseline): interfaz de chat en texto plano con el mismo LLM socrático. |
-| Conectar teoría de andamiaje (scaffolding) con lógica técnica | El Apartado D integra la teoría de Vygotsky/ZPD directamente con el sistema de escalado de pistas del agente. |
-| Monitorear latencia < 1.5s | Incluida como métrica log-based en la Matriz de Consistencia (Apartado B). |
-| Mejorar documentación README | Actualización pendiente en el repositorio (instrucciones de entorno de desarrollo). |
-
-La **nueva orientación del proyecto** (Revisión Embodiment, mayo 2026) reconoce que un avatar 3D de alta fidelidad no es un prerrequisito indispensable para el estudio. El énfasis ahora recae en el **embodiment cognitivo y sensorial** —voz, sincronización labial, gestos deícticos— sobre una representación VRM estilizada que evite el Uncanny Valley y preserve la calidez del arquetipo de "Mentor Empático".
-
----
-
 ## Apartado A: Definición de Condiciones Experimentales
 
-### Condición A — Experimental: Ada con Embodiment Multimodal (VRM + Voz + Gestos)
+### Condición A — Experimental: Ada (Agente Pedagógico Afectivo 2D de Baja Fricción)
 
-La **Condición A** consiste en la interacción con **Ada**, la tutora socrática corporeizada, desplegada como agente visual-auditivo completo en entorno web. Técnicamente, Ada se renderiza como un modelo **VRM** (Virtual Reality Model) en el navegador mediante **Three.js** y la librería `@pixiv/three-vrm`, lo cual constituye la alternativa funcional al servicio Ready Player Me, descontinuado en enero de 2026. Visualmente, Ada presenta una silueta holográfica estilizada —rasgos faciales suaves, paleta de colores neón azul y violeta, vestimenta que evoca una estética futurista accesible— diseñada para proyectar empatía sin alcanzar el umbral del Uncanny Valley. La voz de Ada se genera en tiempo real mediante **Gemini Flash TTS** (latencia < 500 ms), con sincronización labial (*lip-sync*) implementada a través del mapeo de visemas VRM a las frecuencias fonéticas del flujo de audio. El comportamiento gestual incluye movimientos deícticos (señalar bloques de código), *beats* de cabeza y microexpresiones de comprensión y estímulo. El razonamiento socrático lo ejecuta **Gemini 2.5 Flash** con un *system prompt* que prohíbe explícitamente entregar código directo y obliga a formular todas las respuestas como preguntas reflexivas, basadas en los cuatro pilares del pensamiento computacional: descomposición, reconocimiento de patrones, abstracción y diseño de algoritmos.
+La **Condición A** consiste en la interacción con **Ada**, la tutora socrática multimodal. Técnicamente, Ada abandona la complejidad del WebGL/3D fotorrealista en favor de un modelo **2D expresivo (Live2D o sprites reactivos de alta calidad)** que cambia según la intención acústica y la respuesta del LLM. Esta condición implementa las siguientes vías multimodales:
+1. **Canal Visual (2D):** Avatar ubicado en una esquina de la pantalla, validado científicamente para no caer en el *Uncanny Valley* y favorecer tareas de alta carga cognitiva.
+2. **Canal Auditivo (Sincronía Paraverbal):** Integración de SSML (Speech Synthesis Markup Language) en el TTS para pausas socráticas y entonaciones empáticas (*Voice-Driven Empathy*).
+3. **Visión Computacional / Fusión Multimodal:** Implementación de reconocimiento afectivo (ej. análisis de microexpresiones de frustración o falta de interacción prolongada) o reconocimiento del estado del entorno (DOM snapshot) para intervenciones proactivas del tutor.
+El razonamiento socrático lo ejecuta **Gemini 3.1 Flash** con un *system prompt* que prohíbe explícitamente entregar código directo, formulando respuestas reflexivas basadas en la comprensión del contexto del estudiante (código + emoción/voz).
 
 **Características técnicas de la Condición A:**
-- **Motor gráfico:** Three.js + @pixiv/three-vrm (WebGL, browser-nativo)
-- **LLM:** Gemini 2.5 Flash con *system prompt* socrático restricto
-- **TTS:** Gemini Flash TTS (streaming de audio)
-- **Lip-sync:** Visemas VRM sincronizados con phonemes del audio
-- **Gestos:** Animaciones procedurales deícticas y afectivas
-- **Latencia objetivo:** < 1.5 s extremo a extremo (captura STT → LLM → TTS → render)
+- **Motor visual:** Live2D Cubism / Sprites 2D reactivos (baja latencia y menor carga computacional)
+- **Fusión Multimodal:** Captura opcional silenciosa del DOM, STT (Whisper) y/o face-api.js para monitoreo afectivo
+- **LLM:** Gemini 3.1 Flash con *system prompt* socrático
+- **TTS:** Gemini Flash TTS optimizado con marcadores SSML para sincronía paraverbal
+- **Gestos:** Animaciones 2D reactivas al estado emocional de la conversación
+- **Latencia objetivo:** Optimizada gracias a la reducción de carga gráfica
 
 ---
 
@@ -47,8 +32,8 @@ La **Condición A** consiste en la interacción con **Ada**, la tutora socrátic
 La **Condición B** consiste en la interacción con el mismo agente socrático Ada, pero desprovisto de toda representación visual, síntesis de voz y animaciones. El participante se enfrenta a una interfaz de chat conversacional de texto plano —estilo terminal o ventana de mensajería— donde lee las respuestas de Ada en forma escrita y responde mediante teclado. El **system prompt** y las restricciones del LLM son idénticos a los de la Condición A: Ada no entrega código directo, formula preguntas reflexivas y escala las pistas de lo general a lo específico según el ZPD del participante. Lo que se elimina deliberadamente en esta condición son todos los vectores de embodiment multimodal: el avatar, la voz, el lip-sync y los gestos. El nombre "Ada" permanece visible en la interfaz como remitente del mensaje para mantener la coherencia de la identidad del agente, pero sin representación corporal.
 
 **Características técnicas de la Condición B:**
-- **Interfaz:** Chat de texto plano (HTML/CSS básico, sin Three.js)
-- **LLM:** Gemini 2.5 Flash con **idéntico** *system prompt* socrático
+- **Interfaz:** Chat de texto plano (HTML/CSS básico, sin representaciones visuales del agente)
+- **LLM:** Gemini 3.1 Flash con **idéntico** *system prompt* socrático
 - **TTS:** Deshabilitado
 - **Avatar/Gestos:** Ninguno
 - **Input:** Solo texto (teclado)
@@ -57,7 +42,7 @@ La **Condición B** consiste en la interacción con el mismo agente socrático A
 
 ### Justificación de la Comparación para Aislar el Efecto del Embodiment
 
-La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Gemini 2.5 Flash), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (avatar + voz + gestos), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la inversión técnica en Three.js y VRM.
+La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Gemini 3.1 Flash), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (avatar 2D + voz paraverbal + sensibilidad afectiva), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
 
 ---
 
@@ -67,11 +52,13 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 
 ### Preguntas de Investigación Actualizadas
 
-- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (avatar VRM + voz TTS + gestos deícticos) versus una interfaz de chat en texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
+- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (avatar 2D afectivo + sincronía paraverbal + visión computacional) versus una interfaz de chat en texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
 
 - **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código?
 
 - **RQ3:** ¿Qué relación existe entre la **carga cognitiva percibida** (NASA-TLX), el **estado afectivo** (PANAS-SF) y la modalidad del agente (Condición A vs. B) durante una sesión de tutoría socrática de resolución de problemas?
+
+- **RQ4:** ¿Qué relación existe entre la latencia total de respuesta multimodal y la percepción de continuidad conversacional en el piloto, manteniendo tiempos estrictos menores a 1.5s?
 
 ---
 
@@ -86,8 +73,8 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 | **RQ2** — Motivación situacional | Motivación intrínseca, interés, esfuerzo percibido durante la tarea | **SIMS — Situational Intrinsic Motivation Scale** (Guay et al., 2000) — 16 ítems | Post-interacción con el agente (inmediatamente después de completar o agotar el tiempo de las tareas) |
 | **RQ3** — Carga cognitiva | Demanda mental, temporal, esfuerzo, frustración, performance, esfuerzo | **NASA-TLX** (Hart & Staveland, 1988) — 6 dimensiones con escala analógica | Post-interacción completa (tras la última tarea) |
 | **RQ3** — Estado afectivo | Afecto positivo (PA) y afecto negativo (NA) | **PANAS-SF** (Thompson, 2007) — 10 ítems | **PRE-interacción** (línea base) y **POST-interacción** (cambio de estado) |
+| **RQ4** — Latencia < 1.5s y Continuidad | Latencia extremo a extremo (ms), tasa de errores de audio, percibida continuidad | **Registros automáticos del sistema** (timestamps en backend) | Continuo durante toda la sesión (Condición A únicamente) |
 | Transversal / Control | Perfil demográfico, experiencia previa con programación y con IA | **Cuestionario demográfico ad-hoc** | Inicio de sesión (antes de cualquier exposición al agente) |
-| Transversal / Técnica | Latencia extremo a extremo (ms), tasa de errores de audio, tasa de fallos de lip-sync | **Registros automáticos del sistema** (timestamps en backend) | Continuo durante toda la sesión (Condición A únicamente) |
 
 ---
 
@@ -104,7 +91,7 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 
 ## Apartado C: Protocolo Experimental HTML
 
-> El protocolo oficial adaptado se encuentra en el archivo `docs/protocolo-experimental.html` de este repositorio. A continuación se describen sus componentes principales.
+> El protocolo oficial adaptado se encuentra en el archivo `docs/experimental-instrument.html` de este repositorio. A continuación se describen sus componentes principales.
 
 El archivo HTML adaptado incluye:
 1. **Identificación formal del estudio**: Código PF-3311, investigador principal, unidad ejecutora (ECCI/UCR).
@@ -122,17 +109,17 @@ El archivo HTML adaptado incluye:
 
 Justine Cassell y colegas (Cassell et al., 2000) constituyen la base canónica sobre los **Agentes Conversacionales Corporizados (ECAs)**. Su contribución central es demostrar que la comunicación humana es inherentemente **multimodal**: el 65% de la información social se transmite por canales no verbales —gestos, mirada, postura, expresiones faciales— que operan en sincronía con el discurso verbal para construir significado y presencia social. En consecuencia, un agente es verdaderamente "encarnado" no por el mero hecho de tener una representación visual, sino por la **integración funcional de sus comportamientos no verbales con el acto de habla**.
 
-En el diseño de Ada, la teoría de Cassell se implementa a tres niveles:
+En el diseño de Ada, la teoría de Cassell se implementa a tres niveles adaptados al M-ITS y la animación 2D:
 
-1. **Gestos deícticos**: Cuando Ada pregunta "¿qué valor tiene esta variable en la línea 7?", un gesto señalador sincronizado con la frase dirige la atención visual del estudiante hacia el segmento de código relevante. Este anclaje atencional reduce la **carga cognitiva externa** (Sweller, 1988) al eliminar la necesidad de que el estudiante busque manualmente el objeto de la pregunta.
+1. **Sincronía Paraverbal (Voice-Driven Empathy)**: Cuando Ada pregunta "¿qué valor tiene esta variable en la línea 7?", la voz incorpora marcadores SSML para pausas empáticas y un tono adaptativo sincronizado con la intención del comportamiento, lo cual transmite una "corporeidad acústica" y un lazo social potente.
 
-2. **Beats y reguladores**: Movimientos de cabeza rítmicos durante los turnos de escucha ("backchannel signals") señalizan al estudiante que el agente procesa su respuesta. Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
+2. **Beats Visuales y Respuestas 2D Reactivas**: Utilizando Live2D o sprites, el avatar cambia a estados de escucha activa (backchannel) o comprensión. Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
 
-3. **Expresiones afectivas calibradas**: Microexpresiones de "sorpresa positiva" o "comprensión" cuando el estudiante llega a una deducción correcta refuerzan el andamiaje positivo sin proporcionar validación verbal directa (que podría funcionar como respuesta disfrazada).
+3. **Fusión Multimodal (Screen Vision) y Expresiones Afectivas**: Integrando visualización del contexto (DOM o cámara web), el agente adecúa sus microexpresiones socráticas integrando la percepción del estado del estudiante, brindando así andamiaje ajustado sin dar la respuesta directamente.
 
 La hipótesis derivada de Cassell es que los participantes de la **Condición A** percibirán una mayor **naturalidad** e **inteligencia percibida** del agente que los de la Condición B, medibles en las subescalas de Godspeed.
 
-Adicionalmente, Cassell conecta con la teoría de **andamiaje de Vygotsky (ZPD)** al señalar que los gestos deícticos funcionan como andamios no verbales que sostienen la atención del estudiante en su zona de desarrollo próximo: en lugar de dar la respuesta, Ada señala el punto de confusión para que el estudiante lo examine. Este vínculo corrige la brecha identificada en el E1 entre la teoría de scaffolding y la arquitectura técnica del agente.
+Adicionalmente, Cassell conecta con la teoría de **andamiaje de Vygotsky (ZPD)** al señalar que las expresiones afectivas y el canal paraverbal funcionan como andamios no verbales que sostienen la atención del estudiante en su zona de desarrollo próximo: en lugar de dar la respuesta directamente, el agente utiliza su modelo de "Screen Vision" y pausas acústicas para señalar el punto de confusión para que el estudiante lo examine. Este vínculo corrige la brecha identificada en el E1 entre la teoría de scaffolding y la arquitectura técnica del agente.
 
 ---
 
@@ -165,7 +152,7 @@ Un avatar con rasgos autoritarios, hiperrealistas o institucionales (traje forma
 Yee y Bailenson demuestran que interactuar con un agente visualmente presente —incluso sin control directo de su avatar— aumenta el compromiso comportamental del usuario: más turnos conversacionales, respuestas más elaboradas, mayor persistencia ante la dificultad. En el experimento AVTS, se predice que los participantes de la Condición A producirán más turnos conversacionales y menor tasa de abandono que los de la Condición B, efecto medible en las **métricas log-based** de RQ2.
 
 **Riesgo del Uncanny Valley (Mori, 1970):**  
-El efecto inverso —conocido como el Valle Inquietante— ocurre cuando un avatar es "casi humano" pero falla en microexpresiones o sincronía temporal. En ese umbral, la respuesta emocional del usuario pasa de empatía a incomodidad, elevando la carga cognitiva y dañando la experiencia. El diseño VRM estilizado de Ada —deliberadamente no fotorrealista— neutraliza este riesgo al operar en el territorio seguro de la representación claramente artificial pero expresiva. Esta decisión se refleja en la inversión de tiempo de renderizado (Three.js a 60 fps con modelo VRM ligero < 30 MB) frente a la alternativa de un modelo hiperrealista de mayor costo computacional y mayor riesgo de Uncanny Valley.
+El efecto inverso —conocido como el Valle Inquietante— ocurre cuando un avatar es "casi humano" pero falla en microexpresiones o sincronía temporal. En ese umbral, la respuesta emocional del usuario pasa de empatía a incomodidad, elevando la carga cognitiva y dañando la experiencia. El diseño 2D estilizado de Ada —deliberadamente de tipo 'cartoon-like' y reactivo— neutraliza este riesgo por completo al operar en el territorio seguro de la representación claramente artificial pero altamente expresiva. Esta decisión se refleja en la extrema eficiencia y baja latencia de la aplicación web, superior al renderizado 3D (Three.js/VRM), reduciendo el consumo de recursos computacionales durante la alta demanda de la tarea de programación.
 
 ---
 

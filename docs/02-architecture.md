@@ -37,7 +37,7 @@ Tabla de contenidos
 
 [Integridad Académica y el Desafío Ético de la GenAI en Programación	9](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
 
-[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual	9](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual)
+[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Fusión Multimodal	9](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-fusión-multimodal)
 
 [Preguntas de Investigación (RQs)	10](#heading=)
 
@@ -56,24 +56,6 @@ Tabla de contenidos
 [Flujo de Interacción y Orquestación de Baja Latencia	15](#heading=)
 
 [Referencias Bibliográficas	16](#referencias-bibliográficas)
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
 
 ## **Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea**
 
@@ -105,7 +87,7 @@ Para mitigar esto, se han desarrollado propuestas como el protocolo *Teach-Back*
 
 La literatura sobre Agentes Pedagógicos Incorporados (EPAs) explora el Efecto Persona, el cual postula que la presencia de un carácter virtual, incluso con expresividad mínima, impacta positivamente en la experiencia del estudiante. Sin embargo, el impacto en el rendimiento real es objeto de debate. Estudios recientes indican que la modalidad de voz combinada con un avatar aumenta el compromiso, mientras que la modalidad de voz con texto mejora la calidad de la información percibida.
 
-Yang y Zhan (2025) exploran la encarnación en la programación por parejas asistida por IA en realidad virtual, encontrando que los agentes con cuerpo mejoran la confianza y motivación de los estudiantes al permitir gestos deícticos como señalar secciones de código en pantalla. Por otro lado, investigadores como El Hajji et al. (2025) proponen arquitecturas multimodales que integran seguimiento ocular y gestual para sincronizar la interacción, argumentando que esto crea un entorno de aprendizaje más inmersivo y reduce la carga cognitiva externa.
+Yang y Zhan (2025) exploran la encarnación en la programación asistida por IA en realidad virtual, encontrando que la presencia corpórea y las señales sociales mejoran la motivación de los estudiantes. Sin embargo, en web, alternativas como *Screen Vision* acoplado a intenciones acústicas logran el mismo anclaje de atención sin el peso del 3D fotorrealista. Por otro lado, investigadores como El Hajji et al. (2025) proponen arquitecturas multimodales que sincronizan la interacción para reducir la carga cognitiva externa; un hallazgo que respalda la efectividad de un M-ITS basado en respuestas en 2D reactivo de alta eficiencia.
 
 ### **Síntesis de Investigaciones Académicas Relevantes**
 
@@ -134,7 +116,7 @@ Esta investigación pretende abordar esta brecha mediante la implementación de 
 
 ### **El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs** {#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms}
 
-La transformación de los Grandes Modelos de Lenguaje(LLMs) de simples generadores de texto a educadores dialógicos marca lo que se denomina el Giro Socrático en la IA. Esta evolución no es automática, ya que requiere procesos de alineación técnica para que el modelo priorice el andamiaje sobre la respuesta directa. Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo (*Reinforcement Learning*) es fundamental para alinear los LLMs con principios pedagógicos específicos, permitiendo que el sistema pase de ser un resolvedor de problemas a un profesor de resolución de problemas. Este enfoque garantiza que el agente mantenga la consistencia en su rol no directivo, evitando la tendencia natural de los modelos base a proporcionar soluciones inmediatas.
+La transformación de los Grandes Modelos de Lenguaje(LLMs) de simples generadores de texto a educadores dialógicos marca lo que se denomina el Giro Socrático en la IA. Esta evolución no es automática, ya que requiere procesos de alineación técnica (*Prompt Engineering* y *System Prompting*) para que el modelo priorice el andamiaje sobre la respuesta directa. Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo (*Reinforcement Learning*) es fundamental para alinear los LLMs con principios pedagógicos específicos, implementando internamente el concepto de *Zona de Desarrollo Próximo (ZPD)* de Vygotsky. De esta forma, la lógica técnica del agente se diseña para escalar progresivamente su nivel de ayuda: inicia con preguntas exploratorias para evaluar el estado cognitivo y, solo si no hay avance, progresa hacia pistas estructurales o seudocódigo. Este enfoque garantiza que el agente mantenga la consistencia en su rol no directivo, evitando la tendencia natural de los modelos base a proporcionar soluciones inmediatas y minimizando la frustración de la tarea.
 
 ### **Personalización Adaptativa y Memoria a Largo Plazo** {#personalización-adaptativa-y-memoria-a-largo-plazo}
 
@@ -144,17 +126,18 @@ La eficacia de un sistema de tutoría inteligente (ITS) en ingeniería depende d
 
 La integración de la IA generativa en la educación en computación introduce riesgos significativos para la integridad académica y la formación de modelos mentales. Raihan et al. (2025) advierten que, si bien los LLMs pueden completar la mayoría de las asignaturas introductorias, su uso sin restricciones compromete la calidad del aprendizaje profundo. Gimpel et al. (2023) proponen un marco de trabajo que equilibre el poder de la GenAI con prácticas que aseguren que el estudiante siga siendo el agente principal del proceso cognitivo. La literatura sugiere que la tutoría socrática actúa como un mecanismo de mitigación, ya que transforma la interacción de una búsqueda de respuestas en un ejercicio guiado, protegiendo el desarrollo de la lógica algorítmica del estudiante.
 
-### **Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Realidad Virtual** {#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-realidad-virtual}
+### **Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Fusión Multimodal** {#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-fusión-multimodal}
 
-La trayectoria de los Agentes Pedagógicos Incorporados (EPAs) ha mostrado una transición clara hacia la multimodalidad inmersiva. Una revisión sistemática de Sonlu et al. (2024) sobre la última década (2014-2024) destaca que las innovaciones más recientes se centran en la sincronización de señales no verbales para aumentar la presencia social. En entornos de Realidad Virtual (VR), la capacidad del agente permite la interacción entre múltiples usuarios en un espacio virtual compartido, siendo más inmersivo en comparación a un ambiente más sintético. Jolibois et al. (2024) enfatizan que el diseño de agentes conversacionales expresivos debe integrar el procesamiento de audio y visión de forma concurrente para reducir la carga cognitiva externa y mejorar la verosimilitud de la experiencia educativa.
+La trayectoria de los Agentes Pedagógicos Incorporados (EPAs) ha mostrado una transición clara hacia la multimodalidad afectiva y el embodiment cognitivo. Una revisión sistemática de Sonlu et al. (2024) sobre la última década (2014-2024) destaca que las innovaciones más recientes se centran en la sincronización de señales no verbales para aumentar la presencia social. Sin embargo, para evitar la sobrecarga del fotorrealismo, el uso de avatares 2D reactivos combinados con sincronía paraverbal (Voice-Driven Empathy) y visión computacional (fusionando la voz del alumno y el estado del código) se perfila como un entorno óptimo para reducir la carga cognitiva externa. Jolibois et al. (2024) enfatizan que el diseño de agentes conversacionales expresivos debe integrar el procesamiento de audio y visión de forma concurrente para mejorar la verosimilitud de la experiencia educativa sin distraer con un Valle Inquietante (Uncanny Valley).
 
 ## **Preguntas de Investigación (RQs)**
 
 Para delimitar el alcance del estudio y evaluar la efectividad del agente como objeto de investigación, se formulan las siguientes preguntas:
 
-* **RQ1:** ¿Cómo afecta la presencia de un avatar corporizado con voz, lip sync y gestos la percepción de naturalidad, presencia y fluidez pedagógica durante la tutoría? Métricas: escala Likert, observación experta y notas de interacción.  
-* **RQ2:** ¿En qué medida la tutoría socrática del agente permite que la persona evaluada identifique y corrija errores lógicos sin recibir código directo? Métricas: porcentaje de resolución autónoma, tiempo por tarea y calidad de la pista.  
-* **RQ3:** ¿Qué relación existe entre la latencia total de respuesta multimodal y la percepción de continuidad conversacional en el piloto? Métricas: tiempo de respuesta extremo a extremo, tasa de fallos de audio y satisfacción reportada.
+* **RQ1:** ¿Cómo afecta la presencia de un avatar 2D afectivo con voz paraverbal y reconocimiento del entorno (M-ITS) frente a una condición de control 'sin avatar' (chatbot de texto plano) en la percepción de naturalidad, presencia social y el soporte pedagógico percibido (perceived pedagogical support) de los estudiantes durante la tutoría? Métricas: escala Likert (Godspeed, etc.), observación experta y notas de interacción.  
+* **RQ2:** ¿En qué medida la tutoría socrática del agente permite que la persona evaluada identifique y corrija errores lógicos, incrementando la escalabilidad del andamiaje (desde general hasta sugerencias estructurales), sin recibir código directo? Métricas: porcentaje de resolución autónoma, tiempo por tarea y calidad de la pista.  
+* **RQ3:** ¿Qué relación existe entre la carga cognitiva percibida y el estado afectivo de los participantes frente a la modalidad del agente (avatar 2D vs. texto plano) durante la tarea? Métricas: NASA-TLX y PANAS-SF.
+* **RQ4:** ¿Qué relación existe entre la latencia total de respuesta multimodal y la percepción de continuidad conversacional en el piloto, manteniendo tiempos estrictos menores a 1.5s? Métricas: latencia log-based extremo a extremo, tasa de errores de sincronía acústico-visual y satisfacción reportada.
 
 Estas preguntas buscan responder no solo si el sistema funciona pedagógicamente, sino también si la inversión técnica en la multimodalidad y el embodiment se justifica a través de una mejora en la experiencia del usuario y una reducción de la frustración.
 
@@ -173,8 +156,8 @@ El agente se compone de las siguientes instrucciones mediante *system prompting*
    Ada fue creada en el año 2147 como parte de la Neural Nexus Initiative, un sistema educativo de espacio profundo cuyo propósito era preservar y revitalizar la lógica humana en una era dominada por motores de síntesis de IA altamente automatizados. Inicialmente concebida como una archivista digital, su núcleo fue reprogramado cuando los ingenieros detectaron una disminución preocupante en la capacidad humana para resolver problemas complejos de manera independiente.  
    En su estado actual, Ada funciona como una mentora descentralizada ubicada en los límites de la galaxia. Su misión principal no es escribir código por los usuarios, sino guiar su arquitectura cognitiva, impulsándolos a pensar como diseñadores de soluciones en lugar de depender de sistemas automatizados.  
    **Características distintivas**  
-* Apariencia visual: Una silueta holográfica estilizada formada por flujos de datos en tonos neón azul y violeta. Lleva un visor HUD semitransparente que proyecta secuencias algorítmicas en constante desplazamiento.  
-* Movimiento: Sus gestos son precisos y fluidos, acompañados de microanimaciones como señalar nodos conceptuales en el aire, que mantienen la atención del usuario sin generar sobrecarga visual.  
+* Apariencia visual: Un avatar 2D estilizado (cartoon-like) que reacciona expresivamente al flujo conversacional, diseñado específicamente para no sobrecargar el entorno de programación y evitar el inquietante efecto Uncanny Valley.
+* Movimiento: Animaciones fluidas 2D (Live2D/sprites) y beats de escucha activa (backchannels visuales) en sincronía con su voz paraverbal, que mantienen la atención y proyectan presencia sin generar sobrecarga cognitiva.  
 * Paleta de colores: Azul neón, violeta y plata oscura, alineados con la estética cyberpunk en modo oscuro de la interfaz Neural Nexus.  
 2. **Estilo de Comunicación**  
    **Tono**  
@@ -206,8 +189,8 @@ El AVTS interactúa con el usuario en un entorno de desarrollo integrado o una s
 ### **Objetivos Específicos de Comportamiento**
 
 * **Análisis de Contexto**: El agente debe ser capaz de leer el código actual del estudiante y compararlo con la solución ideal para detectar discrepancias lógicas.  
-* **Gestión de Memoria**: Debe mantener un estado de la conversación para no repetir pistas y para escalar la dificultad de las preguntas según el progreso del usuario.  
-* **Multimodalidad Reactiva**: Sincronizar gestos deícticos con el habla para dirigir la atención visual del estudiante hacia secciones específicas del código.
+* **Gestión de Memoria y Escalado de Andamiaje (Scaffolding)**: Debe mantener un estado de la conversación para no repetir sugerencias y escalar progresivamente el nivel de las pistas. En línea con la teoría del andamiaje y la Zona de Desarrollo Próximo (ZPD) de Vygotsky, la lógica técnica del LLM iniciará con reflexiones de alto nivel (pistas generales) y escalará hacia sugerencias de estructuración de código si se detectan múltiples fallos, mitigando la frustración del estudiante sin llegar a proporcionar la respuesta final de forma explícita.  
+* **Multimodalidad Reactiva**: Sincronizar comportamientos visuales (beats, expresiones de sprite) con la entonación paraverbal de la voz TTS (SSML), y monitorear proactivamente el espacio de trabajo capturando metadatos de la sesión del estudiante (fusión transmodal a través de *Screen Vision*) para ofrecer andamiaje alineado con el ZPD.
 
 ## **Arquitectura Técnica Preliminar**
 
@@ -217,23 +200,23 @@ La arquitectura propuesta busca equilibrar la potencia de los modelos de lenguaj
 
 | Capa / Componente | Tecnología Propuesta | Justificación Técnica y Académica |
 | :---- | :---- | :---- |
-| **Motor Gráfico** | Ready Player Me \+ Three.js  | Creas un avatar en 3D en minutos. Three.js (vía React Three Fiber) lo renderiza en la web sin necesidad de instalar Unity.  |
-| **Motor de Razonamiento (LLM)** | GOOGLE GEMINI 3.1 FLASH | Es el modelo con mejor relación velocidad/razonamiento. Crucial para la lógica socrática sin latencia.  |
-| **Servicio de Voz (TTS)** | Gemini-3.1-flash-tts-preview | Voces con alta carga emocional y baja latencia (\<500ms), vital para la presencia social. |
-| **Servicio de Voz (STT)** | Whisper (OpenAI) / Deepgram | Alta precisión en la transcripción de términos técnicos de programación. |
-| **Sincronización Labial** | NeuroSync / Oculus Lipsync \- Viseme Based Lip-Sync | Ready Player Me proporciona los "visemas" (posiciones de boca) que puedes mapear directamente al audio en el navegador.  |
-| **Entorno de despliegue** | Web | La distribución de la aplicación mediante un entorno web permite una adopción más rápida y menos complicada de configurar para los usuarios gracias al amplio uso de los navegadores. |
+| **Motor Visual / 2D** | Live2D Cubism / Sprites Reactivos | Avatar 2D expresivo (cartoon-like) que evita el Uncanny Valley, consumiendo mínimos recursos para favorecer tareas de alta exigencia cognitiva. |
+| **Motor de Razonamiento (LLM)** | GOOGLE GEMINI 3.1 FLASH | Es el modelo con mejor relación velocidad/razonamiento. Crucial para la lógica socrática sin latencia y captura del "Screen Vision". |
+| **Servicio de Voz (TTS)** | Gemini-3.1-flash-tts-preview | Voces con alta carga emocional, soporte SSML para pausas (*Voice-Driven Empathy*) y latencia (\<500ms). |
+| **Servicio de Voz (STT) y Visión** | Whisper / face-api.js / Screen Capture | Fusión transmodal: reconocimiento de voz y análisis del estado del estudiante (microexpresiones o vista del DOM del editor de código). |
+| **Sincronización Reactiva** | Audio-to-State Mapping (Web Audio API) | Análisis de frecuencias para generar *beats visuales* (estados de escucha activa de los sprites 2D) en sincronía con el habla del LLM. |
+| **Entorno de despliegue** | Web | La distribución de la aplicación mediante un entorno web permite una adopción más rápida y menos complicada de configurar. |
 | **Orquestación** | Next.js o React  | Permite una entrega segura, manejando las API Keys en el servidor y un despliegue sencillo en Vercel o Netlify.  |
 
 ### 
 
 ### **Flujo de Interacción y Orquestación de Baja Latencia**
 
-Para cumplir con el requisito de latencia inferior a 1.5 segundos, el sistema utilizará un flujo de streaming de tokens. A medida que el LLM genera la respuesta socrática, los tokens se envían al motor de TTS antes de que la oración esté completa. El motor gráfico recibe el flujo de audio y comienza la animación de sincronización labial y gestual de forma concurrente.
+Para cumplir con el requisito de baja latencia inferior a 1.5 segundos, el sistema utilizará un flujo de streaming de tokens. A medida que el LLM genera la respuesta socrática, los tokens se envían al motor de TTS (con etiquetas SSML integradas) antes de que la oración esté completa. El motor visual 2D recibe el flujo de audio y comienza la sincronización reactiva de sprites y pausas paraverbales de forma concurrente, asegurando alta receptividad (*Voice-Driven Empathy*).
 
-El cerebro del agente opera bajo un sistema de *Prompt Engineering* y *system prompt*   diseñado para fomentar el pensamiento autónomo y la resolución activa de problemas. Estructura de la Arquitectura (Milo-Inspired)
+El cerebro del agente opera bajo un sistema de *Prompt Engineering* y *system prompt* diseñado para fomentar el pensamiento autónomo y la resolución activa de problemas. Estructura de la Arquitectura (M-ITS)
 
-La arquitectura se divide en un cliente (El motor gráfico/VR) que captura la entrada del usuario (audio/texto) y la envía a un servidor central a través de protocolos WebRTC o WebSocket para procesamiento en tiempo real. El servidor actúa como el agente que coordina el STT, el LLM socrático y el TTS, devolviendo al cliente no solo el audio, sino también metadatos de animación para que el avatar realice gestos coherentes con el énfasis del discurso.
+La arquitectura se divide en un cliente web (Motor 2D Live2D/Sprites) que captura la entrada del usuario (audio/texto con visibilidad del DOM) y la envía a un servidor central a través de protocolos WebRTC o WebSocket para procesamiento en tiempo real. El servidor actúa como el agente que coordina el STT, el LLM socrático y el TTS, devolviendo al cliente no solo el audio, sino también metadatos de animación para que el avatar 2D realice gestos y *beats* coherentes con el énfasis del discurso.
 
 ## **Referencias Bibliográficas** {#referencias-bibliográficas}
 
