@@ -24,6 +24,10 @@ Qué esperamos encontrar / resolver
 
 Resolver la brecha de lógica: Ayudar a que los estudiantes no se atasquen ante un problema nuevo, dándoles herramientas mentales para descomponer problemas complejos.
 
-Hallazgos esperados: Demostrar que los estudiantes que usan el agente socrático muestran una mayor retención del conocimiento en pruebas posteriores y una mayor confianza al escribir código desde cero, en comparación con quienes solo copian y pegan soluciones generadas por IA.
+Hallazgos esperados: Demostrar que el soporte multimodal corporizado (Avatar 2D Live2D + Voz Paraverbal + Reconocimiento Visual) mejora significativamente:
+- **Percepción de naturalidad, presencia social y apoyo pedagógico percibido** (RQ1) comparado con un chatbot en texto plano
+- **Eficacia pedagógica autónoma** (RQ2): mayor porcentaje de resolución sin código directo, más turnos conversacionales reflexivos, menor tiempo por tarea
+- **Estado afectivo** (RQ3): reducción de afecto negativo y aumento de motivación intrínseca
+- **Continuidad conversacional** (RQ4): latencia < 1.5s mantenida sin desincronización audiovisual
 
-https://convai.com/blog/ai-avatars-inside-browser-threejs-react-convai-web-sdk-tutorial
+Esta investigación cierra la brecha identificada en la literatura: documentar que los agentes corporizados en tutoría socrática de programación generan ganancias pedagógicas significativas sobre interfaces de texto plano, justificando la inversión técnica en embodiment multimodal.
