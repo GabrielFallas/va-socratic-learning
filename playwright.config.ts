@@ -9,8 +9,9 @@ export default defineConfig({
   reporter: [["html", { outputFolder: "tests/e2e/report" }], ["list"]],
   use: {
     baseURL: "http://localhost:3000",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
+    trace: "on",
+    screenshot: "on",
+    video: "off",
   },
   projects: [
     {
