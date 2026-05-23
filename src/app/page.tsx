@@ -81,32 +81,7 @@ export default function HomePage() {
               plano. Condición de control.
             </p>
           </div>
-        </div>
-
-        {/* RQs */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8">
-          <h3 className="text-white/70 text-xs font-mono font-bold mb-3 tracking-wider">
-            PREGUNTAS DE INVESTIGACIÓN
-          </h3>
-          <div className="space-y-2 text-xs text-white/50 leading-relaxed">
-            <p>
-              <span className="text-cyan-400 font-mono">RQ1</span> — ¿Mejora el
-              avatar la percepción de naturalidad y soporte pedagógico?
-            </p>
-            <p>
-              <span className="text-purple-400 font-mono">RQ2</span> — ¿Afecta
-              el embodiment la eficacia pedagógica autónoma?
-            </p>
-            <p>
-              <span className="text-pink-400 font-mono">RQ3</span> — ¿Qué
-              relación hay entre modalidad y carga cognitiva/estado afectivo?
-            </p>
-            <p>
-              <span className="text-amber-400 font-mono">RQ4</span> — ¿Se
-              mantiene la latencia por debajo de 1.5s?
-            </p>
-          </div>
-        </div>
+        </div>V
 
         {/* Start buttons */}
         <div className="space-y-3">
@@ -147,7 +122,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-center text-white/20 text-xs mt-6 font-mono">
-          Powered by Gemini 2.0 Flash · Free tier · Web Speech API
+          Powered by Ollama Gemma 3 12B
         </p>
       </div>
     </main>

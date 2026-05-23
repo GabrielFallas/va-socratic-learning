@@ -1,0 +1,43 @@
+# Development overlay — merge with the base compose file:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# What this changes vs production:
+#   • app uses Dockerfile.dev (next dev, not next start)
+#   • source tree is bind-mounted → edits appear instantly
+#   • node_modules kept in an anonymous volume (not shadowed by the mount)
+#   • WATCHPACK_POLLING=true → file-change polling for Windows / WSL2
+#   • speech-api mounts server.py → restart container to pick up Python changes
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: va-socratic-learning-app-dev
+    container_name: va-app-dev
+    volumes:
+      # Bind-mount the whole project (except node_modules — see below)
+      - .:/app
+      # Anonymous volume keeps the container's node_modules intact
+      # so the bind-mount above doesn't shadow it
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: gemma3:12b
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SPEECH_API_URL: http://speech-api:5001
+      # Polling is required on Windows + Docker Desktop (WSL2 inotify gap)
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    # No depends_on health-gate in dev — start fast, tolerate Ollama being slow
+    depends_on:
+      - ollama
+      - speech-api
+
+  speech-api:
+    volumes:
+      # Hot-reload Python server: edit server.py on host, then restart the container
+      # docker compose -f docker-compose.yml -f docker-compose.dev.yml restart speech-api
+      - ./speech-api/server.py:/app/server.py:ro

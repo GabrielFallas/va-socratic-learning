@@ -1,0 +1,16 @@
+# Development image — hot reload via `next dev`
+# Source code is bind-mounted at runtime; only deps are baked in.
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install deps once; node_modules stays inside the container
+# (the anonymous volume in compose prevents the bind-mount from shadowing it)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

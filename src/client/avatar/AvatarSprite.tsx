@@ -174,11 +174,6 @@ export default function AvatarSprite({
         {/* Eyes */}
         <EyeAnimation />
 
-        {/* Center emoji/icon */}
-        <span className="text-2xl" aria-hidden="true">
-          {config.emoji}
-        </span>
-
         {/* Mouth or thinking dots */}
         {state === "thinking" ? (
           <ThinkingDots />

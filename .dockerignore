@@ -1,0 +1,27 @@
+# Node
+node_modules
+npm-debug.log*
+
+# Next.js local build (rebuilt inside Docker)
+.next
+out
+
+# Dev / test artifacts
+.env.local
+.env.*.local
+tests
+context
+docs
+scripts
+
+# Git
+.git
+.gitignore
+
+# Speech API (has its own build context)
+speech-api
+
+# Misc
+*.md
+playwright-report
+test-results

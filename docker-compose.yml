@@ -1,0 +1,86 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# VA Socratic Learning — Docker Compose
+#
+# Services:
+#   ollama      Ollama LLM server     → port 11434  (gemma3:12b, GPU)
+#   speech-api  Python FastAPI        → port 5001   (TTS + STT)
+#   app         Next.js 15            → port 3000   (frontend + API routes)
+#
+# First-time setup (model download ~7 GB):
+#   docker compose up ollama -d
+#   docker compose exec ollama ollama pull gemma3:12b
+#   docker compose up --build
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Ollama LLM ──────────────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: va-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ── Speech API ──────────────────────────────────────────────────────────────
+  speech-api:
+    build:
+      context: ./speech-api
+      dockerfile: Dockerfile
+    image: va-socratic-learning-speech-api
+    container_name: va-speech-api
+    ports:
+      - "5001:5001"
+    volumes:
+      # Cache Whisper model between restarts (~150 MB)
+      - whisper_models:/tmp/whisper-models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s   # Whisper download on first start
+
+  # ── Next.js App ─────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: va-socratic-learning-app
+    container_name: va-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: gemma3:12b
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SPEECH_API_URL: http://speech-api:5001
+    depends_on:
+      ollama:
+        condition: service_healthy
+      speech-api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local
+  whisper_models:
+    driver: local
