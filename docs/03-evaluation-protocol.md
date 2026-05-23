@@ -11,19 +11,20 @@
 
 ### Condición A — Experimental: Ada (Agente Pedagógico Afectivo 2D de Baja Fricción)
 
-La **Condición A** consiste en la interacción con **Ada**, la tutora socrática multimodal. Técnicamente, Ada abandona la complejidad del WebGL/3D fotorrealista en favor de un modelo **2D expresivo (Live2D o sprites reactivos de alta calidad)** que cambia según la intención acústica y la respuesta del LLM. Esta condición implementa las siguientes vías multimodales:
-1. **Canal Visual (2D):** Avatar ubicado en una esquina de la pantalla, validado científicamente para no caer en el *Uncanny Valley* y favorecer tareas de alta carga cognitiva.
-2. **Canal Auditivo (Sincronía Paraverbal):** Integración de SSML (Speech Synthesis Markup Language) en el TTS para pausas socráticas y entonaciones empáticas (*Voice-Driven Empathy*).
-3. **Visión Computacional / Fusión Multimodal:** Implementación de reconocimiento afectivo (ej. análisis de microexpresiones de frustración o falta de interacción prolongada) o reconocimiento del estado del entorno (DOM snapshot) para intervenciones proactivas del tutor.
-El razonamiento socrático lo ejecuta **Gemini 3.1 Flash** con un *system prompt* que prohíbe explícitamente entregar código directo, formulando respuestas reflexivas basadas en la comprensión del contexto del estudiante (código + emoción/voz).
+La **Condición A** consiste en la interacción con **Ada**, la tutora socrática multimodal. Técnicamente, Ada utiliza un modelo **2D expresivo implementado en CSS y SVG animado** (sin librerías externas) que cambia de estado según la intención socrática de la respuesta del LLM. Esta condición implementa las siguientes vías multimodales:
+1. **Canal Visual (2D):** Avatar ubicado en la zona superior derecha del panel de chat, con 8 estados expresivos reactivos (idle, thinking, speaking, listening, happy, curious, empathetic, encouraging). Diseño estilizado tipo *cartoon* que evita el Valle Inquietante y favorece tareas de alta carga cognitiva.
+2. **Canal Auditivo (Sincronía Paraverbal):** Síntesis de voz mediante Web Speech API (SpeechSynthesis, nativa del navegador) con sincronización de la animación de la boca al estado de reproducción de audio.
+3. **Control de Estado desde el LLM:** El modelo de lenguaje incluye una etiqueta `[AVATAR_STATE:estado]` al final de cada respuesta; el cliente la interpreta y actualiza las animaciones CSS del avatar en consecuencia.
+
+El razonamiento socrático lo ejecuta **Ollama con Gemma 3 12B** (Q4_K_M, inferencia GPU local) con un *system prompt* que prohíbe explícitamente entregar código directo y escala el andamiaje en tres niveles de ZPD.
 
 **Características técnicas de la Condición A:**
-- **Motor visual:** Live2D Cubism / Sprites 2D reactivos (baja latencia y menor carga computacional)
-- **Fusión Multimodal:** Captura opcional silenciosa del DOM, STT (Whisper) y/o face-api.js para monitoreo afectivo
-- **LLM:** Gemini 3.1 Flash con *system prompt* socrático
-- **TTS:** Gemini Flash TTS optimizado con marcadores SSML para sincronía paraverbal
-- **Gestos:** Animaciones 2D reactivas al estado emocional de la conversación
-- **Latencia objetivo:** Optimizada gracias a la reducción de carga gráfica
+- **Motor visual:** CSS/SVG Animado (sin librerías externas) — 8 estados expresivos
+- **STT:** Web Speech API — SpeechRecognition (nativa del navegador), español latinoamericano
+- **LLM:** Ollama + Gemma 3 12B con *system prompt* socrático (ZPD 3 niveles)
+- **TTS:** Web Speech API — SpeechSynthesis (nativa del navegador), sincronizada con animación de boca
+- **Gestos:** Animaciones 2D (CSS keyframes) reactivas al estado emocional del diálogo
+- **Latencia objetivo:** < 1.5 s extremo a extremo (registro automático en backend)
 
 ---
 
@@ -33,7 +34,7 @@ La **Condición B** consiste en la interacción con el mismo agente socrático A
 
 **Características técnicas de la Condición B:**
 - **Interfaz:** Chat de texto plano (HTML/CSS básico, sin representaciones visuales del agente)
-- **LLM:** Gemini 3.1 Flash con **idéntico** *system prompt* socrático
+- **LLM:** Ollama + Gemma 3 12B con **idéntico** *system prompt* socrático
 - **TTS:** Deshabilitado
 - **Avatar/Gestos:** Ninguno
 - **Input:** Solo texto (teclado)
@@ -42,7 +43,7 @@ La **Condición B** consiste en la interacción con el mismo agente socrático A
 
 ### Justificación de la Comparación para Aislar el Efecto del Embodiment
 
-La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Gemini 3.1 Flash), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (avatar 2D + voz paraverbal + sensibilidad afectiva), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
+La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Ollama + Gemma 3 12B), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (avatar 2D + voz paraverbal + sensibilidad afectiva), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
 
 ---
 
@@ -113,7 +114,7 @@ En el diseño de Ada, la teoría de Cassell se implementa a tres niveles adaptad
 
 1. **Sincronía Paraverbal (Voice-Driven Empathy)**: Cuando Ada pregunta "¿qué valor tiene esta variable en la línea 7?", la voz incorpora marcadores SSML para pausas empáticas y un tono adaptativo sincronizado con la intención del comportamiento, lo cual transmite una "corporeidad acústica" y un lazo social potente.
 
-2. **Beats Visuales y Respuestas 2D Reactivas**: Utilizando Live2D o sprites, el avatar cambia a estados de escucha activa (backchannel) o comprensión. Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
+2. **Beats Visuales y Respuestas 2D Reactivas**: Mediante animaciones CSS y SVG, el avatar cambia a estados de escucha activa (backchannel) o comprensión (estados *listening*, *thinking*). Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
 
 3. **Fusión Multimodal (Screen Vision) y Expresiones Afectivas**: Integrando visualización del contexto (DOM o cámara web), el agente adecúa sus microexpresiones socráticas integrando la percepción del estado del estudiante, brindando así andamiaje ajustado sin dar la respuesta directamente.
 

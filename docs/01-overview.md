@@ -24,7 +24,7 @@ Qué esperamos encontrar / resolver
 
 Resolver la brecha de lógica: Ayudar a que los estudiantes no se atasquen ante un problema nuevo, dándoles herramientas mentales para descomponer problemas complejos.
 
-Hallazgos esperados: Demostrar que el soporte multimodal corporizado (Avatar 2D Live2D + Voz Paraverbal + Reconocimiento Visual) mejora significativamente:
+Hallazgos esperados: Demostrar que el soporte multimodal corporizado (Avatar 2D CSS/SVG reactivo + Voz Paraverbal Web Speech + Reconocimiento de Voz) mejora significativamente:
 - **Percepción de naturalidad, presencia social y apoyo pedagógico percibido** (RQ1) comparado con un chatbot en texto plano
 - **Eficacia pedagógica autónoma** (RQ2): mayor porcentaje de resolución sin código directo, más turnos conversacionales reflexivos, menor tiempo por tarea
 - **Estado afectivo** (RQ3): reducción de afecto negativo y aumento de motivación intrínseca

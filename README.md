@@ -1,133 +1,187 @@
-# Implementacion de un Agente Virtual de Tutoria Socratica
+# Ada — Tutora Socrática Corporizada (M-ITS)
+
+> **PF-3311 · Agentes Virtuales Inteligentes · Universidad de Costa Rica · I Semestre 2026**
 
 ## Resumen
-Repositorio del proyecto de investigacion sobre un agente virtual de tutoria socratica para el desarrollo de logica de programacion y resolucion de problemas en entornos STEM. El objetivo es evaluar si una interaccion basada en preguntas reflexivas y pistas graduales mejora la comprension y la autonomia del estudiante sin entregar soluciones directas.
 
-## Proposito y motivacion
-El proyecto busca mitigar la dependencia de herramientas de IA que entregan codigo completo y, en su lugar, fomentar pensamiento critico, descomposicion de problemas y razonamiento algoritimico. Un agente virtual puede ofrecer tutoria uno-a-uno de forma escalable y alineada con el metodo socratico.
+Repositorio del proyecto de investigación sobre un agente virtual de tutoría socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM. El objetivo es evaluar si una interacción basada en preguntas reflexivas y pistas graduales —complementada con un avatar 2D afectivo y síntesis de voz— mejora la comprensión y la autonomía del estudiante, en comparación con un chatbot de texto plano, sin entregar soluciones de código directas.
 
-## Rol del agente virtual
-- Analizar el contexto del estudiante (enunciado o codigo) para detectar discrepancias logicas.
-- Mantener memoria del progreso para ajustar la dificultad de las preguntas.
-- Guiar con preguntas reflexivas, sin proporcionar codigo directo.
+## 🎥 Video de Demostración
 
-## Resultados esperados
-- Reduccion de la brecha de logica en tareas nuevas y mayor autonomia en depuracion.
-- Mayor retencion de conocimientos y confianza al programar desde cero.
+> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/DEMO_LINK_PLACEHOLDER)**  
+> *(~3 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
 
-## Arquitectura tecnica
+---
 
-### Stack tecnologico
-| Capa / componente | Tecnologia | Razon principal |
-| --- | --- | --- |
-| Motor Visual / 2D | Live2D Cubism / Sprites Reactivos | Avatar 2D expresivo que evita el Uncanny Valley, consumiendo mínimos recursos para tareas cognitivas pesadas. |
-| Motor de razonamiento (LLM) | Google Gemini 3.1 Flash | Equilibrio entre velocidad y razonamiento para dialogo socratico. |
-| TTS | gemini-3.1-flash-tts-preview | Voz expresiva con latencia <500ms y pausas SSML. |
-| STT y Visión | Whisper / face-api.js / Screen Capture | Fusión transmodal: transcripción y reconocimiento del entorno (DOM del editor). |
-| Sincronización | Audio-to-State Mapping (Web Audio API) | Análisis de frecuencias para generar beats visuales (estados reactivos 2D) en sincronía con el habla. |
-| Entorno de despliegue | Web | Acceso rapido sin instalacion local. |
-| Orquestacion | Next.js o React | Enrutamiento y proteccion de claves en servidor. |
+## Propósito y Motivación
 
-### Componentes principales
-- Cliente web con avatar, entrada de texto/voz, y renderizado en tiempo real.
-- Servidor de orquestacion para estado, memoria conversacional y ruteo de servicios.
-- Servicios de IA para STT, LLM y TTS con flujo de streaming.
-- Telemetria para latencia, turnos de dialogo y resolucion autonoma.
+El proyecto busca mitigar la dependencia de herramientas de IA que entregan código completo y, en su lugar, fomentar el pensamiento crítico, la descomposición de problemas y el razonamiento algorítmico. Un agente virtual puede ofrecer tutoría uno a uno de forma escalable y alineada con el método socrático.
 
-### Flujo de interaccion (baja latencia)
-1. El usuario envia texto o voz desde el cliente web.
-2. El servidor procesa audio con STT y actualiza memoria conversacional, recibiendo opcionalmente estados analizados del editor (Screen Vision).
-3. El LLM genera preguntas socraticas progresivas guiadas por la Zona de Desarrollo Proximo y las transmite en streaming.
-4. El TTS convierte tokens (con etiquetas SSML para pausas empaticas) en audio.
-5. El cliente web lanza beats visuales (estados del avatar 2D) reactivos en sincronia al audio recibido.
-6. Se registran metricas continuas de latencia y efectividad pedagogica.
+## Preguntas de Investigación
 
-## Entorno de Desarrollo Local (Configuración)
+| RQ | Pregunta |
+|---|---|
+| **RQ1** | ¿Cómo afecta la presencia del avatar 2D afectivo con voz paraverbal frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
+| **RQ2** | ¿En qué medida la modalidad corpórea influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
+| **RQ3** | ¿Qué relación existe entre la modalidad del agente y la carga cognitiva percibida (NASA-TLX) y el estado afectivo (PANAS-SF) durante la tarea? |
+| **RQ4** | ¿Se mantiene la latencia de respuesta multimodal por debajo de 1.5 segundos de forma consistente? |
 
-Para replicar y ejecutar la arquitectura M-ITS en tu entorno local, sigue estos pasos rigurosamente:
+## Rol del Agente — Ada
+
+- Analiza el contexto del estudiante (enunciado o código) para detectar discrepancias lógicas.
+- Mantiene memoria del progreso conversacional para ajustar la dificultad de las preguntas (ZPD — Zona de Desarrollo Próximo, Vygotsky).
+- Guía con preguntas reflexivas en tres niveles de andamiaje, sin proporcionar código directo.
+- En la Condición A: reacciona visualmente (avatar 2D, 8 estados expresivos) y vocalmente (TTS paraverbal).
+
+## Arquitectura Técnica
+
+### Stack Tecnológico
+
+| Capa / Componente | Tecnología | Razón principal |
+|---|---|---|
+| **Avatar 2D** | CSS/SVG Animado (sin librerías externas) | Avatar expresivo que evita el Valle Inquietante, sin dependencias de terceros ni servicios de pago. Reemplaza Ready Player Me (descontinuado en ene. 2026). |
+| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (local) | Sin API keys externas. Inferencia GPU local. Reproducible sin cuentas de servicios en la nube. |
+| **Síntesis de Voz (TTS)** | Web Speech API — SpeechSynthesis (nativa del navegador) | Sin costo, sin API keys, latencia de inicio <200 ms. Disponible en Chrome, Edge y Safari. |
+| **Reconocimiento de Voz (STT)** | Web Speech API — SpeechRecognition (nativa del navegador) | Resultados intermedios en tiempo real, español latinoamericano, sin dependencias externas. |
+| **Framework / Orquestación** | Next.js 14 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
+| **Telemetría** | Módulo logger.ts (en memoria, servidor) | Registra latencia extremo a extremo, turnos, tiempo por tarea y resolución autónoma (RQ4). |
+
+### Componentes Principales
+
+- **Cliente web:** Avatar 2D (CSS/SVG), entrada de texto y voz, panel de código con syntax highlighting.
+- **Servidor de orquestación:** Estado de sesión, telemetría log-based, enrutamiento al LLM.
+- **Servicios de IA locales:** Ollama (LLM) + Web Speech API (TTS/STT).
+- **Flujo de streaming:** Server-Sent Events (SSE) para latencia percibida reducida.
+
+### Flujo de Interacción
+
+1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (avatar multimodal) o B (texto plano).
+2. El sistema inicializa la sesión con un ID único y carga el contexto de la Tarea 1 (depuración de bucle infinito).
+3. El participante interactúa con Ada mediante texto (ambas condiciones) o voz (solo Condición A).
+4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON.
+5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A, se activa TTS y se sincroniza el estado del avatar.
+6. Al completar ambas tareas, se presenta un resumen de sesión con análisis de latencia (RQ4).
+
+---
+
+## Ejecución de la Prueba de Concepto (PoC)
 
 ### 1. Requisitos Previos
-- **Node.js** (v18.17 o superior) y **npm** o **yarn**.
-- **Cuentas de Servicios (API Keys)** para:
-  - Google Gemini API (para Gemini 3.1 Flash LLM y TTS).
-  - OpenAI (para Whisper STT).
 
-### 2. Instalación de Dependencias
-Clona el repositorio e instala las dependencias base (Next.js/React y librerías de Live2D/Audio):
+- **Node.js** v18.17 o superior y **npm**.
+- **Ollama** instalado y ejecutándose localmente.
+  - Instalar Ollama: [https://ollama.com/download](https://ollama.com/download)
+  - Descargar el modelo: `ollama pull gemma3:12b`
+  - Verificar que el servidor esté corriendo: `ollama serve` (por defecto en `http://localhost:11434`)
+- **GPU NVIDIA** con VRAM suficiente (≥8 GB recomendado para Gemma 3 12B Q4_K_M).  
+  Si no se dispone de GPU, Ollama usará CPU (latencia significativamente mayor).
+
+### 2. Clonar el Repositorio e Instalar Dependencias
+
 ```bash
-git clone https://github.com/tu-usuario/va-socratic-learning.git
+git clone https://github.com/GabrielFallas/va-socratic-learning.git
 cd va-socratic-learning
 npm install
 ```
 
-### 3. Configuración de Variables de Entorno
-Crea un archivo `.env.local` en la raíz del proyecto tomando como plantilla `.env.example`, y añade tus credenciales:
+### 3. Configurar Variables de Entorno
+
+Crea un archivo `.env.local` en la raíz del proyecto (no se sube al repositorio):
+
 ```env
-NEXT_PUBLIC_GEMINI_API_KEY=tu_clave_de_gemini
-NEXT_PUBLIC_OPENAI_API_KEY=tu_clave_de_openai
-# Variables adicionales para telemetría y web sockets
+# URL del servidor Ollama (por defecto: http://localhost:11434)
+OLLAMA_BASE_URL=http://localhost:11434
+
+# Modelo Ollama a utilizar
+OLLAMA_MODEL=gemma3:12b
 ```
 
-### 4. Lanzamiento del Servidor de Desarrollo
-Ejecuta el servidor de Next.js:
+> **Nota de seguridad:** No se requieren API keys externas para la PoC. No subas credenciales al repositorio.
+
+### 4. Lanzar el Servidor de Desarrollo
+
 ```bash
 npm run dev
 ```
+
 La interfaz de tutoría estará disponible en `http://localhost:3000`.
 
-### 5. Configuración de Live2D/Sprites (Avatar)
-Si bien el entorno de UI levanta por defecto, para ver el modelo 2D, asegúrate de colocar los recursos del modelo (archivos `.moc3`, `.json`, `.png`) dentro del directorio `public/avatar_assets/`.
+### 5. Ejecutar la Sesión Experimental
 
-## Estructura del repositorio
+1. Abre `http://localhost:3000` en Chrome, Edge o Safari (navegadores con soporte completo de Web Speech API).
+2. Selecciona **"Iniciar Sesión (Aleatoria)"** para asignación automática de condición, o fuerza la Condición A o B para pruebas internas.
+3. Completa las dos tareas de depuración interactuando con Ada.
+4. Al finalizar, el resumen de sesión muestra métricas de latencia (RQ4) y resultados por tarea.
 
-### Documentacion
-| Ruta | Descripcion |
-| --- | --- |
-| [docs/](docs/) | Documentacion principal del proyecto. |
-| [docs/entregable-1.pdf](docs/entregable-1.pdf) | Documento del entregable 1 (PDF). |
-| [docs/01-overview.md](docs/01-overview.md) | Resumen del objetivo y motivacion. |
-| [docs/02-architecture.md](docs/02-architecture.md) | Arquitectura y diseño del sistema (M-ITS). |
-| [docs/03-evaluation-protocol.md](docs/03-evaluation-protocol.md) | Protocolo de Evaluación y Matriz de Consistencia. |
-| [docs/04-evaluation-guide.md](docs/04-evaluation-guide.md) | Guía paso a paso para la evaluación. |
-| [docs/project-canvas.html](docs/project-canvas.html) | Canvas del proyecto interactivo. |
-| [docs/experimental-instrument.html](docs/experimental-instrument.html) | Instrumento/Consentimiento experimental web. |
+> **Sobre TTS/STT:** La síntesis de voz y el reconocimiento de voz funcionan únicamente en la Condición A y requieren permiso de micrófono en el navegador. Si el navegador no soporta Web Speech API, la condición A funcionará en modo solo texto.
 
-### Codigo fuente (alineado a la arquitectura)
-| Ruta | Descripcion |
-| --- | --- |
-| [src/](src/) | Codigo fuente principal. |
-| [src/client/](src/client/) | Cliente web (UI, avatar y audio). |
-| [src/client/avatar/](src/client/avatar/) | Render y control del avatar. |
-| [src/client/audio/](src/client/audio/) | Captura y reproduccion de audio. |
-| [src/client/components/](src/client/components/) | Componentes de interfaz. |
-| [src/client/state/](src/client/state/) | Estado y memoria en cliente. |
-| [src/client/ui/](src/client/ui/) | Vistas y layout. |
-| [src/server/](src/server/) | Servidor de orquestacion. |
-| [src/server/api/](src/server/api/) | Endpoints y contratos. |
-| [src/server/orchestration/](src/server/orchestration/) | Coordinacion STT/LLM/TTS. |
-| [src/server/memory/](src/server/memory/) | Memoria conversacional. |
-| [src/server/telemetry/](src/server/telemetry/) | Metricas y logs. |
-| [src/services/](src/services/) | Integraciones de IA. |
-| [src/services/llm/](src/services/llm/) | Cliente del LLM. |
-| [src/services/stt/](src/services/stt/) | Servicio de transcripcion. |
-| [src/services/tts/](src/services/tts/) | Servicio de voz. |
-| [src/prompts/](src/prompts/) | Prompts socraticos. |
-| [src/shared/](src/shared/) | Tipos y utilidades compartidas. |
-| [src/shared/config/](src/shared/config/) | Configuracion. |
-| [src/shared/types/](src/shared/types/) | Tipos y contratos. |
-| [src/shared/utils/](src/shared/utils/) | Utilidades comunes. |
+---
+
+## Estructura del Repositorio
+
+### Documentación
+
+| Ruta | Descripción |
+|---|---|
+| [`docs/`](docs/) | Documentación principal del proyecto. |
+| [`docs/entregable-2.html`](docs/entregable-2.html) | **Documento principal del Entregable 2** (secciones a–f, imprimible como PDF). |
+| [`docs/entregable-1.pdf`](docs/entregable-1.pdf) | Documento del Entregable 1 (PDF). |
+| [`docs/01-overview.md`](docs/01-overview.md) | Resumen del objetivo y motivación del proyecto. |
+| [`docs/02-architecture.md`](docs/02-architecture.md) | Arquitectura y diseño del sistema (M-ITS). |
+| [`docs/03-evaluation-protocol.md`](docs/03-evaluation-protocol.md) | Protocolo de evaluación y matriz de consistencia metodológica. |
+| [`docs/04-evaluation-guide.md`](docs/04-evaluation-guide.md) | Guía paso a paso para la evaluación experimental. |
+| [`docs/project-canvas.html`](docs/project-canvas.html) | Canvas del proyecto (formato interactivo). |
+| [`docs/experimental-instrument.html`](docs/experimental-instrument.html) | Consentimiento informado e instrumento experimental web. |
+| [`context/Cuestionarios-20260522/`](context/Cuestionarios-20260522/) | Cuestionarios validados: PANAS-SF, Godspeed, SUS, NASA-TLX, SIMS, entre otros. |
+
+### Código Fuente
+
+| Ruta | Descripción |
+|---|---|
+| [`src/app/page.tsx`](src/app/page.tsx) | Landing page — asignación de condición e inicio de sesión. |
+| [`src/app/session/page.tsx`](src/app/session/page.tsx) | Página principal de la sesión experimental. |
+| [`src/app/session/complete/page.tsx`](src/app/session/complete/page.tsx) | Página de resumen post-sesión con métricas. |
+| [`src/app/api/chat/route.ts`](src/app/api/chat/route.ts) | API de chat — orchestra LLM y streaming SSE. |
+| [`src/app/api/session/route.ts`](src/app/api/session/route.ts) | API de sesión — telemetría y gestión de estado. |
+| [`src/client/avatar/AvatarSprite.tsx`](src/client/avatar/AvatarSprite.tsx) | Avatar 2D CSS/SVG animado con 8 estados expresivos. |
+| [`src/client/components/ChatInterface.tsx`](src/client/components/ChatInterface.tsx) | Interfaz de chat — Condición A y B, TTS, STT. |
+| [`src/client/components/CodePanel.tsx`](src/client/components/CodePanel.tsx) | Panel de código con syntax highlighting y timer. |
+| [`src/services/llm/ollamaClient.ts`](src/services/llm/ollamaClient.ts) | Cliente Ollama — streaming NDJSON, extracción de estado del avatar. |
+| [`src/services/tts/webSpeechTTS.ts`](src/services/tts/webSpeechTTS.ts) | Servicio TTS — Web Speech API. |
+| [`src/services/stt/webSpeechSTT.ts`](src/services/stt/webSpeechSTT.ts) | Servicio STT — Web Speech API. |
+| [`src/prompts/ada-system.ts`](src/prompts/ada-system.ts) | System prompt socrático de Ada con protocolo ZPD de 3 niveles. |
+| [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Definición de las dos tareas experimentales de depuración. |
+| [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) | Módulo de telemetría — logs de latencia y métricas por sesión. |
 
 ### Pruebas
-| Ruta | Descripcion |
-| --- | --- |
-| [tests/](tests/) | Suite de pruebas. |
-| [tests/unit/](tests/unit/) | Pruebas unitarias. |
-| [tests/integration/](tests/integration/) | Pruebas de integracion. |
-| [tests/e2e/](tests/e2e/) | Pruebas end-to-end. |
 
-### Scripts
-| Ruta | Descripcion |
-| --- | --- |
-| [scripts/](scripts/) | Automatizaciones y utilidades. |
-| [scripts/setup/](scripts/setup/) | Preparacion de entorno. |
-| [scripts/evaluation/](scripts/evaluation/) | Scripts de evaluacion. |
+| Ruta | Descripción |
+|---|---|
+| [`tests/unit/`](tests/unit/) | Pruebas unitarias. |
+| [`tests/integration/`](tests/integration/) | Pruebas de integración. |
+| [`tests/e2e/`](tests/e2e/) | Pruebas end-to-end. |
+
+---
+
+## Condiciones Experimentales
+
+| | Condición A — Experimental | Condición B — Control |
+|---|---|---|
+| **Avatar** | ✓ CSS/SVG 2D animado, 8 estados | ✗ Sin avatar |
+| **Voz (TTS)** | ✓ Web Speech API paraverbal | ✗ Deshabilitada |
+| **Reconocimiento de voz (STT)** | ✓ Web Speech API | ✗ Deshabilitado |
+| **Modelo LLM** | ✓ Ollama + Gemma 3 12B | ✓ Idéntico |
+| **System Prompt** | ✓ Socrático ZPD 3 niveles | ✓ Idéntico |
+| **Tareas** | ✓ Bucle + Algoritmo | ✓ Idénticas |
+
+---
+
+## Consideraciones de Seguridad
+
+- **API Keys:** No se requieren API keys externas para la PoC. Ollama corre completamente local.
+- **Datos de sesión:** Los logs de conversación se almacenan en memoria en el servidor bajo un ID alfanumérico único, sin nombre legal ni correo del participante.
+- **`.env.local`:** El archivo de variables de entorno está incluido en `.gitignore` y nunca debe subirse al repositorio.
+
+---
+
+*Proyecto individual · Gabriel Isaías Fallas López · PF-3311 · UCR · I Semestre 2026*

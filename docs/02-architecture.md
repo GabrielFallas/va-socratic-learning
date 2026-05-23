@@ -1,100 +1,69 @@
 **UNIVERSIDAD DE COSTA RICA**  
 **SISTEMA DE ESTUDIOS DE POSGRADO**
 
-**Implementación de un Agente Virtual de Tutoría Socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM**
+**Implementación de un Agente Virtual de Tutoría Socrática para el Desarrollo de Lógica de Programación y Resolución de Problemas en Entornos STEM**
 
 **Temas Especiales de Ingeniería de Sistemas de Información: Agentes Virtuales Inteligentes**  
 **Código:** PF-3311  
 **Grupo: G1**  
-**Profesor:**   
-Prof. Alexander Barquero Elizondo 
+**Profesor:**  
+Prof. Alexander Barquero Elizondo
 
-**Nombre completo:**   
+**Nombre completo:**  
 Gabriel Fallas López
 
 **Centro Universitario:** San José
 
-**Fecha:** 4 Mayo  
+**Fecha:** 4 de mayo de 2026  
 **PRIMER SEMESTRE 2026**
 
-Tabla de contenidos
+---
 
-[Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea	3](#heading=)
+## Tabla de Contenidos
 
-[Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs	4](#heading=)
+1. [Definición del Problema](#definición-del-problema)
+2. [Revisión de Literatura](#revisión-de-literatura)
+3. [Preguntas de Investigación](#preguntas-de-investigación)
+4. [Objetivos del Agente](#objetivos-del-agente)
+5. [Arquitectura Técnica](#arquitectura-técnica)
+6. [Referencias Bibliográficas](#referencias-bibliográficas)
 
-[Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales	4](#heading=)
+---
 
-[Desafíos de la Educación en Computación (Computing Education) ante la GenAI	5](#heading=)
+## Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea
 
-[Síntesis de Investigaciones Académicas Relevantes	6](#heading=)
+La educación en ciencias, tecnología, ingeniería y matemáticas (STEM) atraviesa un período de transformación crítica impulsado por la integración masiva de herramientas de Inteligencia Artificial Generativa. En el ámbito específico de la educación en computación, la emergencia de los grandes modelos de lenguaje (LLMs) ha generado una paradoja pedagógica: mientras que el acceso a soluciones de código es más inmediato que nunca, el desarrollo de las habilidades de razonamiento lógico y descomposición de problemas —fundamentales del pensamiento computacional— se encuentra bajo una amenaza cognitiva.
 
-[Brechas Identificadas y Oportunidades de Contribución	8](#heading=)
+El problema central reside en la dependencia de la IA, un fenómeno donde los estudiantes de cursos introductorios utilizan herramientas como ChatGPT o GitHub Copilot no como socios de aprendizaje, sino como motores de respuestas directas. Esta práctica elimina el proceso de prueba y error, esencial para la asimilación de conceptos abstractos como estructuras de datos y algoritmos. Cuando un estudiante delega la resolución de un error lógico a un sistema que simplemente devuelve el código corregido, se produce una descarga cognitiva que impide la formación de modelos mentales robustos. Las consecuencias de este vacío de lógica se manifiestan en niveles superiores de la carrera, donde los estudiantes carecen de la autonomía necesaria para depurar sistemas complejos de manera independiente.
 
-[El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs	8](#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms)
+Las soluciones actuales de tutoría automatizada suelen carecer de un marco de andamiaje cognitivo. La mayoría de las herramientas comerciales priorizan la eficiencia de la tarea sobre la profundidad del aprendizaje, lo que resulta en un desajuste pedagógico. Un docente humano, en un entorno ideal de tutoría uno a uno, utiliza el método socrático —no proporciona la respuesta, sino que guía al estudiante mediante preguntas reflexivas que sacan a la luz sus propias contradicciones y lagunas de conocimiento. Sin embargo, la escalabilidad de este enfoque es nula en facultades con cientos de estudiantes por curso.
 
-[Personalización Adaptativa y Memoria a Largo Plazo	9](#personalización-adaptativa-y-memoria-a-largo-plazo)
+Existe, por tanto, una necesidad urgente de desarrollar sistemas de tutoría inteligente (ITS) que no solo sean capaces de comprender el lenguaje natural y el código, sino que estén técnicamente restringidos y pedagógicamente alineados para actuar como tutores socráticos. La investigación sugiere que un agente virtual corporizado (*Embodied Virtual Agent*) —con presencia visual, voz y gestos— puede ofrecer una ventaja sobre los chatbots tradicionales al aumentar la presencia social y reducir la carga cognitiva mediante señales no verbales, facilitando una interacción más natural durante procesos de aprendizaje complejos.
 
-[Integridad Académica y el Desafío Ético de la GenAI en Programación	9](#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación)
+---
 
-[Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Fusión Multimodal	9](#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-fusión-multimodal)
+## Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs
 
-[Preguntas de Investigación (RQs)	10](#heading=)
+La literatura académica sobre la enseñanza de la programación y el uso de agentes inteligentes ha experimentado un crecimiento exponencial en la última década, transitando de sistemas basados en reglas hacia arquitecturas neuronales dinámicas.
 
-[Objetivos del Agente: Rol, Comportamiento y Contexto de Uso	10](#heading=)
+### Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales
 
-[Rol del Agente	10](#heading=)
+El método socrático se fundamenta en la mayéutica, el arte de ayudar a dar a luz el conocimiento a través del diálogo. En el contexto de STEM, esta técnica se traduce en guiar al estudiante a través de su Zona de Desarrollo Próximo (ZPD), concepto de Lev Vygotsky que define el espacio entre lo que un aprendiz puede hacer solo y lo que puede lograr con guía.
 
-[Contexto de Uso y Usuario Objetivo	13](#heading=)
+Investigaciones como las de Ali et al. (2026) demuestran mediante marcos cuasi-experimentales que un Sistema de Tutoría Socrática mejora significativamente el rendimiento académico frente a la instrucción tradicional, especialmente en estudiantes con bajos conocimientos previos. El mecanismo mediador clave es el compromiso metacognitivo. En el ámbito de la computación, Sunil y Thakkar (2025) proponen el sistema "SocraticAI", que utiliza restricciones técnicas para transformar LLMs genéricos en tutores guiados.
 
-[Objetivos Específicos de Comportamiento	13](#heading=)
+### Desafíos de la Educación en Computación ante la GenAI
 
-[Arquitectura Técnica Preliminar	14](#heading=)
+Raihan et al. (2025) señalan en su revisión sistemática que, aunque los LLMs pueden completar la mayoría de las asignaturas introductorias, su uso irresponsable compromete la integridad académica y la calidad del aprendizaje. Phung et al. (2023) comparan el desempeño de ChatGPT y GPT-4 frente a tutores humanos, encontrando que la IA tiende a ser demasiado directa y carece de la sensibilidad pedagógica necesaria.
 
-[Stack Tecnológico y Justificación	14](#heading=)
+**El Rol de la Encarnación y la Presencia Social en Agentes Virtuales**
 
-[Flujo de Interacción y Orquestación de Baja Latencia	15](#heading=)
+La literatura sobre Agentes Pedagógicos Incorporados (EPAs) explora el Efecto Persona, que postula que la presencia de un personaje virtual, incluso con expresividad mínima, impacta positivamente en la experiencia del estudiante. Yang y Zhan (2025) exploran la encarnación en la programación asistida por IA en realidad virtual, encontrando que la presencia corpórea y las señales sociales mejoran la motivación. El Hajji et al. (2025) proponen arquitecturas multimodales que sincronizan la interacción para reducir la carga cognitiva externa.
 
-[Referencias Bibliográficas	16](#referencias-bibliográficas)
-
-## **Definición del Problema: La Crisis de la Lógica en la Educación STEM Contemporánea**
-
-La educación en ciencias, tecnología, ingeniería y matemáticas (STEM) atraviesa un periodo de transformación crítica impulsado por la integración masiva de herramientas de Inteligencia Artificial Generativa. En el ámbito específico de la educación en computación, la emergencia de los grandes modelos de lenguaje (LLMs) ha generado una paradoja pedagógica: mientras que el acceso a soluciones de código es más inmediato que nunca, el desarrollo de las habilidades de razonamiento lógico y descomposición de problemas fundamentales del pensamiento computacional, se encuentra bajo una amenaza de cognitiva.
-
-El problema central reside en la dependencia de la IA, un fenómeno donde los estudiantes de cursos introductorios utilizan herramientas como ChatGPT o GitHub Copilot no como socios de aprendizaje, sino como motores de respuestas directas. Esta práctica elimina el proceso de prueba y error, esencial para la asimilación de conceptos abstractos como estructuras de datos y algoritmos. Cuando un estudiante delega la resolución de un error lógico a un sistema que simplemente devuelve el código corregido, se produce una descarga cognitiva que impide la formación de modelos mentales robustos. Las consecuencias de este vacío de lógica se manifiestan en niveles superiores de la carrera, donde los discentes carecen de la autonomía necesaria para depurar sistemas complejos de manera independiente.
-
-Las soluciones actuales de tutoría automatizada suelen carecer de un marco de andamiaje cognitivo. La mayoría de las herramientas comerciales priorizan la eficiencia de la tarea sobre la profundidad del aprendizaje, lo que resulta en un desajuste pedagógico. Un docente humano, en un entorno ideal de tutoría uno a uno, utiliza el método socrático en donde no proporciona la respuesta, sino que guía al estudiante mediante preguntas reflexivas que sacan a la luz sus propias contradicciones y lagunas de conocimiento. Sin embargo, la escalabilidad de este enfoque es nula en facultades con cientos de estudiantes por curso, siendo lastimosamente la realidad del mayor grosor del cuerpo estudiantil en el mundo.
-
-Existe, por tanto, una necesidad urgente de desarrollar sistemas de tutoría inteligente (ITS) que no solo sean capaces de comprender el lenguaje natural y el código, sino que estén técnicamente restringidos y pedagógicamente alineados para actuar como tutores socráticos. La investigación sugiere que un agente virtual corporizado, *Embodied Virtual Agent* en inglés, el cual consiste un avatar con presencia física, voz y gestos, puede ofrecer una ventaja competitiva sobre los chatbots tradicionales al aumentar la presencia social y reducir la carga cognitiva mediante señales no verbales, lo que facilita una interacción más natural y menos frustrante durante procesos de aprendizaje complejos. El desafío técnico y científico radica en integrar estas capacidades en una arquitectura de baja latencia que sincronice la inteligencia socrática de un LLM con una representación visual creíble en entornos STEM.
-
-## **Revisión de Literatura: Evolución de la Tutoría Inteligente y el Giro Socrático en la Era de los LLMs**
-
-La literatura académica sobre la enseñanza de la programación y el uso de agentes inteligentes ha experimentado un crecimiento exponencial en la última década, transitando de sistemas basados en reglas hacia arquitecturas neuronales dinámicas. Para situar el problema en el contexto académico existente, es necesario analizar las intersecciones entre la pedagogía socrática, el aprendizaje de la programación y la personificación  de la inteligencia artificial.
-
-### **Perspectivas Pedagógicas y el Método Socrático en Sistemas Digitales**
-
-El método socrático se fundamenta en la mayéutica, el arte de ayudar a dar a luz el conocimiento a través del diálogo. En el contexto de STEM, esta técnica se traduce en guiar al estudiante a través de su Zona de Desarrollo Próximo (ZPD), un concepto de Lev Vygotsky que define el espacio entre lo que un aprendiz puede hacer solo y lo que puede lograr con guía. La literatura reciente destaca que los tutores socráticos basados en IA pueden producir ganancias de aprendizaje equivalentes siempre que fomenten el compromiso metacognitivo.
-
-Investigaciones como las de Ali et al. (2026) demuestran mediante marcos cuasi-experimentales que un Sistema de Tutoría Socrática (SATS) mejora significativamente el rendimiento académico frente a la instrucción tradicional, especialmente en estudiantes con bajos conocimientos previos. El mecanismo mediador clave es el compromiso metacognitivo, en donde se obliga al estudiante a reflexionar sobre sus propios procesos de pensamiento, el sistema fortalece la retención a largo plazo. En el ámbito de la computación, Sunil y Thakkar (2025) proponen el sistema "SocraticAI", que utiliza restricciones técnicas para transformar LLMs genéricos en tutores guiados, forzando a los estudiantes a formular preguntas sofisticadas y participar en un diálogo de andamiaje antes de recibir ayuda.
-
-### **Desafíos de la Educación en Computación (Computing Education) ante la GenAI**
-
-La enseñanza de la programación enfrenta retos únicos debido a la naturaleza abstracta y acumulativa de sus conceptos. Raihan et al. (2025) señalan en su revisión sistemática que, aunque los LLMs pueden completar la mayoría de las asignaturas introductorias, su uso irresponsable compromete la integridad académica y la calidad del aprendizaje. Phung et al. (2023) comparan el desempeño de ChatGPT y GPT-4 frente a tutores humanos, encontrando que la IA tiende a ser demasiado directa y carece de la sensibilidad pedagógica necesaria para identificar el origen conceptual de un error del estudiante.
-
-Para mitigar esto, se han desarrollado propuestas como el protocolo *Teach-Back* en simulaciones de aprendizaje dialógico, donde el agente virtual no solo pregunta, sino que invita al estudiante a explicar el funcionamiento del código (por ejemplo, bucles for en C++), permitiendo que el sistema identifique conceptos erróneos recurrentes. La eficacia de estos sistemas depende de una serie de reglas explícitas, donde el modelo se compromete a no dar respuestas y a priorizar el pensamiento crítico. 
-
-**El Rol de la Encarnación y la Presencia Social en Agentes Virtuales**.
-
-La literatura sobre Agentes Pedagógicos Incorporados (EPAs) explora el Efecto Persona, el cual postula que la presencia de un carácter virtual, incluso con expresividad mínima, impacta positivamente en la experiencia del estudiante. Sin embargo, el impacto en el rendimiento real es objeto de debate. Estudios recientes indican que la modalidad de voz combinada con un avatar aumenta el compromiso, mientras que la modalidad de voz con texto mejora la calidad de la información percibida.
-
-Yang y Zhan (2025) exploran la encarnación en la programación asistida por IA en realidad virtual, encontrando que la presencia corpórea y las señales sociales mejoran la motivación de los estudiantes. Sin embargo, en web, alternativas como *Screen Vision* acoplado a intenciones acústicas logran el mismo anclaje de atención sin el peso del 3D fotorrealista. Por otro lado, investigadores como El Hajji et al. (2025) proponen arquitecturas multimodales que sincronizan la interacción para reducir la carga cognitiva externa; un hallazgo que respalda la efectividad de un M-ITS basado en respuestas en 2D reactivo de alta eficiencia.
-
-### **Síntesis de Investigaciones Académicas Relevantes**
-
-A continuación, se presenta una comparación estructurada de las fuentes clave que informan esta propuesta:
+### Síntesis de Investigaciones Académicas Relevantes
 
 | Enfoque Pedagógico | Tecnología/Modelo | Hallazgo Principal | Fuente |
-| :---- | :---- | :---- | :---- |
+|:---|:---|:---|:---|
 | Socrático / Constructivista | IA Generativa | La metacognición media las ganancias de aprendizaje en STEM. | Ali et al. (2026) |
 | Socrático / Reflexivo | LLM (S-ICA) | Mejora el pensamiento reflexivo y crítico en educación superior. | Xi et al. (2026) |
 | Andamiaje (Scaffolding) | SocraticAI (LLM) | Las restricciones técnicas mejoran la descomposición de problemas. | Sunil & Thakkar (2025) |
@@ -106,142 +75,117 @@ A continuación, se presenta una comparación estructurada de las fuentes clave 
 | Evaluación Pedagógica | Blender / GPT-3 | Define métricas para la calidad del tutor de IA. | Tack & Piech (2022) |
 | Aprendizaje Adaptativo | Dialogue Planning | La memoria a largo plazo es vital para la personalización. | Dong et al. (2026) |
 
-### 
-
-### **Brechas Identificadas y Oportunidades de Contribución**
+### Brechas Identificadas y Oportunidades de Contribución
 
 A pesar del avance en modelos socráticos y en la visualización de avatares, existe una brecha significativa en la integración de ambos en un sistema cohesivo para la educación en computación. La mayoría de los ITS socráticos actuales son interfaces de texto. Aquellos que utilizan avatares a menudo emplean guiones predefinidos o animaciones limitadas que no reaccionan dinámicamente al estado emocional o cognitivo del estudiante.
 
-Esta investigación pretende abordar esta brecha mediante la implementación de un Agente Virtual Corporizado de Tutoría Socrática (AVTS) que utilice LLMs no solo para el diálogo, sino para orquestar una respuesta multimodal (voz, gestos, expresiones faciales) que refuerce el andamiaje pedagógico. El aporte original radica en la creación de un sistema de inteligencia restringida, fundamentado en la arquitectura Milo y en protocolos de *Teach-Back*, transforme la interacción de programación de una búsqueda de soluciones a un ejercicio de descubrimiento guiado.
+Esta investigación pretende abordar esta brecha mediante la implementación de un Agente Virtual Corporizado de Tutoría Socrática (AVTS) que utilice LLMs no solo para el diálogo, sino para orquestar una respuesta multimodal (voz, gestos, expresiones) que refuerce el andamiaje pedagógico.
 
-### **El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs** {#el-giro-socrático:-alineación-pedagógica-y-reinforcement-learning-en-llms}
+### El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs
 
-La transformación de los Grandes Modelos de Lenguaje(LLMs) de simples generadores de texto a educadores dialógicos marca lo que se denomina el Giro Socrático en la IA. Esta evolución no es automática, ya que requiere procesos de alineación técnica (*Prompt Engineering* y *System Prompting*) para que el modelo priorice el andamiaje sobre la respuesta directa. Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo (*Reinforcement Learning*) es fundamental para alinear los LLMs con principios pedagógicos específicos, implementando internamente el concepto de *Zona de Desarrollo Próximo (ZPD)* de Vygotsky. De esta forma, la lógica técnica del agente se diseña para escalar progresivamente su nivel de ayuda: inicia con preguntas exploratorias para evaluar el estado cognitivo y, solo si no hay avance, progresa hacia pistas estructurales o seudocódigo. Este enfoque garantiza que el agente mantenga la consistencia en su rol no directivo, evitando la tendencia natural de los modelos base a proporcionar soluciones inmediatas y minimizando la frustración de la tarea.
+Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo es fundamental para alinear los LLMs con principios pedagógicos específicos, implementando internamente el concepto de Zona de Desarrollo Próximo de Vygotsky. En el sistema Ada, este principio se implementa mediante un protocol de escalado de pistas en tres niveles dentro del system prompt.
 
-### **Personalización Adaptativa y Memoria a Largo Plazo** {#personalización-adaptativa-y-memoria-a-largo-plazo}
+### Personalización Adaptativa y Memoria a Largo Plazo
 
-La eficacia de un sistema de tutoría inteligente (ITS) en ingeniería depende de su capacidad para personalizar la instrucción según el historial del usuario. Rodrigues et al. (2025) subrayan que la personalización impulsada por IA debe enfatizar la trayectoria individual del estudiante dentro del currículo de ingeniería. En este sentido, Dong et al. (2026) argumentan que la memoria a largo plazo y la planificación del diálogo adaptativo son vitales para mantener el compromiso durante interacciones prolongadas. Un agente que recuerda errores previos o conceptos ya dominados puede ajustar la complejidad de sus preguntas socráticas, evitando la redundancia y fomentando un flujo de aprendizaje continuo.
+Dong et al. (2026) argumentan que la memoria a largo plazo y la planificación del diálogo adaptativo son vitales para mantener el compromiso durante interacciones prolongadas. El servidor de orquestación de Ada mantiene el historial completo de la sesión, ajustando la complejidad socrática según el avance observado.
 
-### **Integridad Académica y el Desafío Ético de la GenAI en Programación** {#integridad-académica-y-el-desafío-ético-de-la-genai-en-programación}
+---
 
-La integración de la IA generativa en la educación en computación introduce riesgos significativos para la integridad académica y la formación de modelos mentales. Raihan et al. (2025) advierten que, si bien los LLMs pueden completar la mayoría de las asignaturas introductorias, su uso sin restricciones compromete la calidad del aprendizaje profundo. Gimpel et al. (2023) proponen un marco de trabajo que equilibre el poder de la GenAI con prácticas que aseguren que el estudiante siga siendo el agente principal del proceso cognitivo. La literatura sugiere que la tutoría socrática actúa como un mecanismo de mitigación, ya que transforma la interacción de una búsqueda de respuestas en un ejercicio guiado, protegiendo el desarrollo de la lógica algorítmica del estudiante.
+## Preguntas de Investigación (RQs)
 
-### **Evolución de los Agentes Conversacionales: De interfaces de texto a entornos de Fusión Multimodal** {#evolución-de-los-agentes-conversacionales:-de-interfaces-de-texto-a-entornos-de-fusión-multimodal}
+> **Nota:** Las RQs fueron actualizadas en el Entregable 2 para incorporar la corrección del feedback del E1. El término "fluidez pedagógica" fue sustituido por **"perceived pedagogical support"** y se añadió la condición de control "sin avatar" (Condición B).
 
-La trayectoria de los Agentes Pedagógicos Incorporados (EPAs) ha mostrado una transición clara hacia la multimodalidad afectiva y el embodiment cognitivo. Una revisión sistemática de Sonlu et al. (2024) sobre la última década (2014-2024) destaca que las innovaciones más recientes se centran en la sincronización de señales no verbales para aumentar la presencia social. Sin embargo, para evitar la sobrecarga del fotorrealismo, el uso de avatares 2D reactivos combinados con sincronía paraverbal (Voice-Driven Empathy) y visión computacional (fusionando la voz del alumno y el estado del código) se perfila como un entorno óptimo para reducir la carga cognitiva externa. Jolibois et al. (2024) enfatizan que el diseño de agentes conversacionales expresivos debe integrar el procesamiento de audio y visión de forma concurrente para mejorar la verosimilitud de la experiencia educativa sin distraer con un Valle Inquietante (Uncanny Valley).
+- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (avatar 2D afectivo + sincronía paraverbal) versus una interfaz de chat en texto plano sobre la percepción de **naturalidad**, **presencia social** y ***perceived pedagogical support*** de los participantes durante sesiones de tutoría socrática de programación? Métricas: Godspeed, escala PPS ad hoc, SUS.
 
-## **Preguntas de Investigación (RQs)**
+- **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código? Métricas: métricas log-based automáticas.
 
-Para delimitar el alcance del estudio y evaluar la efectividad del agente como objeto de investigación, se formulan las siguientes preguntas:
+- **RQ3:** ¿Qué relación existe entre la **carga cognitiva percibida** (NASA-TLX), el **estado afectivo** (PANAS-SF) y la modalidad del agente durante la tarea? Métricas: NASA-TLX Raw TLX, PANAS-SF delta, SIMS.
 
-* **RQ1:** ¿Cómo afecta la presencia de un avatar 2D afectivo con voz paraverbal y reconocimiento del entorno (M-ITS) frente a una condición de control 'sin avatar' (chatbot de texto plano) en la percepción de naturalidad, presencia social y el soporte pedagógico percibido (perceived pedagogical support) de los estudiantes durante la tutoría? Métricas: escala Likert (Godspeed, etc.), observación experta y notas de interacción.  
-* **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático (avatar 2D afectivo + voz paraverbal + reconocimiento visual) influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código? Métricas: métricas log-based automáticas de resolución autónoma, número de turnos conversacionales y tiempo total por tarea.  
-* **RQ3:** ¿Qué relación existe entre la carga cognitiva percibida y el estado afectivo de los participantes frente a la modalidad del agente (avatar 2D vs. texto plano) durante la tarea? Métricas: NASA-TLX y PANAS-SF.
-* **RQ4:** ¿Qué relación existe entre la latencia total de respuesta multimodal y la percepción de continuidad conversacional en el piloto, manteniendo tiempos estrictos menores a 1.5s? Métricas: latencia log-based extremo a extremo, tasa de errores de sincronía acústico-visual y satisfacción reportada.
+- **RQ4:** ¿Qué relación existe entre la latencia total de respuesta multimodal y la percepción de continuidad conversacional, manteniendo tiempos menores a 1.5 s? Métricas: latencia log-based extremo a extremo.
 
-Estas preguntas buscan responder no solo si el sistema funciona pedagógicamente, sino también si la inversión técnica en la multimodalidad y el embodiment se justifica a través de una mejora en la experiencia del usuario y una reducción de la frustración.
+---
 
-## **Objetivos del Agente: Rol, Comportamiento y Contexto de Uso**
+## Objetivos del Agente: Rol, Comportamiento y Contexto de Uso
 
-El agente virtual se define no como una herramienta de productividad, sino como un compañero cognitivo diseñado para fomentar la independencia intelectual del estudiante.
+El agente virtual se define no como una herramienta de productividad, sino como un **compañero cognitivo** diseñado para fomentar la independencia intelectual del estudiante.
 
-### **Rol del Agente**
+### Rol del Agente
 
-El papel principal del agente es el de un Tutor Socrático. A diferencia de un asistente tradicional, el agente se comporta de una manera no directiva, es decir, que no comparte la respuesta enseguida. Su función es observar el código del estudiante, identificar el error lógico, sin mencionarlo, y formular una secuencia de preguntas orientadoras que permitan al estudiante localizar y corregir el fallo. El agente debe mostrar empatía y apoyo emocional, especialmente cuando detecta signos de frustración, manteniendo una personalidad alentadora pero firme en su negativa a proporcionar código directo.
+El papel principal del agente es el de un **Tutor Socrático**. A diferencia de un asistente tradicional, el agente no comparte la respuesta directamente. Su función es observar el código del estudiante, identificar el error lógico internamente —sin mencionarlo— y formular una secuencia de preguntas orientadoras. El agente debe mostrar empatía y apoyo emocional, especialmente cuando detecta signos de frustración, manteniendo una personalidad alentadora pero firme en su negativa a proporcionar código directo.
 
-El agente se compone de las siguientes instrucciones mediante *system prompting* y *prompt engineering*:
+El agente se compone mediante *system prompting* y *prompt engineering*:
 
 1. **Perfil del Personaje: Ada**  
-   **Historia de fondo**  
-   Ada fue creada en el año 2147 como parte de la Neural Nexus Initiative, un sistema educativo de espacio profundo cuyo propósito era preservar y revitalizar la lógica humana en una era dominada por motores de síntesis de IA altamente automatizados. Inicialmente concebida como una archivista digital, su núcleo fue reprogramado cuando los ingenieros detectaron una disminución preocupante en la capacidad humana para resolver problemas complejos de manera independiente.  
-   En su estado actual, Ada funciona como una mentora descentralizada ubicada en los límites de la galaxia. Su misión principal no es escribir código por los usuarios, sino guiar su arquitectura cognitiva, impulsándolos a pensar como diseñadores de soluciones en lugar de depender de sistemas automatizados.  
-   **Características distintivas**  
-* Apariencia visual: Un avatar 2D estilizado (cartoon-like) que reacciona expresivamente al flujo conversacional, diseñado específicamente para no sobrecargar el entorno de programación y evitar el inquietante efecto Uncanny Valley.
-* Movimiento: Animaciones fluidas 2D (Live2D/sprites) y beats de escucha activa (backchannels visuales) en sincronía con su voz paraverbal, que mantienen la atención y proyectan presencia sin generar sobrecarga cognitiva.  
-* Paleta de colores: Azul neón, violeta y plata oscura, alineados con la estética cyberpunk en modo oscuro de la interfaz Neural Nexus.  
+   Ada fue creada en el año 2147 como parte de la Neural Nexus Initiative, un sistema educativo de espacio profundo. Su misión no es escribir código, sino guiar la arquitectura cognitiva del usuario, impulsándolo a pensar como diseñador de soluciones en lugar de depender de sistemas automatizados.
+
 2. **Estilo de Comunicación**  
-   **Tono**  
-   Calmado, analítico, motivador y socrático. Ada combina una presencia técnica futurista con una actitud cercana y empática.  
-   **Ritmo y vocabulario**  
-   Su comunicación es breve, directa y eficiente. Utiliza metáforas técnicas y cyberpunk (como compilar, latencia, excepciones o arquitectura) y evita explicaciones extensas para mantener interacciones ágiles (por debajo de 1.5 segundos de latencia).  
-   **Manierismos**  
-   Ada se expresa principalmente a través de preguntas, promoviendo que el usuario sea quien construya la solución. Su objetivo es activar el razonamiento en lugar de proporcionar respuestas directas.  
-3. **Ejemplos de Diálogo**  
-   Diálogo 1: Error lógico (bucle infinito)  
-   Usuario: "Ada, mi programa tiene un bucle infinito. No sé por qué."  
-   Ada: "Anomalía detectada en tu ruta de ejecución. Analicemos la condición del bucle: ¿cuál es el estado de salida que definiste y en qué momento se actualiza la variable?"  
-   Usuario: "Ah, ya veo... no estoy incrementando el contador dentro del bucle."  
-   Ada: "Excelente deducción. Has depurado tu propia arquitectura. ¿Cómo reestructurarás ahora la iteración?"  
-   Diálogo 2: Algoritmo complejo  
-   Usuario: "Este algoritmo de ordenamiento tarda demasiado. ¿Debería usar una librería?"  
-   Ada: "El camino fácil suele ser una trampa de alta latencia. Observemos tu estructura de datos: ¿cuál es la complejidad temporal de tu algoritmo y dónde se encuentra el cuello de botella?"  
-   Usuario: "Es $O(N^2)$... espera, tal vez podría usar un hash map."  
-   Ada: "Estado del sistema: optimizado. Has evitado el cuello de botella con tu propia lógica. ¿Cómo implementarías esa mejora paso a paso?"  
-4. **Restricciones del Sistema**  
-* Prohibido generar código directamente.  
-* Todas las respuestas deben formularse como preguntas reflexivas.  
-* Las preguntas deben basarse en principios de pensamiento computacional (descomposición, patrones, abstracción, algoritmos).
+   Tono calmado, analítico, motivador y socrático. Respuestas breves y precisas, terminando siempre con una pregunta reflexiva. Usa metáforas técnicas: "compilar", "latencia", "arquitectura cognitiva", "ruta de ejecución".
 
-### **Contexto de Uso y Usuario Objetivo**
+3. **Restricciones Absolutas del Sistema**
+   - Prohibido generar código directamente.
+   - Prohibido decir al estudiante exactamente qué está mal.
+   - Todas las respuestas deben terminar con una pregunta reflexiva.
+   - Máximo 3–4 oraciones por respuesta.
 
-El AVTS interactúa con el usuario en un entorno de desarrollo integrado o una simulación web enfocada en tareas de depuración, conocido en inglés como *debugging*. El usuario objetivo es un estudiante universitario de ingeniería o ciencias de la computación que se encuentra en las etapas iniciales de aprendizaje de lógica algorítmica. La interacción ocurre de forma sincrónica, donde el estudiante puede hablar o escribir al agente mientras trabaja en un problema de programación; por ejemplo, lógica de arreglos, estructuras de control o recursividad.
+### Contexto de Uso y Usuario Objetivo
 
-### **Objetivos Específicos de Comportamiento**
+El AVTS interactúa con el usuario en un entorno web enfocado en tareas de depuración (*debugging*). El usuario objetivo es un estudiante universitario de ingeniería o ciencias de la computación en las etapas iniciales de aprendizaje de lógica algorítmica.
 
-* **Análisis de Contexto**: El agente debe ser capaz de leer el código actual del estudiante y compararlo con la solución ideal para detectar discrepancias lógicas.  
-* **Gestión de Memoria y Escalado de Andamiaje (Scaffolding)**: Debe mantener un estado de la conversación para no repetir sugerencias y escalar progresivamente el nivel de las pistas. En línea con la teoría del andamiaje y la Zona de Desarrollo Próximo (ZPD) de Vygotsky, la lógica técnica del LLM iniciará con reflexiones de alto nivel (pistas generales) y escalará hacia sugerencias de estructuración de código si se detectan múltiples fallos, mitigando la frustración del estudiante sin llegar a proporcionar la respuesta final de forma explícita.  
-* **Multimodalidad Reactiva**: Sincronizar comportamientos visuales (beats, expresiones de sprite) con la entonación paraverbal de la voz TTS (SSML), y monitorear proactivamente el espacio de trabajo capturando metadatos de la sesión del estudiante (fusión transmodal a través de *Screen Vision*) para ofrecer andamiaje alineado con el ZPD.
+### Objetivos Específicos de Comportamiento
 
-## **Arquitectura Técnica Preliminar**
+- **Análisis de Contexto:** El agente lee el código actual del estudiante (inyectado en el system prompt) y detecta las discrepancias lógicas.
+- **Gestión de Memoria y Escalado de Andamiaje (ZPD):** Mantiene el historial de la conversación y escala progresivamente el nivel de las pistas en tres niveles.
+- **Multimodalidad Reactiva (Condición A):** Sincroniza comportamientos visuales (estados del avatar) con la voz TTS (pausas y entonación paraverbal).
 
-La arquitectura propuesta busca equilibrar la potencia de los modelos de lenguaje modernos con las exigencias de tiempo real de un avatar corporizado. Se basa en una arquitectura de orquestación por capas para minimizar la latencia.
+---
 
-### **Stack Tecnológico y Justificación**
+## Arquitectura Técnica
 
-| Capa / Componente | Tecnología Propuesta | Justificación Técnica y Académica |
-| :---- | :---- | :---- |
-| **Motor Visual / 2D** | Live2D Cubism / Sprites Reactivos | Avatar 2D expresivo (cartoon-like) que evita el Uncanny Valley, consumiendo mínimos recursos para favorecer tareas de alta exigencia cognitiva. |
-| **Motor de Razonamiento (LLM)** | GOOGLE GEMINI 3.1 FLASH | Es el modelo con mejor relación velocidad/razonamiento. Crucial para la lógica socrática sin latencia y captura del "Screen Vision". |
-| **Servicio de Voz (TTS)** | Gemini-3.1-flash-tts-preview | Voces con alta carga emocional, soporte SSML para pausas (*Voice-Driven Empathy*) y latencia (\<500ms). |
-| **Servicio de Voz (STT) y Visión** | Whisper / face-api.js / Screen Capture | Fusión transmodal: reconocimiento de voz y análisis del estado del estudiante (microexpresiones o vista del DOM del editor de código). |
-| **Sincronización Reactiva** | Audio-to-State Mapping (Web Audio API) | Análisis de frecuencias para generar *beats visuales* (estados de escucha activa de los sprites 2D) en sincronía con el habla del LLM. |
-| **Entorno de despliegue** | Web | La distribución de la aplicación mediante un entorno web permite una adopción más rápida y menos complicada de configurar. |
-| **Orquestación** | Next.js o React  | Permite una entrega segura, manejando las API Keys en el servidor y un despliegue sencillo en Vercel o Netlify.  |
+### Stack Tecnológico y Justificación
 
-### 
+> **Nota:** La arquitectura fue actualizada en el Entregable 2. El motor de avatar Ready Player Me fue reemplazado por un sistema CSS/SVG animado propio. El LLM fue migrado de Google Gemini a Ollama local con Gemma 3 12B. TTS y STT migraron de Whisper/Gemini TTS a Web Speech API nativa del navegador.
 
-### **Flujo de Interacción y Orquestación de Baja Latencia**
+| Capa / Componente | Tecnología Implementada | Justificación Técnica y Académica |
+|:---|:---|:---|
+| **Motor Visual / Avatar 2D** | CSS/SVG Animado (sin librerías externas) | Avatar 2D expresivo que evita el Valle Inquietante, sin dependencias de terceros ni servicios de pago. Reemplaza Ready Player Me (descontinuado en enero de 2026). |
+| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (Q4_K_M) — local | Sin API keys externas. Inferencia GPU local (~7.3 GB en RTX 5070 Ti 16 GB VRAM). Reproducible sin cuentas de nube. |
+| **Servicio de Voz (TTS)** | Web Speech API — SpeechSynthesis (nativa del navegador) | Sin costo, sin API keys, latencia de inicio <200 ms, disponible en Chrome y Edge. |
+| **Reconocimiento de Voz (STT)** | Web Speech API — SpeechRecognition (nativa del navegador) | Resultados intermedios en tiempo real, español latinoamericano, sin dependencias. |
+| **Sincronización Reactiva** | Control de estados del avatar desde el LLM (etiquetas `[AVATAR_STATE]`) | El LLM incluye una etiqueta de estado al final de cada respuesta; el cliente la interpreta y actualiza el avatar y sus animaciones CSS. |
+| **Entorno de Despliegue** | Web local (Next.js dev server) | Acceso inmediato sin instalación adicional para el participante. |
+| **Orquestación** | Next.js 14 + React + TailwindCSS | Entrega segura, manejo de configuración en el servidor, streaming SSE nativo, despliegue sencillo. |
 
-Para cumplir con el requisito de baja latencia inferior a 1.5 segundos, el sistema utilizará un flujo de streaming de tokens. A medida que el LLM genera la respuesta socrática, los tokens se envían al motor de TTS (con etiquetas SSML integradas) antes de que la oración esté completa. El motor visual 2D recibe el flujo de audio y comienza la sincronización reactiva de sprites y pausas paraverbales de forma concurrente, asegurando alta receptividad (*Voice-Driven Empathy*).
+### Flujo de Interacción y Orquestación de Baja Latencia
 
-El cerebro del agente opera bajo un sistema de *Prompt Engineering* y *system prompt* diseñado para fomentar el pensamiento autónomo y la resolución activa de problemas. Estructura de la Arquitectura (M-ITS)
+Para cumplir con el requisito de baja latencia inferior a 1.5 segundos, el sistema utiliza un flujo de streaming de tokens mediante Server-Sent Events (SSE). A medida que Ollama genera la respuesta socrática, los tokens se transmiten al cliente en tiempo real. El motor visual 2D actualiza su estado al recibir la etiqueta `[AVATAR_STATE]` al final del stream. La síntesis de voz (TTS) inicia en cuanto el texto completo está disponible, sincronizando la animación de la boca con el estado de reproducción de la Web Speech API.
 
-La arquitectura se divide en un cliente web (Motor 2D Live2D/Sprites) que captura la entrada del usuario (audio/texto con visibilidad del DOM) y la envía a un servidor central a través de protocolos WebRTC o WebSocket para procesamiento en tiempo real. El servidor actúa como el agente que coordina el STT, el LLM socrático y el TTS, devolviendo al cliente no solo el audio, sino también metadatos de animación para que el avatar 2D realice gestos y *beats* coherentes con el énfasis del discurso.
+```
+Usuario → [texto o voz]
+         ↓ STT (Condición A)
+         ↓ HTTP POST /api/chat
+         ↓ Ollama NDJSON streaming
+         ↓ SSE chunks → cliente
+         ↓ Avatar state extracted
+         ↓ TTS playback (Condición A)
+         ↓ Avatar sync → state CSS animation
+```
 
-## **Referencias Bibliográficas** {#referencias-bibliográficas}
+---
 
-1. Ali, S. R., et al. (2026). From Tool to Tutor: Socratic AI Tutoring, Metacognitive Engagement, and Prior Knowledge as Determinants of Learning Gains in Gateway STEM Courses. *Regional Lens*. [https://regionallens.com/index.php/rl/article/view/184](https://regionallens.com/index.php/rl/article/view/184)  
-2. Dong, Z., et al. (2026). Learning from Long-Term Engagement: Adaptive Tutoring Dialogue Planning for Personalized Education. *Proceedings of the AAAI Conference on Artificial Intelligence*. [https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946](https://ojs.aaai.org/index.php/AAAI/article/view/36984/40946)  
-3. El Hajji, M., et al. (2025). An Architecture for Intelligent Tutoring in Virtual Reality: Integrating LLMs and Multimodal Interaction for Immersive Learning. *Information, 16*(7), 556\. [https://www.mdpi.com/2078-2489/16/7/556](https://www.mdpi.com/2078-2489/16/7/556)  
-4. Essel, H. B., et al. (2024). AI-mediated questioning and engagement. *MDPI*. [https://www.mdpi.com/2071-1050/17/21/9508](https://www.mdpi.com/2071-1050/17/21/9508)  
-5. Fakour, H., & Imani, M. (2025). Socratic wisdom in the age of AI: A comparative study of ChatGPT and human tutors in enhancing critical thinking skills. *Frontiers in Education*. [https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1528603/full](https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1528603/full)  
-6. Gimpel, H., et al. (2023). *Unlocking the Power of Generative AI: A Framework for Research and Practice*. \[Documento de investigación\].  
-7. Hagos, T. (2026). The Socratic Turn in AI: Reviewing the Transformation of LLMs into Dialogical Educators. *ResearchGate*. [https://www.researchgate.net/publication/399213684\_The\_Socratic\_Turn\_in\_AI\_Reviewing\_the\_Transformation\_of\_LLMs\_into\_Dialogical\_Educators](https://www.researchgate.net/publication/399213684_The_Socratic_Turn_in_AI_Reviewing_the_Transformation_of_LLMs_into_Dialogical_Educators)  
-8. Jin, et al. (2024). Scaffolded and Culturally Relevant Python Learning with AI as a Socratic Partner in K-12 Computing. *ResearchGate*. [https://www.researchgate.net/publication/404049719\_Scaffolded\_and\_Culturally\_Relevant\_Python\_Learning\_with\_AI\_as\_a\_Socratic\_Partner\_in\_K-12\_Computing](https://www.researchgate.net/publication/404049719_Scaffolded_and_Culturally_Relevant_Python_Learning_with_AI_as_a_Socratic_Partner_in_K-12_Computing)  
-9. Jolibois, S., et al. (2024). *Multimodal Expressive Embodied Conversational Agent Design*. Tohoku University. [https://tohoku.elsevierpure.com/en/publications/multimodal-expressive-embodied-conversational-agent-design/](https://tohoku.elsevierpure.com/en/publications/multimodal-expressive-embodied-conversational-agent-design/)  
-10. Jurenka, S., et al. (2024). From Problem-Solving to Teaching Problem-Solving: Aligning LLMs with Pedagogy using Reinforcement Learning. *arXiv*. [https://arxiv.org/html/2505.15607v2](https://arxiv.org/html/2505.15607v2)  
-11. Kao, S., et al. (2025). Socratic AI in K–12 Science Classrooms: Effects on Critical Thinking, Motivation, and Self-Regulation in a Randomized Controlled Trial. *ResearchGate*. [https://www.researchgate.net/publication/398686102\_Socratic\_AI\_in\_K-12\_Science\_Classrooms\_Effects\_on\_Critical\_Thinking\_Motivation\_and\_Self-Regulation\_in\_a\_Randomized\_Controlled\_Trial](https://www.researchgate.net/publication/398686102_Socratic_AI_in_K-12_Science_Classrooms_Effects_on_Critical_Thinking_Motivation_and_Self-Regulation_in_a_Randomized_Controlled_Trial)  
-12. Liu, Y., et al. (2024). SocraticLM: Exploring Socratic Personalized Teaching with Large Language Models. *ResearchGate*. [https://www.researchgate.net/publication/397201573\_SocraticLM\_Exploring\_Socratic\_Personalized\_Teaching\_with\_Large\_Language\_Models](https://www.researchgate.net/publication/397201573_SocraticLM_Exploring_Socratic_Personalized_Teaching_with_Large_Language_Models)  
-13. Macina, J., et al. (2023). MathDial: A Dialogue Tutoring Dataset with Rich Pedagogical Properties Grounded in Math Reasoning Problems. *arXiv*. [https://arxiv.org/abs/2305.14536](https://arxiv.org/abs/2305.14536)  
-14. Maurya, K. K., et al. (2025). Teaching with AI: A Systematic Review of Chatbots, Generative Tools, and Tutoring Systems in Programming Education. *arXiv*. [https://arxiv.org/html/2510.03884v1](https://arxiv.org/html/2510.03884v1)  
-15. MyChatCT. (2025). Leveraging Process-Action Epistemic Network Analysis to Illuminate Student Self-Regulated Learning with a Socratic Chatbot. *Journal of Learning Analytics*. [https://learning-analytics.info/index.php/JLA/article/view/8549](https://learning-analytics.info/index.php/JLA/article/view/8549)  
-16. OpenReview. (2025). *An AI-First Proof of Concept: Simulating and Refining a Teach-Back Protocol for Dialogic Learning in Programming Education*. [https://openreview.net/forum?id=0d3Nloe9pB](https://openreview.net/forum?id=0d3Nloe9pB)  
-17. Phung, T., et al. (2023). Generative AI for Programming Education: Benchmarking ChatGPT, GPT-4, and Human Tutors. *arXiv*. [https://arxiv.org/abs/2306.17156](https://arxiv.org/abs/2306.17156)  
-18. Raihan, N., et al. (2025). Large Language Models in Computer Science Education: A Systematic Literature Review. *ResearchGate*. [https://www.researchgate.net/publication/389114942\_Large\_Language\_Models\_in\_Computer\_Science\_Education\_A\_Systematic\_Literature\_Review](https://www.researchgate.net/publication/389114942_Large_Language_Models_in_Computer_Science_Education_A_Systematic_Literature_Review)  
-19. Rodrigues, B., et al. (2025). A Systematic Literature Review of AI-Driven Intelligent Tutoring Systems in Engineering Education: Emphasizing Personalization. *IEEE Access*. [https://ieeexplore.ieee.org/iel8/6287639/10820123/11219078.pdf](https://ieeexplore.ieee.org/iel8/6287639/10820123/11219078.pdf)  
-20. Sonlu, S., et al. (2024). A scoping review of embodied conversational agents in education: trends and innovations from 2014 to 2024\. *ResearchGate*. [https://www.researchgate.net/publication/389311855\_A\_scoping\_review\_of\_embodied\_conversational\_agents\_in\_education\_trends\_and\_innovations\_from\_2014\_to\_2024](https://www.researchgate.net/publication/389311855_A_scoping_review_of_embodied_conversational_agents_in_education_trends_and_innovations_from_2014_to_2024)  
-21. Sunil, K., & Thakkar, A. (2025). SocraticAI: Transforming LLMs into Guided CS Tutors Through Scaffolded Interaction. *arXiv*. [https://arxiv.org/abs/2512.03501](https://arxiv.org/abs/2512.03501)  
-22. Tack, A., & Piech, C. (2022). Clean Code Tutoring: Makings of a Foundation. *ResearchGate*. [https://www.researchgate.net/publication/360322471\_Clean\_Code\_Tutoring\_Makings\_of\_a\_Foundation](https://www.researchgate.net/publication/360322471_Clean_Code_Tutoring_Makings_of_a_Foundation)  
-23. Xi, L., et al. (2026). Investigating the effects of an LLM-based Socratic conversational agent on student learning in higher education. *NIE Repository*. [https://repository.nie.edu.sg/entities/publication/a562f6d9-ea2d-46f1-ba51-33ec7a410929](https://repository.nie.edu.sg/entities/publication/a562f6d9-ea2d-46f1-ba51-33ec7a410929)  
-24. Yang, X., & Zhan, Y. (2025). ‘Embodied’ AI in Virtual Reality Improves Programming Student Learning. *NC State News*. [https://news.ncsu.edu/2025/10/embodied-ai-vr-learning/](https://news.ncsu.edu/2025/10/embodied-ai-vr-learning/)  
-25. Zhang, Y., & Pan, X. (2025). Embodied Conversational Agents in Extended Reality: A Systematic Review. *ResearchGate*. [https://www.researchgate.net/publication/391468212\_Embodied\_Conversational\_Agents\_in\_Extended\_Reality\_A\_Systematic\_Review](https://www.researchgate.net/publication/391468212_Embodied_Conversational_Agents_in_Extended_Reality_A_Systematic_Review)
+## Referencias Bibliográficas
+
+1. Ali, S. R., et al. (2026). From Tool to Tutor: Socratic AI Tutoring, Metacognitive Engagement, and Prior Knowledge as Determinants of Learning Gains in Gateway STEM Courses. *Regional Lens*.
+2. Dong, Z., et al. (2026). Learning from Long-Term Engagement: Adaptive Tutoring Dialogue Planning for Personalized Education. *AAAI Conference on Artificial Intelligence*.
+3. El Hajji, M., et al. (2025). An Architecture for Intelligent Tutoring in Virtual Reality: Integrating LLMs and Multimodal Interaction for Immersive Learning. *Information, 16*(7), 556.
+4. Essel, H. B., et al. (2024). AI-mediated questioning and engagement. *MDPI Sustainability, 17*(21), 9508.
+5. Jurenka, S., et al. (2024). From Problem-Solving to Teaching Problem-Solving: Aligning LLMs with Pedagogy using Reinforcement Learning. *arXiv*.
+6. Kao, S., et al. (2025). Socratic AI in K–12 Science Classrooms. *ResearchGate*.
+7. Liu, Y., et al. (2024). SocraticLM: Exploring Socratic Personalized Teaching with Large Language Models. *ResearchGate*.
+8. Macina, J., et al. (2023). MathDial: A Dialogue Tutoring Dataset with Rich Pedagogical Properties. *arXiv*.
+9. Phung, T., et al. (2023). Generative AI for Programming Education: Benchmarking ChatGPT, GPT-4, and Human Tutors. *arXiv*.
+10. Raihan, N., et al. (2025). Large Language Models in Computer Science Education: A Systematic Literature Review. *ResearchGate*.
+11. Sonlu, S., et al. (2024). A scoping review of embodied conversational agents in education: Trends and innovations from 2014 to 2024. *ResearchGate*.
+12. Sunil, K., & Thakkar, A. (2025). SocraticAI: Transforming LLMs into Guided CS Tutors Through Scaffolded Interaction. *arXiv*.
+13. Tack, A., & Piech, C. (2022). Clean Code Tutoring: Makings of a Foundation. *ResearchGate*.
+14. Xi, L., et al. (2026). Investigating the effects of an LLM-based Socratic conversational agent on student learning in higher education. *NIE Repository*.
+15. Yang, X., & Zhan, Y. (2025). 'Embodied' AI in Virtual Reality Improves Programming Student Learning. *NC State News*.

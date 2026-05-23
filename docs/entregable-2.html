@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entregable 2 — Ada: Tutora Socrática Corporizada — PF-3311</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: letter portrait; margin: 2.54cm; }
+    body {
+      font-family: 'Calibri', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11pt; line-height: 1.5; color: #000;
+      background: #f0f0f0;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .page {
+      width: 21.59cm; min-height: 27.94cm; background: white;
+      margin: 1cm auto; padding: 2.54cm;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    @media print {
+      body { background: white; }
+      .page { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
+    }
+    h1 { font-size: 18pt; font-weight: bold; color: #2F5496; margin-bottom: 6pt; }
+    h2 {
+      font-size: 14pt; font-weight: bold; color: #2F5496;
+      margin-top: 18pt; margin-bottom: 6pt;
+      border-bottom: 1px solid #2F5496; padding-bottom: 2pt;
+    }
+    h3 { font-size: 12pt; font-weight: bold; color: #1F3763; margin-top: 14pt; margin-bottom: 4pt; }
+    h4 { font-size: 11pt; font-weight: bold; font-style: italic; color: #000; margin-top: 12pt; margin-bottom: 4pt; }
+    p { margin-bottom: 10pt; text-align: justify; }
+    ul, ol { margin-top: 0; margin-bottom: 10pt; padding-left: 20pt; }
+    li { margin-bottom: 4pt; text-align: justify; }
+    strong { font-weight: bold; }
+    em { font-style: italic; }
+    hr { border: 0; border-top: 1pt solid #D9D9D9; margin: 14pt 0; }
+    blockquote {
+      background: #F2F2F2; border-left: 4pt solid #2F5496;
+      padding: 8pt 12pt; margin: 12pt 0; font-style: italic;
+    }
+    table { width: 100%; border-collapse: collapse; margin: 12pt 0; font-size: 10pt; }
+    th, td { border: 1pt solid #A6A6A6; padding: 6pt 8pt; vertical-align: top; text-align: left; }
+    th { background-color: #D9E2F3; font-weight: bold; color: #000; }
+    tr:nth-child(even) { background-color: #F2F2F2; }
+    .cover-info { font-size: 10pt; color: #444; margin-bottom: 4pt; }
+    .toc { background: #F8F9FA; border: 1pt solid #DEE2E6; padding: 10pt 14pt; margin: 14pt 0; }
+    .toc h3 { margin-top: 0; margin-bottom: 8pt; color: #2F5496; }
+    .toc ol { margin-bottom: 0; }
+    .toc li { margin-bottom: 2pt; font-size: 10pt; }
+    .badge {
+      display: inline-block; padding: 2pt 6pt; border-radius: 3pt;
+      font-size: 9pt; font-weight: bold;
+    }
+    .done { background: #E2EFDA; color: #375623; }
+    .pending { background: #FCE4D6; color: #833C00; }
+    .partial { background: #FFF2CC; color: #7F6000; }
+    .scenario {
+      background: #F0F4FB; border: 1pt solid #BDD0E9;
+      padding: 10pt 12pt; margin: 10pt 0; border-radius: 4pt;
+    }
+    .scenario h4 { margin-top: 0; color: #1F3763; }
+    pre {
+      background: #F4F4F4; padding: 8pt; border-radius: 3pt;
+      font-family: 'Courier New', monospace; font-size: 9.5pt;
+      margin: 6pt 0; white-space: pre-wrap; word-break: break-word;
+    }
+    .arch {
+      background: #1a1a2e; color: #d0d0e0;
+      font-family: 'Courier New', monospace; font-size: 8pt;
+      padding: 10pt; border-radius: 4pt; margin: 10pt 0;
+      line-height: 1.55; white-space: pre;
+    }
+    .footer-note { text-align: center; font-size: 9pt; color: #666; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════ PORTADA ═══════════ -->
+<h1>PF-3311 — Agentes Virtuales Inteligentes</h1>
+<hr>
+<h2>Entregable 2: Avance de Agente e Investigación</h2>
+
+<p class="cover-info"><strong>Título:</strong> Implementación de un Agente Virtual de Tutoría Socrática para el Desarrollo de Lógica de Programación y Resolución de Problemas en Entornos STEM</p>
+<p class="cover-info"><strong>Nombre del Agente:</strong> Ada — Tutora Socrática Corporizada (M-ITS)</p>
+<p class="cover-info"><strong>Estudiante:</strong> Gabriel Isaías Fallas López</p>
+<p class="cover-info"><strong>Profesor:</strong> Alexander Barquero Elizondo</p>
+<p class="cover-info"><strong>Curso:</strong> PF-3311 · Temas Especiales: Agentes Virtuales Inteligentes · Grupo G1</p>
+<p class="cover-info"><strong>Centro Universitario:</strong> San José — Universidad de Costa Rica</p>
+<p class="cover-info"><strong>Fecha de Entrega:</strong> 1 de junio de 2026 · I Semestre 2026</p>
+<hr>
+
+<!-- ═══════════ TABLA DE CONTENIDOS ═══════════ -->
+<div class="toc">
+  <h3>Tabla de Contenidos</h3>
+  <ol>
+    <li>Resumen de Cambios desde el Entregable 1</li>
+    <li>Estado Actual del Agente — Prueba de Concepto (PoC)</li>
+    <li>Diseño Metodológico del Estudio</li>
+    <li>Métricas</li>
+    <li>Instrumentos de Recolección de Datos</li>
+    <li>Protocolos de Interacción</li>
+    <li>Referencias</li>
+  </ol>
+</div>
+
+<!-- ═══════════ SECCIÓN 1 ═══════════ -->
+<h2>1. Resumen de Cambios desde el Entregable 1</h2>
+
+<h3>1.1 Feedback Recibido</h3>
+<p>El Entregable 1 obtuvo una calificación de <strong>89/100</strong>. El profesor Barquero identificó cuatro áreas de mejora:</p>
+
+<table>
+  <thead>
+    <tr><th>Criterio</th><th style="width:9%">Nota</th><th>Observación del Profesor</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Problema y Motivación</td><td>20/20</td>
+      <td>Puntaje perfecto. La tensión entre guiar y no entregar la respuesta está bien definida como eje central.</td>
+    </tr>
+    <tr>
+      <td>Revisión de Literatura</td><td>19/20</td>
+      <td>Completa. Se pierde 1 punto por no conectar explícitamente la teoría de andamiaje pedagógico con la lógica técnica del agente.</td>
+    </tr>
+    <tr>
+      <td>Preguntas de Investigación</td><td>17/20</td>
+      <td>Se debe sustituir "fluidez pedagógica" por la métrica estándar <em>perceived pedagogical support</em>. Falta condición de control "sin avatar".</td>
+    </tr>
+    <tr>
+      <td>Objetivos del Agente</td><td>15/15</td>
+      <td>Puntaje perfecto. Sugerencia: escalar interacciones progresivamente de acuerdo con Vygotsky.</td>
+    </tr>
+    <tr>
+      <td>Arquitectura Técnica</td><td>8/15</td>
+      <td><strong>Ready Player Me descontinuó su servicio el 31 de enero de 2026.</strong> Se solicita identificar e integrar una alternativa funcional de inmediato y documentar el cambio. Latencia &lt;1.5s es un reto a monitorear.</td>
+    </tr>
+    <tr>
+      <td>Redacción, Presentación y Repositorio</td><td>10/10</td>
+      <td>Puntaje perfecto. Sugerencia: incluir instrucciones detalladas de configuración local en el README.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>1.2 Cambios Realizados y Justificación</h3>
+
+<h4>Cambio 1 — Migración del Motor de Avatar (corrección crítica)</h4>
+<p><strong>Problema:</strong> Ready Player Me cerró su servicio en enero de 2026, eliminando el pilar visual de la arquitectura original (avatares VRM 3D, lip-sync mediante visemas).</p>
+<p><strong>Solución adoptada:</strong> Se migró completamente hacia un <strong>avatar 2D reactivo implementado en CSS y SVG animado</strong>, sin dependencia de ninguna biblioteca externa de terceros ni servicios de pago. El avatar de Ada opera mediante estados expresivos discretos (<em>idle, thinking, speaking, listening, happy, curious, empathetic, encouraging</em>), controlados programáticamente desde el modelo de lenguaje mediante etiquetas <code>[AVATAR_STATE:estado]</code>. La animación de la boca se sincroniza con la síntesis de voz del navegador (Web Speech API).</p>
+<p><strong>Justificación teórica:</strong> Esta decisión está respaldada por El Hajji et al. (2025), quienes documentan que los avatares 2D estilizados logran el mismo anclaje de atención pedagógica que los avatares 3D con una fracción del costo computacional. Adicionalmente, el diseño 2D tipo <em>cartoon</em> neutraliza el riesgo del Valle Inquietante (Mori, 1970) y reduce la carga cognitiva externa durante tareas de alta demanda, en línea con la Teoría de Carga Cognitiva (Sweller, 1988).</p>
+
+<h4>Cambio 2 — Actualización de RQ1: "Perceived Pedagogical Support"</h4>
+<p><strong>Problema:</strong> El término "fluidez pedagógica" no corresponde a ningún constructo validado en la literatura HCI ni educativa.</p>
+<p><strong>Solución adoptada:</strong> Se sustituyó por <strong><em>perceived pedagogical support</em></strong>, medido mediante una escala Likert ad hoc de 5 ítems adaptada de Essel et al. (2024). Este constructo está ampliamente documentado en la literatura de Sistemas de Tutoría Inteligente (ITS) y es directamente comparable entre condiciones experimentales.</p>
+
+<h4>Cambio 3 — Incorporación de la Condición de Control "Sin Avatar"</h4>
+<p><strong>Problema:</strong> La ausencia de una condición <em>baseline</em> hacía imposible atribuir causalmente cualquier efecto observado al embodiment del agente.</p>
+<p><strong>Solución adoptada:</strong> Se diseñó e implementó la <strong>Condición B</strong>: un chat de texto plano que mantiene el mismo system prompt socrático, el mismo modelo de lenguaje y las mismas tareas, eliminando únicamente el avatar, la voz y los gestos. Esta comparación Condición A (avatar multimodal) vs. Condición B (texto plano) permite aislar el efecto causal del embodiment, respondiendo directamente a la brecha identificada en la literatura (Sonlu et al., 2024).</p>
+
+<h4>Cambio 4 — Conexión Explícita entre Andamiaje Pedagógico y Arquitectura Técnica</h4>
+<p><strong>Problema:</strong> La teoría del andamiaje (Vygotsky, ZPD) no estaba vinculada formalmente con la lógica técnica del agente en el Entregable 1.</p>
+<p><strong>Solución adoptada:</strong> El system prompt de Ada implementa un <strong>protocolo de escalado de pistas en tres niveles</strong> alineado con la Zona de Desarrollo Próximo: (1) preguntas exploratorias de alto nivel, (2) orientación conceptual, y (3) pista estructural específica sin proporcionar el código. El nivel de andamiaje aumenta únicamente si el participante lleva tres o más turnos sin avance. La justificación teórica HCI (Cassell et al., 2000; Bickmore &amp; Picard, 2005; Yee &amp; Bailenson, 2007) fue incorporada en el documento de protocolo de evaluación (<code>docs/03-evaluation-protocol.md</code>).</p>
+
+<h4>Cambio 5 — Migración del LLM a Infraestructura Local (Ollama + Gemma 3)</h4>
+<p>Para garantizar la reproducibilidad de la PoC sin dependencias de API externas, el motor de razonamiento se migró de Google Gemini a <strong>Ollama corriendo Gemma 3 12B localmente</strong>. Esta decisión no afecta la calidad del diálogo socrático y permite que el profesor pueda ejecutar la PoC de forma autónoma sin necesidad de claves de API.</p>
+
+<h4>Cambio 6 — Ampliación del README con Instrucciones de Configuración</h4>
+<p>El README del repositorio fue actualizado con instrucciones detalladas para instalar Ollama, descargar el modelo Gemma 3, configurar variables de entorno y lanzar el servidor de desarrollo.</p>
+
+<!-- ═══════════ SECCIÓN 2 ═══════════ -->
+<h2>2. Estado Actual del Agente — Prueba de Concepto (PoC)</h2>
+
+<h3>2.1 Descripción General de la PoC</h3>
+<p>La Prueba de Concepto corresponde a una <strong>aplicación web funcional completa</strong> construida con Next.js 14 que implementa los dos brazos del diseño experimental: la Condición A (Ada multimodal con avatar 2D, síntesis de voz y reconocimiento de voz) y la Condición B (chat de texto plano como baseline). El sistema demuestra la integración real de todos los componentes principales de la arquitectura M-ITS propuesta.</p>
+
+<h3>2.2 Diagrama de Arquitectura</h3>
+<div class="arch">
+┌─────────────────────────────────────────────────────────────┐
+│                     NAVEGADOR WEB (Cliente)                 │
+│                                                             │
+│   ┌─────────────────┐      ┌────────────────────────────┐   │
+│   │  CodePanel.tsx  │      │   ChatInterface.tsx         │   │
+│   │  ─────────────  │      │   ─────────────────────     │   │
+│   │  • Código buggy │      │  [Cond.A] AvatarSprite.tsx  │   │
+│   │  • Timer 10 min │      │   • CSS/SVG 2D animado      │   │
+│   │  • Syntax HL    │      │   • 8 estados expresivos    │   │
+│   │  • Botón resolve│      │   • Parpadeo y animac. boca │   │
+│   └─────────────────┘      │                             │   │
+│                            │  [Cond.A] WebSpeechTTS      │   │
+│                            │   • Síntesis de voz nativa  │   │
+│                            │  [Cond.A] WebSpeechSTT      │   │
+│                            │   • Reconocimiento de voz   │   │
+│                            │  Streaming SSE en tiempo real│  │
+│                            └────────────────────────────┘   │
+└────────────────────────────────┬────────────────────────────┘
+                                 │ HTTP / Server-Sent Events
+┌────────────────────────────────▼────────────────────────────┐
+│              SERVIDOR NEXT.JS 14 (Node.js)                  │
+│   ┌──────────────────────┐   ┌──────────────────────────┐   │
+│   │   /api/chat          │   │  /api/session            │   │
+│   │   • System prompt    │   │  • initSession           │   │
+│   │   • Ollama client    │   │  • logTaskResult         │   │
+│   │   • SSE streaming    │   │  • getSessionSummary     │   │
+│   │   • Avatar state tag │   │  • Telemetría log-based  │   │
+│   └──────────┬───────────┘   └──────────────────────────┘   │
+└──────────────┼──────────────────────────────────────────────┘
+               │ HTTP NDJSON Streaming
+┌──────────────▼──────────────────────────────────────────────┐
+│            OLLAMA SERVER (http://localhost:11434)           │
+│            Modelo: gemma3:12b (Q4_K_M ≈ 7.3 GB)            │
+│            GPU: NVIDIA RTX 5070 Ti 16 GB VRAM               │
+└─────────────────────────────────────────────────────────────┘</div>
+
+<h3>2.3 Stack Tecnológico Implementado</h3>
+<table>
+  <thead>
+    <tr><th>Capa / Componente</th><th>Tecnología Implementada</th><th>Justificación</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Avatar 2D</strong></td>
+      <td>CSS/SVG Animado (sin librerías externas)</td>
+      <td>Evita el Valle Inquietante, zero dependencias externas, latencia de renderizado mínima, 8 estados expresivos reactivos al LLM.</td>
+    </tr>
+    <tr>
+      <td><strong>Motor de Razonamiento (LLM)</strong></td>
+      <td>Ollama + Gemma 3 12B (Q4_K_M) local</td>
+      <td>Sin API keys externas, inferencia GPU local, sin latencia de red para el LLM. Reproducible sin cuentas de servicios en la nube.</td>
+    </tr>
+    <tr>
+      <td><strong>Síntesis de Voz (TTS)</strong></td>
+      <td>Web Speech API — SpeechSynthesis (nativa del navegador)</td>
+      <td>Sin costo, sin API keys, latencia de inicio &lt;200 ms. Disponible en Chrome, Edge y Safari modernos.</td>
+    </tr>
+    <tr>
+      <td><strong>Reconocimiento de Voz (STT)</strong></td>
+      <td>Web Speech API — SpeechRecognition (nativa del navegador)</td>
+      <td>Resultados intermedios en tiempo real, detección de errores de permiso de micrófono, español latinoamericano.</td>
+    </tr>
+    <tr>
+      <td><strong>Framework / Orquestación</strong></td>
+      <td>Next.js 14 + React + TailwindCSS</td>
+      <td>SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo, despliegue sencillo.</td>
+    </tr>
+    <tr>
+      <td><strong>Telemetría / Logs</strong></td>
+      <td>Módulo logger.ts (en memoria, lado servidor)</td>
+      <td>Registra latencia extremo a extremo, turnos, tiempo por tarea y resolución autónoma de forma automática.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.4 Funcionalidades Implementadas vs. Pendientes</h3>
+<table>
+  <thead>
+    <tr><th>Componente</th><th>Estado</th><th>Detalle</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Avatar 2D reactivo (8 estados)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Animaciones CSS (float, pulse, bounce), parpadeo de ojos aleatorio, sincronización de boca con TTS.</td>
+    </tr>
+    <tr>
+      <td>Síntesis de voz paraverbal (TTS)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Web Speech API, voz en español, activa únicamente en Condición A.</td>
+    </tr>
+    <tr>
+      <td>Reconocimiento de voz (STT)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Web Speech API, resultados intermedios visibles, manejo de errores de permisos de micrófono.</td>
+    </tr>
+    <tr>
+      <td>LLM socrático con system prompt</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Ollama + Gemma 3 12B. System prompt con protocolo ZPD de 3 niveles, detección de frustración, restricción absoluta de no dar código.</td>
+    </tr>
+    <tr>
+      <td>Streaming de respuesta (SSE)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Tokens en tiempo real con cursor animado. Latencia percibida reducida.</td>
+    </tr>
+    <tr>
+      <td>Panel de código con resaltado de sintaxis</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Python syntax highlighting sin dependencias, timer de tarea por colores, contador de turnos.</td>
+    </tr>
+    <tr>
+      <td>Dos tareas de depuración experimentales</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Tarea 1: bucle infinito (principiante). Tarea 2: complejidad algorítmica O(n³) → O(n) (intermedio).</td>
+    </tr>
+    <tr>
+      <td>Telemetría log-based automática</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Latencia extremo a extremo, turnos, tiempo total, indicador de resolución autónoma (sí/no).</td>
+    </tr>
+    <tr>
+      <td>Condición A vs. B con asignación aleatoria</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Landing page con asignación aleatoria o manual para pruebas internas.</td>
+    </tr>
+    <tr>
+      <td>Página de resumen post-sesión (RQ4)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Métricas globales, análisis de latencia RQ4, resultados por tarea, indicaciones de cuestionarios post-interacción.</td>
+    </tr>
+    <tr>
+      <td>Cuestionarios digitales integrados en flujo web</td>
+      <td><span class="badge partial">⚬ Parcial</span></td>
+      <td>Los instrumentos existen como archivos HTML en <code>/context/Cuestionarios-20260522/</code>. La integración dentro del flujo de la aplicación es parte del desarrollo futuro.</td>
+    </tr>
+    <tr>
+      <td>Reconocimiento afectivo facial (face-api.js)</td>
+      <td><span class="badge pending">✗ Pendiente</span></td>
+      <td>Previsto para el estudio completo. La PoC controla el estado del avatar desde el propio LLM.</td>
+    </tr>
+    <tr>
+      <td>Screen Vision — captura del DOM del editor</td>
+      <td><span class="badge pending">✗ Pendiente</span></td>
+      <td>Previsto para versión de producción. La PoC inyecta el código problemático directamente en el system prompt.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════ SECCIÓN 3 ═══════════ -->
+<h2>3. Diseño Metodológico del Estudio</h2>
+
+<h3>3.1 Tipo de Estudio</h3>
+<p>Se adoptará un diseño de <strong>evaluación piloto con expertos</strong>. Este tipo de estudio es el apropiado dado que:</p>
+<ul>
+  <li>La evaluación con usuarios reales (estudiantes de cursos activos) requiere autorización del Comité Ético Científico (CEC) de la UCR, trámite que excede el alcance temporal del proyecto de curso.</li>
+  <li>Los expertos en educación STEM o en sistemas de tutoría inteligente permiten obtener retroalimentación pedagógica y técnica de alta calidad con una muestra pequeña, suficiente para validar la viabilidad y usabilidad del prototipo (Nielsen &amp; Landauer, 1993).</li>
+  <li>Los hallazgos del piloto informarán el diseño de un estudio controlado con usuarios reales en fases posteriores del proyecto.</li>
+</ul>
+
+<blockquote>
+  <strong>Nota del curso:</strong> Para PF-3311 se trabajará con pilotos y/o evaluaciones con expertos, dado que la evaluación con usuarios reales requiere autorización del CEC.
+</blockquote>
+
+<h3>3.2 Diseño Experimental</h3>
+<p>Se utiliza un <strong>diseño entre grupos (between-subjects)</strong> con dos condiciones:</p>
+<table>
+  <thead>
+    <tr><th>Condición</th><th>Descripción</th><th>Componentes activos</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Condición A — Experimental</strong><br>(Ada Multimodal)</td>
+      <td>Interacción con Ada mediante avatar 2D animado, síntesis de voz paraverbal (TTS) y reconocimiento de voz (STT).</td>
+      <td>Avatar CSS/SVG · TTS Web Speech · STT Web Speech · LLM socrático</td>
+    </tr>
+    <tr>
+      <td><strong>Condición B — Control</strong><br>(Chatbot de Texto)</td>
+      <td>El mismo agente socrático Ada con idéntico system prompt y modelo LLM, presentado como chat de texto plano sin ninguna representación visual ni síntesis de voz.</td>
+      <td>LLM socrático (idéntico) · Entrada y salida de texto únicamente</td>
+    </tr>
+  </tbody>
+</table>
+<p>Al mantener constantes el modelo LLM, el system prompt socrático, las tareas asignadas y el ambiente de evaluación, cualquier diferencia significativa entre condiciones puede atribuirse causalmente a la <strong>presencia del embodiment multimodal</strong>, no a la calidad de la tutoría.</p>
+
+<h3>3.3 Participantes</h3>
+
+<h4>Perfil de la Muestra</h4>
+<ul>
+  <li><strong>¿Quiénes?</strong> Docentes, investigadores o profesionales senior con experiencia en educación STEM, diseño de interfaces conversacionales o sistemas de tutoría inteligente.</li>
+  <li><strong>¿Cuántos?</strong> Entre 4 y 8 participantes (2–4 por condición). Para un estudio piloto exploratorio, esta muestra es estándar en HCI y permite identificar los problemas de usabilidad y pertinencia pedagógica más relevantes.</li>
+  <li><strong>Criterios de inclusión:</strong>
+    <ul>
+      <li>Experiencia demostrable en docencia o investigación en computación, ingeniería o educación STEM.</li>
+      <li>Conocimiento básico de Python suficiente para comprender el contexto de las tareas de depuración.</li>
+      <li>Acceso a un navegador web moderno (Chrome 90+, Edge 90+ o Safari 15+).</li>
+    </ul>
+  </li>
+  <li><strong>Criterios de exclusión:</strong>
+    <ul>
+      <li>Conocimiento previo del objetivo o hipótesis del estudio (para evitar el sesgo de demanda).</li>
+      <li>Haber interactuado previamente con la PoC en modo de prueba o desarrollo.</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Plan de Reclutamiento</h4>
+<p>El reclutamiento se realizará mediante invitación directa dentro de la comunidad académica de la ECCI/UCR y los contactos del profesor del curso PF-3311. Los participantes recibirán una descripción breve y neutral del estudio por correo electrónico (sin revelar la hipótesis) y se coordinarán sesiones individuales de aproximadamente 45 minutos en un entorno sin distracciones. La participación es voluntaria y puede interrumpirse en cualquier momento.</p>
+
+<!-- ═══════════ SECCIÓN 4 ═══════════ -->
+<h2>4. Métricas</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pregunta de Investigación</th>
+      <th>Variable / Constructo</th>
+      <th>Métrica Operacional</th>
+      <th>Tipo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RQ1</strong> — Naturalidad, presencia social y <em>perceived pedagogical support</em></td>
+      <td>Antropomorfismo, animacy, amabilidad, inteligencia percibida, apoyo pedagógico</td>
+      <td>Puntajes Godspeed (1–5 por subescala); puntaje PPS (1–5); puntaje SUS (0–100)</td>
+      <td>Ordinal / Continua</td>
+    </tr>
+    <tr>
+      <td><strong>RQ2</strong> — Eficacia pedagógica autónoma</td>
+      <td>Resolución autónoma, turnos de diálogo, tiempo por tarea</td>
+      <td>% tareas resueltas sin código directo; N.° de turnos hasta resolución; tiempo total (seg) — log-based</td>
+      <td>Continua / Discreta</td>
+    </tr>
+    <tr>
+      <td><strong>RQ3</strong> — Carga cognitiva y estado afectivo</td>
+      <td>Carga mental, esfuerzo, frustración; afecto positivo y negativo; motivación intrínseca</td>
+      <td>Raw TLX NASA-TLX (0–100/dimensión); delta PANAS-SF (PA_post − PA_pre; NA_post − NA_pre); puntaje SIMS</td>
+      <td>Continua (auto-reporte)</td>
+    </tr>
+    <tr>
+      <td><strong>RQ4</strong> — Latencia y continuidad conversacional</td>
+      <td>Latencia extremo a extremo, tasa de respuestas &lt;1.5 s</td>
+      <td>Latencia promedio y máxima (ms); % respuestas &lt;1.5 s; tasa de errores de sincronía audio-visual (Cond. A)</td>
+      <td>Continua (log automático)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Conexión entre métricas y RQs:</strong> El Godspeed Questionnaire (Bartneck et al., 2009) es el estándar en HRI/HCI para medir percepciones de agentes virtuales. Las métricas log-based objetivan la eficacia pedagógica eliminando el sesgo de deseabilidad social. La administración del PANAS-SF en dos momentos (pre y post) permite calcular el delta afectivo inducido por la modalidad del agente, controlando el estado emocional basal. La latencia se mide automáticamente en el backend como diferencia entre la recepción del mensaje del usuario y el envío del último chunk del stream.</p>
+
+<!-- ═══════════ SECCIÓN 5 ═══════════ -->
+<h2>5. Instrumentos de Recolección de Datos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Instrumento</th>
+      <th>¿Qué mide?</th>
+      <th>Base en Literatura</th>
+      <th>Momento de Administración</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cuestionario Demográfico</strong> (ad hoc)</td>
+      <td>Experiencia en docencia STEM, familiaridad con IA generativa, nivel de Python</td>
+      <td>Estándar en diseños HCI para controlar variables de experiencia previa</td>
+      <td>Inicio de sesión — antes de cualquier exposición al agente</td>
+    </tr>
+    <tr>
+      <td><strong>PANAS-SF</strong> (10 ítems, Likert 1–5)</td>
+      <td>Estado afectivo: afecto positivo (PA) y afecto negativo (NA)</td>
+      <td>Thompson (2007) — validación internacional de la forma breve</td>
+      <td><em>PRE-interacción</em> (línea base) y <em>POST-interacción</em> (delta afectivo)</td>
+    </tr>
+    <tr>
+      <td><strong>Godspeed Questionnaire</strong> (5 subescalas semánticas diferenciales)</td>
+      <td>Antropomorfismo, animacy, amabilidad, inteligencia percibida, seguridad percibida del agente</td>
+      <td>Bartneck et al. (2009) — estándar de facto en HRI/HCI para percepciones de agentes virtuales</td>
+      <td>Post-sesión completa (tras ambas tareas)</td>
+    </tr>
+    <tr>
+      <td><strong>SUS — System Usability Scale</strong> (10 ítems, Likert 1–5)</td>
+      <td>Usabilidad percibida del sistema (0–100). Puntaje ≥68: aceptable; ≥80: buena; ≥90: excelente</td>
+      <td>Brooke (1996) — instrumento de usabilidad más utilizado en investigación HCI</td>
+      <td>Cierre de la sesión, antes de la entrevista cualitativa</td>
+    </tr>
+    <tr>
+      <td><strong>NASA-TLX Raw TLX</strong> (6 dimensiones)</td>
+      <td>Carga de trabajo percibida: demanda mental, temporal, física, rendimiento, esfuerzo, frustración</td>
+      <td>Hart &amp; Staveland (1988) — instrumento de carga cognitiva más utilizado en Computing Education</td>
+      <td>Post-interacción completa</td>
+    </tr>
+    <tr>
+      <td><strong>SIMS — Situational Intrinsic Motivation Scale</strong> (16 ítems, Likert 1–7)</td>
+      <td>Motivación intrínseca situacional: interés, disfrute, competencia percibida, esfuerzo</td>
+      <td>Guay, Vallerand &amp; Blanchard (2000) — sensible a motivación situacional, no a disposiciones crónicas</td>
+      <td>Post-interacción, inmediatamente después de completar o agotar el tiempo de las tareas</td>
+    </tr>
+    <tr>
+      <td><strong>Escala de Perceived Pedagogical Support</strong> (5 ítems, Likert 1–5 · ad hoc)</td>
+      <td>Utilidad de las pistas socráticas, sensación de guía, percepción de que el agente comprende el estado cognitivo</td>
+      <td>Adaptada de Essel et al. (2024) — reemplaza "fluidez pedagógica" del E1</td>
+      <td>Post-tarea 1 y post-tarea 2</td>
+    </tr>
+    <tr>
+      <td><strong>Métricas Log-Based Automáticas</strong></td>
+      <td>Latencia extremo a extremo (ms), N.° de turnos, tiempo por tarea (seg), resolución autónoma (sí/no)</td>
+      <td>Siemens &amp; Long (2011) — Learning Analytics para medir eficacia pedagógica objetivamente</td>
+      <td>Continuo durante toda la sesión, registrado automáticamente en backend</td>
+    </tr>
+    <tr>
+      <td><strong>Entrevista Semi-Estructurada</strong> (~5 min)</td>
+      <td>Percepciones cualitativas: utilidad de las pistas socráticas, comparación con IA generativa tradicional, sugerencias de mejora</td>
+      <td>Preece, Rogers &amp; Sharp (2015) — técnica cualitativa estándar en HCI</td>
+      <td>Al finalizar todos los cuestionarios post-interacción</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>5.1 Orden de Administración</h3>
+<ol>
+  <li>Cuestionario demográfico + PANAS-SF <em>PRE</em></li>
+  <li>Sesión experimental — Tarea 1 → Perceived Pedagogical Support (post-tarea)</li>
+  <li>Sesión experimental — Tarea 2 → Perceived Pedagogical Support (post-tarea)</li>
+  <li>PANAS-SF <em>POST</em></li>
+  <li>Godspeed Questionnaire</li>
+  <li>SUS — System Usability Scale</li>
+  <li>NASA-TLX</li>
+  <li>SIMS</li>
+  <li>Entrevista semi-estructurada</li>
+</ol>
+
+<!-- ═══════════ SECCIÓN 6 ═══════════ -->
+<h2>6. Protocolos de Interacción</h2>
+<p>Se presentan dos escenarios de interacción detallados, diseñados para ser reproducibles y redactados de forma neutral, sin mencionar los términos "avatar", "embodiment" ni "presencia social", para evitar el sesgo de expectativa del participante (Efecto Proteus, Yee &amp; Bailenson, 2007).</p>
+
+<div class="scenario">
+  <h4>Escenario 1 — Depuración de Bucle Infinito (Principiante)</h4>
+
+  <p><strong>Contexto presentado al participante:</strong><br>
+  "Usted está trabajando con un estudiante de primer año de ingeniería. El estudiante le muestra el siguiente programa en Python que, según indica, debería imprimir los números del 1 al 5, pero nunca termina. Su tarea es interactuar con el sistema de apoyo disponible para identificar el error lógico en el código y ser capaz de explicarlo con sus propias palabras. No modifique el código; solo identifique el problema."</p>
+
+  <p><strong>Código presentado al participante:</strong></p>
+  <pre>def print_numbers():
+    counter = 1
+    while counter &lt;= 5:
+        print(f"Número: {counter}")
+        # ¿Por qué nunca termina?
+
+print_numbers()</pre>
+
+  <p><strong>Tareas específicas a realizar:</strong></p>
+  <ol>
+    <li>Observar el código durante 1–2 minutos sin interactuar con el sistema.</li>
+    <li>Iniciar una conversación con el agente describiendo el comportamiento observado.</li>
+    <li>Responder a las preguntas del agente y continuar el diálogo hasta identificar el error lógico.</li>
+    <li>Al identificar el problema, presionar el botón "Resolví el problema" y describir verbalmente la solución.</li>
+  </ol>
+
+  <p><strong>Resultado esperado de la interacción:</strong><br>
+  El participante identifica que la variable <code>counter</code> nunca se incrementa dentro del bucle <code>while</code>, por lo que la condición <code>counter &lt;= 5</code> es siempre verdadera. La corrección consiste en añadir <code>counter += 1</code> al final del cuerpo del bucle. El agente no menciona directamente el error; guía mediante preguntas sobre la condición de salida y el estado de la variable de control.</p>
+
+  <p><strong>Ejemplo de flujo de diálogo esperado:</strong></p>
+  <table style="font-size:9.5pt;">
+    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Ada (ejemplo de respuesta socrática)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>"El programa no termina nunca."</td><td>"Anomalía detectada en la ruta de ejecución. Analicemos la condición de salida: ¿qué valor debe alcanzar <code>counter</code> para que el bucle se detenga?"</td></tr>
+      <tr><td>2</td><td>"<code>counter</code> debe ser mayor a 5."</td><td>"Correcto. Ahora dime: ¿dónde exactamente, dentro del cuerpo del bucle, se actualiza el valor de <code>counter</code>?"</td></tr>
+      <tr><td>3</td><td>"No veo que se actualice en ningún lado…"</td><td>"Estado del sistema: análisis correcto. Si <code>counter</code> nunca cambia, ¿qué implicación tiene eso para la condición de salida en cada iteración?"</td></tr>
+      <tr><td>4</td><td>"La condición siempre será verdadera. ¡Ya entendí!"</td><td>"Excelente deducción autónoma. Has localizado el error de arquitectura. ¿Cómo reestructurarías el bucle para que avance correctamente?"</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Duración estimada:</strong> 5–10 minutos (tiempo máximo: 10 minutos).</p>
+  <p><strong>Criterio de éxito:</strong> El participante identifica verbalmente que <code>counter</code> no se incrementa, sin que el agente haya revelado directamente el error.</p>
+</div>
+
+<div class="scenario">
+  <h4>Escenario 2 — Análisis de Complejidad y Optimización Algorítmica (Intermedio)</h4>
+
+  <p><strong>Contexto presentado al participante:</strong><br>
+  "Usted está revisando el código de un estudiante de segundo año. El programa funciona correctamente —encuentra los números duplicados en una lista—, pero se vuelve extremadamente lento cuando la lista tiene miles de elementos. El estudiante no entiende por qué. Interactúe con el sistema de apoyo para identificar por qué el algoritmo es ineficiente y qué estructura de datos podría mejorar el rendimiento. No proponga código directamente; solo identifique el problema conceptual."</p>
+
+  <p><strong>Código presentado al participante:</strong></p>
+  <pre>def find_duplicates(numbers):
+    """Encuentra números duplicados en una lista."""
+    duplicates = []
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            if numbers[i] == numbers[j]:
+                if numbers[i] not in duplicates:
+                    duplicates.append(numbers[i])
+    return duplicates
+
+# Prueba con lista grande
+import random
+big_list = [random.randint(1, 1000) for _ in range(10000)]
+result = find_duplicates(big_list)
+print(f"Duplicados encontrados: {len(result)}")</pre>
+
+  <p><strong>Tareas específicas a realizar:</strong></p>
+  <ol>
+    <li>Analizar la estructura del algoritmo: identificar cuántos bucles existen y qué operaciones realiza cada uno.</li>
+    <li>Interactuar con el agente para razonar sobre el concepto de complejidad temporal.</li>
+    <li>Identificar cuántas operaciones realiza el algoritmo para una lista de N elementos.</li>
+    <li>Proponer, en palabras, qué estructura de datos reduciría la complejidad y explicar por qué.</li>
+  </ol>
+
+  <p><strong>Resultado esperado de la interacción:</strong><br>
+  El participante identifica que el algoritmo tiene complejidad O(n³) en el peor caso: dos bucles anidados O(n²) más la búsqueda lineal <code>not in duplicates</code> O(n). La solución conceptual es utilizar un <em>set</em> (conjunto) para rastrear los elementos vistos, reduciendo la complejidad total a O(n). El agente guía mediante preguntas sobre qué hace cada bucle, cuántas veces se ejecuta y qué garantiza un conjunto frente a una lista en cuanto a tiempo de búsqueda.</p>
+
+  <p><strong>Ejemplo de flujo de diálogo esperado:</strong></p>
+  <table style="font-size:9.5pt;">
+    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Ada (ejemplo de respuesta socrática)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>"El código es lento por los dos bucles."</td><td>"Diagnóstico inicial prometedor. Si el bucle externo itera N veces y el interno itera aproximadamente N veces también, ¿cuántas comparaciones totales ocurren para N = 10 000?"</td></tr>
+      <tr><td>2</td><td>"Serían unos 50 millones de comparaciones."</td><td>"Latencia crítica identificada. Ahora observa la tercera operación dentro del bucle: <code>not in duplicates</code>. ¿Qué estructura es <code>duplicates</code> y cuánto tarda en verificar si un elemento ya existe?"</td></tr>
+      <tr><td>3</td><td>"Es una lista… buscar en ella es O(n)."</td><td>"Estado del sistema: análisis correcto. Entonces tienes O(n) × O(n) × O(n). ¿Qué estructura de datos garantiza búsqueda en tiempo constante O(1), independientemente del tamaño?"</td></tr>
+      <tr><td>4</td><td>"Un set. Con un set la búsqueda es instantánea."</td><td>"Arquitectura optimizada identificada de forma autónoma. ¿Cómo describirías el nuevo algoritmo usando dos conjuntos: uno para elementos vistos y otro para duplicados?"</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Duración estimada:</strong> 8–10 minutos (tiempo máximo: 10 minutos).</p>
+  <p><strong>Criterio de éxito:</strong> El participante identifica los tres niveles de complejidad y propone el uso de un conjunto (<em>set</em>), sin que el agente haya mencionado directamente ninguna de estas respuestas.</p>
+</div>
+
+<h3>6.1 Consideraciones Generales del Protocolo</h3>
+<ul>
+  <li><strong>Instrucciones neutras:</strong> Ninguna instrucción entregada al participante menciona "avatar", "embodiment" ni "presencia social", para evitar el sesgo de expectativa.</li>
+  <li><strong>Asignación ciega a condición:</strong> El investigador carga la condición (A o B) sin revelar que existe una condición alternativa ni cuál es el objetivo de la comparación.</li>
+  <li><strong>Tiempo máximo por tarea:</strong> 10 minutos. Si el participante no identifica el error en ese tiempo, la tarea se registra como no resuelta y se avanza a la siguiente.</li>
+  <li><strong>Protocolo de des-escalada de frustración:</strong> Si el participante muestra signos de frustración (más de 3 turnos sin avance), Ada escala automáticamente el andamiaje al siguiente nivel sin proporcionar el código de corrección.</li>
+  <li><strong>Consentimiento informado:</strong> Todos los participantes firman un consentimiento informado antes de iniciar la sesión (código PF-3311, investigador: Gabriel Fallas López, unidad: ECCI/UCR). Los datos se vinculan únicamente a un ID alfanumérico anónimo.</li>
+</ul>
+
+<!-- ═══════════ REFERENCIAS ═══════════ -->
+<h2>Referencias</h2>
+
+<ol style="font-size:10pt; line-height:1.6;">
+  <li>Bartneck, C., Kulić, D., Croft, E., &amp; Zoghbi, S. (2009). Measurement instruments for the anthropomorphism, animacy, likeability, perceived intelligence, and perceived safety of robots. <em>International Journal of Social Robotics, 1</em>(1), 71–81.</li>
+  <li>Bickmore, T. W., &amp; Picard, R. W. (2005). Establishing and maintaining long-term human–computer relationships. <em>ACM Transactions on Computer-Human Interaction, 12</em>(2), 293–327.</li>
+  <li>Brooke, J. (1996). SUS: A "quick and dirty" usability scale. En P. W. Jordan et al. (Eds.), <em>Usability evaluation in industry</em> (pp. 189–194). Taylor &amp; Francis.</li>
+  <li>Cassell, J., Sullivan, J., Prevost, S., &amp; Churchill, E. (Eds.). (2000). <em>Embodied conversational agents</em>. MIT Press.</li>
+  <li>El Hajji, M., et al. (2025). An architecture for intelligent tutoring in virtual reality: Integrating LLMs and multimodal interaction for immersive learning. <em>Information, 16</em>(7), 556.</li>
+  <li>Essel, H. B., Vlachopoulos, D., Essuman, A. B., &amp; Amankwa, J. O. (2024). AI-mediated questioning and engagement. <em>MDPI Sustainability, 17</em>(21), 9508.</li>
+  <li>Guay, F., Vallerand, R. J., &amp; Blanchard, C. (2000). On the assessment of situational intrinsic and extrinsic motivation: The Situational Motivation Scale (SIMS). <em>Motivation and Emotion, 24</em>(3), 175–213.</li>
+  <li>Hart, S. G., &amp; Staveland, L. E. (1988). Development of NASA-TLX (Task Load Index): Results of empirical and theoretical research. En P. A. Hancock &amp; N. Meshkati (Eds.), <em>Human mental workload</em> (pp. 139–183). North-Holland.</li>
+  <li>Mori, M. (1970). The uncanny valley. <em>Energy, 7</em>(4), 33–35.</li>
+  <li>Nielsen, J., &amp; Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En <em>INTERACT '93 and CHI '93 Conference Proceedings</em> (pp. 206–213). ACM.</li>
+  <li>Preece, J., Rogers, Y., &amp; Sharp, H. (2015). <em>Interaction design: Beyond human-computer interaction</em> (4.ª ed.). Wiley.</li>
+  <li>Siemens, G., &amp; Long, P. (2011). Penetrating the fog: Analytics in learning and education. <em>Educause Review, 46</em>(5), 30–32.</li>
+  <li>Sonlu, S., et al. (2024). A scoping review of embodied conversational agents in education: Trends and innovations from 2014 to 2024. <em>ResearchGate</em>.</li>
+  <li>Thompson, E. R. (2007). Development and validation of an internationally reliable short-form of the Positive and Negative Affect Schedule (PANAS). <em>Journal of Cross-Cultural Psychology, 38</em>(2), 227–242.</li>
+  <li>Yee, N., &amp; Bailenson, J. (2007). The Proteus effect: The effect of transformed self-representation on behavior. <em>Human Communication Research, 33</em>(3), 271–290.</li>
+</ol>
+
+<hr>
+<p class="footer-note">
+  PF-3311 · Agentes Virtuales Inteligentes · Universidad de Costa Rica · I Ciclo 2026<br>
+  Gabriel Isaías Fallas López · Entregable 2 · Fecha límite: 1 de junio de 2026
+</p>
+
+</div>
+</body>
+</html>

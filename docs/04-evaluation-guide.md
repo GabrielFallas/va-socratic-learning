@@ -30,7 +30,7 @@
 
 - **Eficacia Pedagógica Autónoma:** Capacidad del usuario para resolver el error lógico de forma autónoma sin código directo (porcentaje de resolución, turnos, tiempo).
 - **Naturalidad y Soporte Pedagógico:** Percepción de naturalidad, presencia social y soporte pedagógico percibido (perceived pedagogical support).
-- **Latencia y ContinuidadConversacional:** Tiempo de respuesta extremo a extremo (end-to-end) del sistema multimodal < 1.5s y percepción de continuidad.
+- **Latencia y Continuidad Conversacional:** Tiempo de respuesta extremo a extremo (end-to-end) del sistema multimodal < 1.5s y percepción de continuidad.
 - **Carga Cognitiva y Estado Afectivo:** Nivel de demanda mental (NASA-TLX) y cambios en el estado emocional (PANAS-SF).
 
 ---
