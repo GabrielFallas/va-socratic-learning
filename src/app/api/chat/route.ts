@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { streamChatResponse, extractAvatarState } from "@/services/llm/geminiClient";
+import { streamChatResponse, extractAvatarState } from "@/services/llm/ollamaClient";
 import { buildTaskSystemPrompt, ADA_SYSTEM_PROMPT } from "@/prompts/ada-system";
 import { logMessage, getSession, initSession } from "@/server/telemetry/logger";
 import type { ApiChatRequest } from "@/shared/types/session";
