@@ -33,6 +33,16 @@ function SessionContent() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Reset state when task changes
+  useEffect(() => {
+    setTaskCompleted(false);
+    setShowSummary(false);
+    setTimeRemaining(task.maxTimeSeconds);
+    setTurnCount(0);
+    setLatencyReadings([]);
+    setResolvedAutonomously(false);
+  }, [taskId, task.maxTimeSeconds]);
+
   // Start task timer
   useEffect(() => {
     if (taskCompleted) return;

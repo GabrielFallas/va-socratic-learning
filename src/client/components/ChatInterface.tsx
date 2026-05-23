@@ -52,16 +52,26 @@ export default function ChatInterface({
   const [isListeningSTT, setIsListeningSTT] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const [streamingText, setStreamingText] = useState("");
-  const [ttsAvailable] = useState(() =>
-    typeof window !== "undefined" ? isTTSAvailable() : false
-  );
-  const [sttAvailable] = useState(() =>
-    typeof window !== "undefined" ? isSTTAvailable() : false
-  );
+  const [ttsAvailable, setTtsAvailable] = useState(false);
+  const [sttAvailable, setSttAvailable] = useState(false);
+  const [sttError, setSttError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isConditionA = condition === "A";
+
+  // Check TTS/STT availability after hydration
+  useEffect(() => {
+    setTtsAvailable(isTTSAvailable());
+    setSttAvailable(isSTTAvailable());
+  }, []);
+
+  // Clear STT error after 5 seconds
+  useEffect(() => {
+    if (!sttError) return;
+    const timer = setTimeout(() => setSttError(null), 5000);
+    return () => clearTimeout(timer);
+  }, [sttError]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -255,8 +265,10 @@ export default function ChatInterface({
     if (isListeningSTT) {
       stopListening();
       setIsListeningSTT(false);
+      setSttError(null);
       if (isConditionA) setAvatarState("thinking");
     } else {
+      setSttError(null);
       setIsListeningSTT(true);
       if (isConditionA) setAvatarState("listening");
       startListening(
@@ -274,6 +286,13 @@ export default function ChatInterface({
             console.error("STT error:", error);
             setIsListeningSTT(false);
             if (isConditionA) setAvatarState("idle");
+            const errorMessage =
+              error === "not-allowed"
+                ? "Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en tu navegador."
+                : error === "network"
+                ? "Error de conexión. Verifica tu conexión a internet."
+                : `Error: ${error}`;
+            setSttError(errorMessage);
           },
           onEnd: () => {
             setIsListeningSTT(false);
@@ -466,19 +485,26 @@ export default function ChatInterface({
 
           {/* Microphone button (Condition A only, if STT available) */}
           {isConditionA && sttAvailable && (
-            <button
-              onClick={toggleSTT}
-              className={`p-3 rounded-xl transition-all duration-200 ${
-                isListeningSTT
-                  ? "bg-red-500 hover:bg-red-600 animate-pulse"
-                  : "bg-white/10 hover:bg-white/20 border border-white/20"
-              }`}
-              aria-label={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
-              title={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
-              data-testid="mic-button"
-            >
-              <span className="text-lg">{isListeningSTT ? "⏹️" : "🎤"}</span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={toggleSTT}
+                className={`p-3 rounded-xl transition-all duration-200 ${
+                  isListeningSTT
+                    ? "bg-red-500 hover:bg-red-600 animate-pulse"
+                    : "bg-white/10 hover:bg-white/20 border border-white/20"
+                }`}
+                aria-label={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
+                title={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
+                data-testid="mic-button"
+              >
+                <span className="text-lg">{isListeningSTT ? "⏹️" : "🎤"}</span>
+              </button>
+              {sttError && (
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-950 border border-red-500/50 rounded-lg px-3 py-2 text-xs text-red-200 whitespace-normal">
+                  {sttError}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Send button */}
