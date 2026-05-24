@@ -1,37 +1,199 @@
 @import "tailwindcss";
 
+/* ─── Mania arcade font ──────────────────────────────────────── */
+@font-face {
+  font-family: 'Mania';
+  src: url('/fonts/mania.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Sonic / Green Hill Zone Theme ─────────────────────────── */
 :root {
-  --background: #0a0a0f;
-  --foreground: #e2e8f0;
+  /* Core palette */
+  --sonic-blue: #0066cc;
+  --sonic-blue-light: #4da6ff;
+  --sonic-gold: #ffcc00;
+  --sonic-gold-bright: #ffe566;
+  --ring-orange: #ff8c00;
+  --hill-green: #4caf50;
+  --hill-green-dark: #2d6a2d;
+  --sky-blue: #87ceeb;
+  --eggman-red: #cc0000;
+  --eggman-orange: #ff6600;
+  --dark-bg: #0a0a1a;
+  --mid-dark: #111128;
+  --panel-bg: #0d1117;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  background-color: var(--dark-bg);
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ─── Pixel font simulation ──────────────────────────────────── */
+.sonic-font {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  letter-spacing: 0.05em;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+/* ─── Ring sprite sheet animation (16 frames) ───────────────── */
+@keyframes ringSheetSpin {
+  from { background-position-x: 0%; }
+  to   { background-position-x: 100%; }
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.4);
-  border-radius: 3px;
+/* ─── Ring animation (legacy CSS fallback) ───────────────────── */
+@keyframes ring-spin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
+@keyframes ring-collect {
+  0%   { transform: scale(1) translateY(0); opacity: 1; }
+  50%  { transform: scale(1.5) translateY(-20px); opacity: 1; }
+  100% { transform: scale(0) translateY(-40px); opacity: 0; }
+}
+
+@keyframes float-up {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-60px); opacity: 0; }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+@keyframes sonic-run {
+  0%   { transform: translateX(-120%) scaleX(1); }
+  49%  { transform: translateX(120%) scaleX(1); }
+  50%  { transform: translateX(120%) scaleX(-1); }
+  99%  { transform: translateX(-120%) scaleX(-1); }
+  100% { transform: translateX(-120%) scaleX(1); }
+}
+
+@keyframes ground-scroll {
+  from { background-position-x: 0; }
+  to   { background-position-x: -200px; }
+}
+
+@keyframes hill-scroll {
+  from { background-position-x: 0; }
+  to   { background-position-x: -400px; }
+}
+
+@keyframes bounce-in {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px) rotate(-2deg); }
+  40%       { transform: translateX(4px) rotate(2deg); }
+  60%       { transform: translateX(-4px) rotate(-1deg); }
+  80%       { transform: translateX(4px) rotate(1deg); }
+}
+
+@keyframes eggman-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-5deg); }
+  75%       { transform: rotate(5deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes pulse-ring {
+  0%    { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); }
+  70%   { box-shadow: 0 0 0 15px rgba(255, 204, 0, 0); }
+  100%  { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+}
+
+/* ─── Tailwind animation utilities ───────────────────────────── */
+.animate-ring-spin     { animation: ring-spin 1s linear infinite; }
+.animate-ring-collect  { animation: ring-collect 0.5s ease-out forwards; }
+.animate-float-up      { animation: float-up 1s ease-out forwards; }
+.animate-star-twinkle  { animation: star-twinkle 2s ease-in-out infinite; }
+.animate-sonic-run     { animation: sonic-run 4s linear infinite; }
+.animate-bounce-in     { animation: bounce-in 0.5s ease-out forwards; }
+.animate-fade-in       { animation: fade-in 0.3s ease-out; }
+.animate-blink         { animation: blink 1s step-end infinite; }
+.animate-pulse-ring    { animation: pulse-ring 1.5s ease-out infinite; }
+.animate-eggman-shake  { animation: eggman-shake 0.5s ease-in-out infinite; }
+.animate-shake         { animation: shake 0.4s ease-in-out; }
+
+/* ─── Green Hill Zone background ────────────────────────────── */
+.green-hill-bg {
+  background:
+    linear-gradient(180deg,
+      #87ceeb 0%,
+      #b0e0f5 40%,
+      #6dc36d 40%,
+      #4caf50 55%,
+      #2d6a2d 55%,
+      #1a3d1a 100%
+    );
+}
+
+/* ─── Code panel — terminal style ──────────────────────────── */
+.code-terminal {
+  background: #0d1117;
+  border: 2px solid #30363d;
+  border-top: 30px solid #161b22;
+  border-radius: 8px;
+  position: relative;
+}
+
+.code-terminal::before {
+  content: '● ● ●';
+  position: absolute;
+  top: -22px;
+  left: 10px;
+  color: #ff5f56;
+  font-size: 12px;
+  letter-spacing: 4px;
+}
+
+/* ─── Ring counter glow ──────────────────────────────────────── */
+.ring-glow {
+  text-shadow: 0 0 10px var(--sonic-gold), 0 0 20px var(--ring-orange);
+  color: var(--sonic-gold);
+}
+
+/* ─── Scrollbar styling ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a1a; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #ffcc00; }
+
+/* ─── Chat message bubbles ──────────────────────────────────── */
+.sonic-bubble {
+  background: linear-gradient(135deg, #003399 0%, #0066cc 100%);
+  border: 2px solid var(--sonic-blue-light);
+  border-radius: 18px 18px 18px 4px;
+}
+
+.user-bubble {
+  background: linear-gradient(135deg, #1a0066 0%, #3300cc 100%);
+  border: 2px solid #6633ff;
+  border-radius: 18px 18px 4px 18px;
 }
 
 /* Focus styles */
 *:focus-visible {
-  outline: 2px solid rgba(0, 212, 255, 0.5);
+  outline: 2px solid rgba(255, 204, 0, 0.5);
   outline-offset: 2px;
 }

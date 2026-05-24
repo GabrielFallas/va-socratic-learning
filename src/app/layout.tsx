@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ada — Tutora Socrática Neural Nexus",
+  title: "Sonic Code — Tutor Socrático de Programación",
   description:
-    "Agente Virtual de Tutoría Socrática para programación STEM. Proyecto de investigación PF-3311 — UCR.",
+    "Sonic the Hedgehog te guía a través del aprendizaje socrático de programación. ¡Gotta go fast! Proyecto de investigación PF-3311 — UCR I Semestre 2026.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark">
-      <body className="min-h-screen bg-gray-950 text-white antialiased">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen antialiased" style={{ background: "#0a0a1a", color: "#ffffff" }}>
         {children}
       </body>
     </html>

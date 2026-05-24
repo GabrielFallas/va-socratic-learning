@@ -1,24 +1,27 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import type {
-  ChatMessage,
-  Condition,
-  AvatarState,
-} from "@/shared/types/session";
-import AvatarSprite from "@/client/avatar/AvatarSprite";
-import { speak, stopSpeaking, isTTSAvailable } from "@/services/tts/webSpeechTTS";
-import {
-  startListening,
-  stopListening,
-  isSTTAvailable,
-} from "@/services/stt/webSpeechSTT";
+import dynamic from "next/dynamic";
+import type { ChatMessage, Condition, AvatarState } from "@/shared/types/session";
+import { speak, stopSpeaking, isTTSAvailable, preloadCheck } from "@/services/tts/piperTTS";
+import { startListening, stopListening, isSTTAvailable } from "@/services/stt/whisperSTT";
+import { playSFX, preloadSFX, startBGMusic, stopBGMusic } from "@/client/audio/sfx";
 
-// ============================================================
-// Main Chat Interface
-// Condition A: Shows avatar + enables TTS/STT
-// Condition B: Text-only, no avatar, no voice
-// ============================================================
+// Dynamic import — Kaplay/Three.js must not run on SSR
+const SonicGameCanvas = dynamic(
+  () => import("@/client/avatar/SonicGameCanvas"),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="w-full h-full flex items-center justify-center font-mono text-sm animate-pulse"
+        style={{ background: "#000a12", color: "#ffcc00" }}
+      >
+        CARGANDO ZONA...
+      </div>
+    ),
+  }
+);
 
 interface ChatInterfaceProps {
   condition: Condition;
@@ -29,6 +32,7 @@ interface ChatInterfaceProps {
     errorDescription: string;
   };
   onNewMessage?: (message: ChatMessage, latencyMs: number) => void;
+  ringsCollected?: number;
 }
 
 function formatTime(ts: number): string {
@@ -38,72 +42,102 @@ function formatTime(ts: number): string {
   });
 }
 
+const WELCOME_TEXT =
+  "¡Hey! ¡Soy SONIC! ¡El tutor más rápido del mundo! Gotta go fast — pero en programación, ir rápido sin entender es como correr en círculos. ¡Vamos! ¿Qué comportamiento inesperado estás viendo en tu código?";
+
+const WELCOME_TEXT_B =
+  "¡Hola! Soy Sonic, tu tutor socrático. Nunca doy respuestas directas — te hago las preguntas correctas para que TÚ encuentres la solución. ¿Qué comportamiento inesperado estás viendo en tu código?";
+
 export default function ChatInterface({
   condition,
   sessionId,
   taskContext,
   onNewMessage,
+  ringsCollected = 0,
 }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [avatarState, setAvatarState] = useState<AvatarState>("idle");
-  const [isSpeakingTTS, setIsSpeakingTTS] = useState(false);
+  const [messages, setMessages]             = useState<ChatMessage[]>([]);
+  const [inputText, setInputText]           = useState("");
+  const [isLoading, setIsLoading]           = useState(false);
+  const [avatarState, setAvatarState]       = useState<AvatarState>("idle");
+  const [isSpeakingTTS, setIsSpeakingTTS]   = useState(false);
   const [isListeningSTT, setIsListeningSTT] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
-  const [streamingText, setStreamingText] = useState("");
-  const [ttsAvailable, setTtsAvailable] = useState(false);
-  const [sttAvailable, setSttAvailable] = useState(false);
-  const [sttError, setSttError] = useState<string | null>(null);
+  const [streamingText, setStreamingText]   = useState("");
+  const [sttAvailable, setSttAvailable]     = useState(false);
+  const [sttError, setSttError]             = useState<string | null>(null);
+  const [soundUnlocked, setSoundUnlocked]   = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const isConditionA = condition === "A";
+  const inputRef       = useRef<HTMLTextAreaElement>(null);
+  const isConditionA   = condition === "A";
 
-  // Check TTS/STT availability after hydration
+  // Pre-load assets
   useEffect(() => {
-    setTtsAvailable(isTTSAvailable());
+    preloadCheck();
+    preloadSFX().catch(() => {});
     setSttAvailable(isSTTAvailable());
   }, []);
 
-  // Clear STT error after 5 seconds
+  // Auto-dismiss STT errors
   useEffect(() => {
     if (!sttError) return;
-    const timer = setTimeout(() => setSttError(null), 5000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setSttError(null), 5000);
+    return () => clearTimeout(t);
   }, [sttError]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
-  // Initial welcome message from Ada
+  // Welcome message
   useEffect(() => {
     const welcome: ChatMessage = {
       id: "welcome",
       role: "assistant",
-      content: isConditionA
-        ? "Sistema Neural Nexus activado. Soy Ada, tu tutora socrática. Estoy aquí para guiarte, no para darte respuestas. ¿Cuál es el comportamiento que estás observando en tu código?"
-        : "Hola, soy Ada. Estoy aquí para guiarte socráticamente — haré preguntas para que tú mismo encuentres la solución. ¿Qué comportamiento inesperado estás viendo en tu código?",
+      content: isConditionA ? WELCOME_TEXT : WELCOME_TEXT_B,
       timestamp: Date.now(),
     };
     setMessages([welcome]);
-
-    if (isConditionA && ttsAvailable) {
-      setAvatarState("speaking");
-      setIsSpeakingTTS(true);
-      speak(welcome.content, {}, () => setIsSpeakingTTS(true), () => {
-        setIsSpeakingTTS(false);
-        setAvatarState("listening");
-      }).catch(console.error);
-    }
+    if (isConditionA) setAvatarState("encouraging");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Stop music on unmount
+  useEffect(() => {
+    return () => { stopBGMusic(); };
+  }, []);
+
+  // ── Unlock audio + start BGM + speak welcome ──────────────────
+  const handleUnlockSound = useCallback(() => {
+    setSoundUnlocked(true);
+    startBGMusic(0.12);
+    preloadSFX().catch(() => {});
+    setAvatarState("speaking");
+    setIsSpeakingTTS(true);
+    speak(
+      WELCOME_TEXT,
+      {},
+      () => setIsSpeakingTTS(true),
+      () => {
+        setIsSpeakingTTS(false);
+        setAvatarState("listening");
+      }
+    ).catch(console.error);
+  }, []);
+
+  // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
+
+      if (isConditionA && !soundUnlocked) {
+        setSoundUnlocked(true);
+        startBGMusic(0.12);
+      }
+
+      // Jump SFX on send
+      if (isConditionA) playSFX("jump", 0.5);
 
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -126,7 +160,6 @@ export default function ChatInterface({
       const sendStart = Date.now();
 
       try {
-        // Build message history for API
         const apiMessages = [
           ...messages.map((m) => ({ role: m.role, content: m.content })),
           { role: userMessage.role, content: userMessage.content },
@@ -135,57 +168,39 @@ export default function ChatInterface({
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId,
-            condition,
-            messages: apiMessages,
-            taskContext,
-          }),
+          body: JSON.stringify({ sessionId, condition, messages: apiMessages, taskContext }),
         });
 
         if (!response.ok || !response.body) {
           throw new Error(`API error: ${response.status}`);
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+        const reader    = response.body.getReader();
+        const decoder   = new TextDecoder();
         let accumulated = "";
-        let latencyMs = 0;
-        let finalAvatarState: AvatarState = "speaking";
+        let latencyMs   = 0;
+        let finalAvatarState: AvatarState = "curious";
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
+          for (const line of chunk.split("\n")) {
             if (!line.startsWith("data: ")) continue;
             try {
               const data = JSON.parse(line.slice(6));
-
               if (data.chunk) {
                 accumulated += data.chunk;
-                // Remove avatar state tag from streaming display
-                const displayText = accumulated.replace(
-                  /\[AVATAR_STATE:\w+\]\s*/g,
-                  ""
-                );
-                setStreamingText(displayText);
-
+                setStreamingText(accumulated.replace(/\[AVATAR_STATE:\w+\]\s*/g, ""));
                 if (isConditionA) setAvatarState("speaking");
               }
-
               if (data.done) {
-                latencyMs = data.latencyMs;
-                finalAvatarState = data.avatarState ?? "speaking";
+                latencyMs        = data.latencyMs;
+                finalAvatarState = data.avatarState ?? "curious";
               }
-
               if (data.error) throw new Error(data.error);
-            } catch {
-              // Skip malformed JSON lines
-            }
+            } catch { /* skip malformed */ }
           }
         }
 
@@ -207,12 +222,14 @@ export default function ChatInterface({
 
         if (isConditionA) {
           setAvatarState(finalAvatarState);
+          // Ring SFX
+          playSFX("ring", 0.7);
         }
 
         onNewMessage?.(assistantMessage, latencyMs);
 
-        // TTS playback for Condition A
-        if (isConditionA && ttsAvailable && cleanText) {
+        // TTS
+        if (isConditionA && cleanText) {
           setIsSpeakingTTS(true);
           speak(
             cleanText,
@@ -227,31 +244,24 @@ export default function ChatInterface({
           setAvatarState("listening");
         }
       } catch (err) {
-        const errMsg =
-          err instanceof Error ? err.message : "Error al conectar con Ada";
-        const errorMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: `⚠️ ${errMsg}`,
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
+        const errMsg = err instanceof Error ? err.message : "Error al conectar con Sonic";
+        if (isConditionA) playSFX("hurt", 0.5);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: `Error: ${errMsg}`,
+            timestamp: Date.now(),
+          },
+        ]);
         setStreamingText("");
         if (isConditionA) setAvatarState("idle");
       } finally {
         setIsLoading(false);
       }
     },
-    [
-      messages,
-      isLoading,
-      sessionId,
-      condition,
-      taskContext,
-      isConditionA,
-      ttsAvailable,
-      onNewMessage,
-    ]
+    [messages, isLoading, sessionId, condition, taskContext, isConditionA, soundUnlocked, onNewMessage]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -272,27 +282,27 @@ export default function ChatInterface({
       setIsListeningSTT(true);
       if (isConditionA) setAvatarState("listening");
       startListening(
-        { lang: "es-ES", interimResults: true },
+        { lang: "es-ES" },
         {
           onResult: (transcript, isFinal) => {
             if (isFinal) {
               setInputText((prev) => prev + transcript + " ");
               setInterimTranscript("");
+              setIsListeningSTT(false);
+              if (isConditionA) setAvatarState("thinking");
             } else {
               setInterimTranscript(transcript);
             }
           },
           onError: (error) => {
-            console.error("STT error:", error);
             setIsListeningSTT(false);
             if (isConditionA) setAvatarState("idle");
-            const errorMessage =
-              error === "not-allowed"
-                ? "Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en tu navegador."
-                : error === "network"
-                ? "Error de conexión. Verifica tu conexión a internet."
-                : `Error: ${error}`;
-            setSttError(errorMessage);
+            setSttError(
+              error === "not-allowed"          ? "Permiso de micrófono denegado." :
+              error === "device-not-found"     ? "Dispositivo no encontrado." :
+              error.includes("network")        ? "Error de conexión STT." :
+              `Error: ${error}`
+            );
           },
           onEnd: () => {
             setIsListeningSTT(false);
@@ -303,91 +313,138 @@ export default function ChatInterface({
     }
   };
 
+  // ── Render ────────────────────────────────────────────────────
   return (
     <div
-      className={`flex flex-col h-full ${
-        isConditionA
-          ? "bg-gradient-to-b from-dark-silver to-mid-dark"
-          : "bg-gray-900"
-      }`}
+      className="flex flex-col h-full relative"
+      style={{
+        background: isConditionA
+          ? "linear-gradient(180deg, #000d1a 0%, #0a0a1a 100%)"
+          : "#0f0f1a",
+      }}
       data-testid="chat-interface"
       data-condition={condition}
     >
-      {/* Condition A: Avatar header */}
+      {/* ── Condition A: Kaplay game canvas ──────────────────────── */}
       {isConditionA && (
-        <div className="flex items-center justify-center py-4 px-4 border-b border-white/10 bg-black/20">
-          <AvatarSprite
-            state={avatarState}
+        <div
+          className="relative border-b flex-shrink-0 overflow-hidden"
+          style={{
+            borderColor: "#0066cc",
+            height: "260px",
+          }}
+        >
+          <SonicGameCanvas
+            avatarState={avatarState}
             isSpeaking={isSpeakingTTS}
-            className="w-36"
+            ringsCollected={ringsCollected}
+            className="w-full h-full"
           />
+
+          {/* "Press Start" overlay */}
+          {!soundUnlocked && (
+            <div
+              className="absolute inset-0 flex items-center justify-center z-20"
+              style={{ background: "rgba(0,5,15,0.82)", backdropFilter: "blur(3px)" }}
+            >
+              <button
+                onClick={handleUnlockSound}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <span
+                  className="font-black text-3xl tracking-widest animate-bounce"
+                  style={{
+                    color: "#ffcc00",
+                    fontFamily: "'Courier New', monospace",
+                    textShadow: "0 0 20px rgba(255,204,0,0.8)",
+                  }}
+                >
+                  SONIC
+                </span>
+                <span
+                  className="font-bold text-sm px-6 py-2 rounded-full animate-pulse"
+                  style={{
+                    background: "linear-gradient(90deg, #ffcc00, #ff8c00)",
+                    color: "black",
+                    fontFamily: "'Courier New', monospace",
+                    boxShadow: "0 0 24px rgba(255,204,0,0.6)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  ▶ PRESS START
+                </span>
+                <span className="text-white/40 text-xs font-mono">
+                  click para activar voz + música
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Condition B: Simple header */}
+      {/* ── Condition B: Simple header ────────────────────────────── */}
       {!isConditionA && (
-        <div className="px-4 py-3 border-b border-white/10 bg-black/30">
+        <div
+          className="px-4 py-3 border-b"
+          style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.5)" }}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
             <span className="text-white font-mono text-sm font-bold">
-              ADA — Chat Socrático
+              [SONIC] Chat Socrático
             </span>
-            <span className="text-white/40 text-xs ml-auto">
-              Condición B: Texto
-            </span>
+            <span className="text-white/40 text-xs ml-auto">Condición B</span>
           </div>
         </div>
       )}
 
-      {/* Messages area */}
+      {/* ── Messages ─────────────────────────────────────────────── */}
       <div
         className="flex-1 overflow-y-auto p-4 space-y-3"
         data-testid="messages-container"
         role="log"
         aria-live="polite"
-        aria-label="Conversación con Ada"
       >
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${
-              msg.role === "user" ? "justify-end" : "justify-start"
-            } animate-fade-in`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
             data-testid={`message-${msg.role}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                msg.role === "user"
-                  ? "bg-purple-600 text-white rounded-br-sm"
-                  : isConditionA
-                  ? "bg-gradient-to-r from-blue-900/80 to-purple-900/80 text-white border border-cyan-500/30 rounded-bl-sm"
-                  : "bg-gray-700 text-white rounded-bl-sm"
-              }`}
+              className="max-w-[80%] px-4 py-3"
+              style={{
+                borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                background:
+                  msg.role === "user"
+                    ? "linear-gradient(135deg, #1a0066, #3300cc)"
+                    : isConditionA
+                    ? "linear-gradient(135deg, #003399, #0066cc)"
+                    : "#1e1e3a",
+                border:
+                  msg.role === "user"
+                    ? "2px solid #6633ff"
+                    : isConditionA
+                    ? "2px solid #4da6ff"
+                    : "1px solid #333355",
+              }}
             >
               {msg.role === "assistant" && (
                 <div
-                  className={`text-xs font-mono mb-1 ${
-                    isConditionA ? "text-cyan-400" : "text-gray-400"
-                  }`}
+                  className="text-xs font-mono mb-1"
+                  style={{ color: isConditionA ? "#ffcc00" : "#88aacc" }}
                 >
-                  Ada
+                  [SONIC]
                 </div>
               )}
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">
                 {msg.content}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs opacity-40">
-                  {formatTime(msg.timestamp)}
-                </span>
+                <span className="text-xs opacity-30">{formatTime(msg.timestamp)}</span>
                 {msg.latencyMs !== undefined && (
                   <span
-                    className={`text-xs font-mono px-1 rounded ${
-                      msg.latencyMs < 1500
-                        ? "text-green-400/70"
-                        : "text-red-400/70"
-                    }`}
-                    title="Latencia de respuesta"
+                    className="text-xs font-mono px-1 rounded"
+                    style={{ color: msg.latencyMs < 1500 ? "#4caf50" : "#f44336" }}
                   >
                     {msg.latencyMs}ms
                   </span>
@@ -397,47 +454,51 @@ export default function ChatInterface({
           </div>
         ))}
 
-        {/* Streaming text preview */}
+        {/* Streaming preview */}
         {streamingText && (
           <div className="flex justify-start animate-fade-in">
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 rounded-bl-sm ${
-                isConditionA
-                  ? "bg-gradient-to-r from-blue-900/80 to-purple-900/80 text-white border border-cyan-500/30"
-                  : "bg-gray-700 text-white"
-              }`}
+              className="max-w-[80%] px-4 py-3"
+              style={{
+                borderRadius: "18px 18px 18px 4px",
+                background: isConditionA ? "linear-gradient(135deg, #003399, #0066cc)" : "#1e1e3a",
+                border: `2px solid ${isConditionA ? "#4da6ff" : "#333355"}`,
+              }}
             >
-              <div
-                className={`text-xs font-mono mb-1 ${
-                  isConditionA ? "text-cyan-400" : "text-gray-400"
-                }`}
-              >
-                Ada
+              <div className="text-xs font-mono mb-1" style={{ color: "#ffcc00" }}>
+                🦔 SONIC
               </div>
-              <p className="text-sm leading-relaxed">{streamingText}</p>
-              <span className="inline-block w-2 h-4 bg-cyan-400 animate-blink ml-1" />
+              <p className="text-sm leading-relaxed text-white">{streamingText}</p>
+              <span
+                className="inline-block w-2 h-4 ml-1 animate-blink"
+                style={{ background: "#ffcc00" }}
+              />
             </div>
           </div>
         )}
 
-        {/* Loading indicator */}
+        {/* Loading dots */}
         {isLoading && !streamingText && (
           <div className="flex justify-start">
             <div
-              className={`rounded-2xl px-4 py-3 rounded-bl-sm ${
-                isConditionA
-                  ? "bg-gradient-to-r from-blue-900/80 to-purple-900/80 border border-cyan-500/30"
-                  : "bg-gray-700"
-              }`}
+              className="px-4 py-3 rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, #003399, #0066cc)",
+                border: "2px solid #4da6ff",
+              }}
             >
-              <div className="flex gap-1">
+              <div className="text-xs font-mono mb-1" style={{ color: "#ffcc00" }}>
+                🦔 SONIC
+              </div>
+              <div className="flex gap-1 items-center">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
+                    className="w-2 h-2 rounded-full animate-bounce"
+                    style={{ background: "#ffcc00", animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
+                <span className="text-xs text-white/40 ml-2 font-mono">pensando...</span>
               </div>
             </div>
           </div>
@@ -446,61 +507,61 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area */}
+      {/* ── Input area ───────────────────────────────────────────── */}
       <div
-        className={`p-4 border-t ${
-          isConditionA ? "border-white/10 bg-black/30" : "border-gray-700 bg-gray-800"
-        }`}
+        className="p-4 border-t"
+        style={{
+          borderColor: isConditionA ? "#0066cc" : "#1a2a3a",
+          background: "rgba(0,0,0,0.4)",
+        }}
       >
         <div className="flex gap-2 items-end">
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
               value={inputText + interimTranscript}
-              onChange={(e) => {
-                if (!isListeningSTT) setInputText(e.target.value);
-              }}
+              onChange={(e) => { if (!isListeningSTT) setInputText(e.target.value); }}
               onKeyDown={handleKeyDown}
-              placeholder="Escribe tu pregunta o describe el problema... (Enter para enviar)"
+              placeholder={
+                isConditionA
+                  ? "Escribe o usa el micrófono... (Enter para enviar)"
+                  : "Escribe tu pregunta... (Enter para enviar)"
+              }
               rows={2}
               disabled={isLoading}
-              className={`w-full resize-none rounded-xl px-4 py-3 text-sm
-                outline-none transition-all duration-200 font-mono
-                ${
-                  isConditionA
-                    ? "bg-white/10 text-white border border-white/20 focus:border-cyan-400/50 placeholder-white/30"
-                    : "bg-gray-700 text-white border border-gray-600 focus:border-gray-400 placeholder-gray-400"
-                }
-                ${isListeningSTT ? "border-red-400/70 bg-red-950/20" : ""}
-                disabled:opacity-50`}
+              className="w-full resize-none rounded-xl px-4 py-3 text-sm text-white outline-none transition-all font-mono disabled:opacity-50"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: `1px solid ${isListeningSTT ? "#ff4444" : isConditionA ? "#0066cc" : "#333355"}`,
+                caretColor: "#ffcc00",
+              }}
               data-testid="chat-input"
-              aria-label="Mensaje para Ada"
             />
-            {interimTranscript && (
-              <div className="absolute bottom-2 right-2 text-xs text-white/30 italic">
-                🎤 {interimTranscript}
-              </div>
-            )}
           </div>
 
-          {/* Microphone button (Condition A only, if STT available) */}
+          {/* Mic button — Condition A only */}
           {isConditionA && sttAvailable && (
             <div className="relative">
               <button
                 onClick={toggleSTT}
-                className={`p-3 rounded-xl transition-all duration-200 ${
-                  isListeningSTT
-                    ? "bg-red-500 hover:bg-red-600 animate-pulse"
-                    : "bg-white/10 hover:bg-white/20 border border-white/20"
-                }`}
-                aria-label={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
-                title={isListeningSTT ? "Detener grabación" : "Hablar con Ada"}
+                className="p-3 rounded-xl transition-all"
+                style={{
+                  background: isListeningSTT ? "#cc0000" : "rgba(0,102,204,0.5)",
+                  border: `1px solid ${isListeningSTT ? "#ff4444" : "#4da6ff"}`,
+                  animation: isListeningSTT ? "pulse 1s infinite" : "none",
+                }}
+                title={isListeningSTT ? "Detener grabación" : "Hablar con Sonic"}
                 data-testid="mic-button"
               >
-                <span className="text-lg">{isListeningSTT ? "⏹️" : "🎤"}</span>
+                <span className="text-sm font-bold text-white">
+                  {isListeningSTT ? "STOP" : "MIC"}
+                </span>
               </button>
               {sttError && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-950 border border-red-500/50 rounded-lg px-3 py-2 text-xs text-red-200 whitespace-normal">
+                <div
+                  className="absolute bottom-full right-0 mb-2 w-52 rounded-lg px-3 py-2 text-xs text-red-200"
+                  style={{ background: "#2a0000", border: "1px solid #ff4444" }}
+                >
                   {sttError}
                 </div>
               )}
@@ -511,33 +572,36 @@ export default function ChatInterface({
           <button
             onClick={() => sendMessage(inputText)}
             disabled={isLoading || !inputText.trim()}
-            className={`p-3 rounded-xl transition-all duration-200 font-bold
-              ${
-                isConditionA
-                  ? "bg-cyan-500 hover:bg-cyan-400 text-black disabled:opacity-40 disabled:cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
-              }`}
+            className="p-3 rounded-xl font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(90deg, #ffcc00, #ff8c00)",
+              color: "black",
+              boxShadow: "0 3px 0 #cc6600",
+            }}
             data-testid="send-button"
             aria-label="Enviar mensaje"
           >
-            <span className="text-lg">➤</span>
+            <span className="text-lg">▶</span>
           </button>
         </div>
 
         {/* Status bar */}
-        <div className="flex items-center gap-3 mt-2 text-xs text-white/30 font-mono">
-          <span>Sesión: {sessionId.slice(0, 8)}</span>
+        <div
+          className="flex items-center gap-3 mt-2 text-xs font-mono"
+          style={{ color: "rgba(255,255,255,0.2)" }}
+        >
+          <span>🎮 {sessionId.slice(0, 8)}</span>
           <span>·</span>
-          <span>Condición {condition}</span>
+          <span>Cond. {condition}</span>
           {isConditionA && (
             <>
               <span>·</span>
-              <span className={ttsAvailable ? "text-green-400/50" : "text-red-400/50"}>
-                TTS: {ttsAvailable ? "✓" : "✗"}
+              <span style={{ color: soundUnlocked ? "#4caf50" : "#f59e0b" }}>
+                🔊 {soundUnlocked ? "voz + música ON" : "click ▶ START"}
               </span>
               <span>·</span>
-              <span className={sttAvailable ? "text-green-400/50" : "text-red-400/50"}>
-                STT: {sttAvailable ? "✓" : "✗"}
+              <span style={{ color: sttAvailable ? "#4caf50" : "#f44336" }}>
+                STT {sttAvailable ? "✓" : "✗"}
               </span>
             </>
           )}
