@@ -240,46 +240,7 @@ function CompleteContent() {
                 </div>
               </div>
             </div>
-
-            {/* ── RQ4 Analysis ────────────────────────────────────── */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: "rgba(255,204,0,0.07)", border: "1px solid rgba(255,204,0,0.25)" }}
-            >
-              <h3 className="text-yellow-300 font-bold mb-3 font-mono text-sm">
-                ⚡ RQ4: Latencia &lt;1.5s
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-white/60">Respuestas bajo 1.5s</span>
-                  <span className="text-green-400 font-mono font-bold">{summary.latencyUnder1500ms}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white/60">Respuestas sobre 1.5s</span>
-                  <span className="font-mono font-bold" style={{ color: summary.latencyOver1500ms > 0 ? "#f44336" : "#4caf50" }}>
-                    {summary.latencyOver1500ms}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden mt-2">
-                  <div
-                    className="h-full rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${summary.latencyUnder1500ms + summary.latencyOver1500ms > 0
-                        ? Math.round((summary.latencyUnder1500ms / (summary.latencyUnder1500ms + summary.latencyOver1500ms)) * 100)
-                        : 0}%`,
-                      background: "linear-gradient(90deg, #4caf50, #8bc34a)",
-                    }}
-                  />
-                </div>
-                <div className="text-right text-xs font-mono" style={{ color: "#4caf50" }}>
-                  {summary.latencyUnder1500ms + summary.latencyOver1500ms > 0
-                    ? Math.round((summary.latencyUnder1500ms / (summary.latencyUnder1500ms + summary.latencyOver1500ms)) * 100) + "% cumplimiento"
-                    : "N/A"}
-                </div>
-              </div>
-            </div>
-
+            
             {/* ── Task results ─────────────────────────────────────── */}
             {summary.taskResults.map((result, i) => (
               <div
