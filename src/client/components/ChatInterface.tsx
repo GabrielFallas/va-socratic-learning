@@ -32,6 +32,7 @@ interface ChatInterfaceProps {
     errorDescription:   string;
   };
   onNewMessage?:         (message: ChatMessage, latencyMs: number) => void;
+  onRingEarned?:         () => void;  // called only when answer approaches solution
   onRingLost?:           () => void;  // called when LLM signals empathetic state
   ringsCollected?:       number;
   timeRemainingSeconds?: number;
@@ -212,6 +213,7 @@ export default function ChatInterface({
   sessionId,
   taskContext,
   onNewMessage,
+  onRingEarned,
   onRingLost,
   ringsCollected       = 0,
   timeRemainingSeconds = 600,
@@ -234,8 +236,13 @@ export default function ChatInterface({
   const inputRef            = useRef<HTMLTextAreaElement>(null);
   const inactivityRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedProactiveRef    = useRef<Set<string>>(new Set());
+  const proactiveCountRef   = useRef(0);            // max 3 proactive messages
+  const soundUnlockedRef    = useRef(false);         // always-current ref (avoids stale closure)
   const isConditionA        = condition === "A";
   const zone: 1 | 2        = taskContext?.taskId.includes("task-2") ? 2 : 1;
+
+  // Keep soundUnlockedRef in sync with state
+  useEffect(() => { soundUnlockedRef.current = soundUnlocked; }, [soundUnlocked]);
 
   // Pre-load assets
   useEffect(() => {
@@ -243,6 +250,12 @@ export default function ChatInterface({
     preloadSFX().catch(() => {});
     setSttAvailable(isSTTAvailable());
   }, []);
+
+  // Reset proactivity counters on task change
+  useEffect(() => {
+    proactiveCountRef.current = 0;
+    usedProactiveRef.current  = new Set();
+  }, [taskContext?.taskId]);
 
   // Auto-dismiss STT errors
   useEffect(() => {
@@ -267,7 +280,7 @@ export default function ChatInterface({
       timestamp: Date.now(),
     };
     setMessages([welcome]);
-    if (isConditionA) setAvatarState("encouraging");
+    if (isConditionA) setAvatarState("idle");  // Sonic runs normally until user interacts
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -279,14 +292,22 @@ export default function ChatInterface({
     };
   }, []);
 
-  // ── Proactivity timer — reset whenever user or Sonic sends a message ──
+  // ── Proactivity timer — reset on every user/Sonic message; max 3 fires ──
+  // Uses refs for soundUnlocked to avoid stale closures inside setTimeout.
+  // Does NOT auto-reschedule — the timer only resets when the user sends a
+  // message or Sonic responds, which prevents an infinite looping chain.
+  const MAX_PROACTIVE = 3;
   const scheduleProactiveMessage = useCallback(() => {
     if (!isConditionA || taskCompleted) return;
+    if (proactiveCountRef.current >= MAX_PROACTIVE) return;
     if (inactivityRef.current) clearTimeout(inactivityRef.current);
 
     inactivityRef.current = setTimeout(() => {
+      if (proactiveCountRef.current >= MAX_PROACTIVE) return;
+
       const msg = getProactiveMessage(taskContext?.taskId, usedProactiveRef.current);
       usedProactiveRef.current.add(msg);
+      proactiveCountRef.current++;
 
       const proactiveMsg: ChatMessage = {
         id:        crypto.randomUUID(),
@@ -297,7 +318,8 @@ export default function ChatInterface({
       setMessages((prev) => [...prev, proactiveMsg]);
       setAvatarState("encouraging");
 
-      if (soundUnlocked) {
+      // Use ref (always current) — NOT the stale closure value
+      if (soundUnlockedRef.current) {
         setIsSpeakingTTS(true);
         speak(
           msg, {},
@@ -305,12 +327,11 @@ export default function ChatInterface({
           () => { setIsSpeakingTTS(false); setAvatarState("listening"); }
         ).catch(console.error);
       }
-
-      // Schedule the next proactive message after 90 s (longer gaps)
-      scheduleProactiveMessage();
+      // NO auto-reschedule here — timer resets only on next user/Sonic message
     }, 60_000);
+  // soundUnlocked intentionally omitted from deps — we use soundUnlockedRef instead
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConditionA, taskCompleted, taskContext?.taskId, soundUnlocked]);
+  }, [isConditionA, taskCompleted, taskContext?.taskId]);
 
   // Start proactivity timer when session is active
   useEffect(() => {
@@ -435,12 +456,15 @@ export default function ChatInterface({
         if (isConditionA) {
           setAvatarState(finalAvatarState);
           if (finalAvatarState === "happy" || finalAvatarState === "encouraging") {
+            // Answer is approaching the solution → award ring + SFX
             playSFX("ring", 0.7);
+            onRingEarned?.();
           } else if (finalAvatarState === "empathetic") {
-            // Answer was off-track: Sonic takes a hit and loses a ring
+            // Answer off-track → Sonic takes a hit and loses rings
             playSFX("hurt", 0.6);
             onRingLost?.();
           }
+          // "curious" / "thinking" / "idle" responses → no ring change
         }
 
         onNewMessage?.(assistantMessage, latencyMs);
@@ -474,7 +498,7 @@ export default function ChatInterface({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, isLoading, sessionId, condition, taskContext, isConditionA, soundUnlocked, onNewMessage, onRingLost, scheduleProactiveMessage]
+    [messages, isLoading, sessionId, condition, taskContext, isConditionA, soundUnlocked, onNewMessage, onRingEarned, onRingLost, scheduleProactiveMessage]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

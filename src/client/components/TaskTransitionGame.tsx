@@ -27,10 +27,12 @@ export default function TaskTransitionGame({
   const [outroVisible,  setOutroVisible]  = useState(false);
   const [fadeOut,       setFadeOut]       = useState(false);
   const [progress,      setProgress]      = useState(0);
-  const [collectedHere, setCollectedHere] = useState(0);
+  const [collectedHere,  setCollectedHere]  = useState(0);
+  // bossDefeated as BOTH state (for React re-render) and ref (for Kaplay closure)
+  const [bossDefeated,   setBossDefeated]   = useState(false);
 
-  const isConditionA   = condition === "A";
-  const ringCount      = Math.max(1, Math.min(earnedRings, 10));
+  const isConditionA    = condition === "A";
+  const ringCount       = Math.max(1, Math.min(earnedRings, 10));
   const bossDefeatedRef = useRef(false);
 
   // Refs so callbacks don't get stale
@@ -67,8 +69,8 @@ export default function TaskTransitionGame({
     if (!isConditionA || !canvasRef.current) return;
     let mounted = true;
     let localRings = 0;
-    // Use ref so the header can also read bossDefeated state
     bossDefeatedRef.current = false;
+    setBossDefeated(false);
 
     createKaplay(canvasRef.current, {
       width:      800,
@@ -96,6 +98,9 @@ export default function TaskTransitionGame({
         anims: { run: { from: 0, to: 4, loop: true, speed: 8 } },
       });
       k.loadSprite("bg", "/sprites/chemical-bg.png");
+      k.loadSprite("platforms", "/sprites/platforms.png", {
+        sliceX: 8, sliceY: 1,
+      });
 
       k.scene("transition", () => {
         k.setGravity(2400);
@@ -112,9 +117,31 @@ export default function TaskTransitionGame({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2.67), k.z(0)]);
 
-        // Ground — wide enough so scrolling world never reveals a gap
-        k.add([k.rect(800, 60), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#1a3d1a")), k.body({ isStatic: true }), k.area(), k.z(1)]);
-        k.add([k.rect(800, 10), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#4caf50")), k.z(2)]);
+        // Zone-2 warm tint overlay (transitioning to Speed Highway / Optimización zone)
+        k.add([
+          k.rect(800, 300), k.pos(0, 0),
+          k.color(k.Color.fromHex("#ff5500")),
+          k.opacity(0.18), k.z(1),
+        ]);
+
+        // Ground — zone-2 colours (red-brown instead of green)
+        k.add([k.rect(800, 60), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#3a1a0a")), k.body({ isStatic: true }), k.area(), k.z(2)]);
+        k.add([k.rect(800, 10), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#cc5500")), k.z(3)]);
+
+        // ── Scrolling platform tiles on top of the ground strip ───────
+        const TILE_W       = 65;  // display width of each tile
+        const TILE_COUNT   = 14;  // covers 800px + buffer
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const platTiles: any[] = [];
+        for (let i = 0; i < TILE_COUNT * 2; i++) {
+          platTiles.push(k.add([
+            k.sprite("platforms", { frame: i % 8 }),
+            k.pos(i * TILE_W, GROUND_Y - 2),
+            k.scale(1),
+            k.anchor("bot"),
+            k.z(4),
+          ]));
+        }
 
         // ── Sonic (player) ────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -225,6 +252,7 @@ export default function TaskTransitionGame({
         sonic.onCollide("motobug", (bug: ReturnType<typeof k.add>) => {
           if (!bossDefeatedRef.current && sonic.vel.y > 30) {
             bossDefeatedRef.current = true;
+            if (mounted) setBossDefeated(true); // triggers React progress bar update
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const ex: any = k.add([k.text("💥", { size: 40 }), k.pos((bug as any).pos.clone()), k.anchor("center"), k.z(9)]);
             setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 600);
@@ -256,6 +284,13 @@ export default function TaskTransitionGame({
           k.get("ring").forEach((ring: ReturnType<typeof k.add>) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (ring as any).pos.x -= WORLD_SPD * k.dt();
+          });
+
+          // ③b Scroll platform tiles (same speed as world for a ground-level runner look)
+          const TILE_FULL = TILE_W * TILE_COUNT * 2;
+          platTiles.forEach((t) => {
+            t.pos.x -= WORLD_SPD * k.dt();
+            if (t.pos.x < -TILE_W) t.pos.x += TILE_FULL;
           });
 
           // ④ Motobug: world scroll + chase speed; flip to face left
@@ -339,41 +374,85 @@ export default function TaskTransitionGame({
           tabIndex={0}
         />
       ) : (
+        /* Condition B: warm zone-2 palette (Speed Highway sunset) */
         <div
-          className="flex-1 flex flex-col items-center justify-center gap-4"
+          className="flex-1 flex flex-col items-center justify-center gap-5"
           style={{
-            backgroundImage: "url(/sprites/chemical-bg.png)",
-            backgroundRepeat: "repeat-x",
-            backgroundSize: "auto 60%",
-            backgroundPosition: "center bottom",
-            imageRendering: "pixelated",
-            animation: "bgScrollCondB 2s linear infinite",
+            background: "linear-gradient(180deg, #1a0800 0%, #3d1200 55%, #0d0400 100%)",
+            position:   "relative",
+            overflow:   "hidden",
           }}
         >
+          {/* Subtle scrolling bg sprite with warm hue filter */}
+          <div style={{
+            position:            "absolute",
+            inset:               0,
+            backgroundImage:     "url(/sprites/chemical-bg.png)",
+            backgroundRepeat:    "repeat-x",
+            backgroundSize:      "auto 60%",
+            backgroundPosition:  "center bottom",
+            imageRendering:      "pixelated",
+            animation:           "bgScrollCondB 2.5s linear infinite",
+            opacity:             0.25,
+            filter:              "hue-rotate(165deg) saturate(2.5) brightness(0.7)",
+          }} />
           <style>{`@keyframes bgScrollCondB{from{background-position-x:0}to{background-position-x:-480px}}`}</style>
-          <div style={{ fontFamily: "'Courier New', monospace", color: "#ffcc00", fontSize: 22, fontWeight: 700, textShadow: "2px 2px 0 #cc6600" }}>
-            Preparando Zona 2...
+
+          {/* Content */}
+          <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+            <div style={{
+              fontFamily:  "'Courier New', monospace",
+              color:       "#ff8c00",
+              fontSize:    24,
+              fontWeight:  900,
+              textShadow:  "2px 2px 0 #cc3300, 0 0 20px rgba(255,100,0,0.5)",
+              letterSpacing: "0.06em",
+              marginBottom: 8,
+            }}>
+              ⚡ PREPARANDO ZONA 2...
+            </div>
+            <div style={{ fontFamily: "'Courier New', monospace", color: "#ffcc0077", fontSize: 13 }}>
+              ZONA 2: {toZone}
+            </div>
           </div>
-          <div style={{ fontFamily: "'Courier New', monospace", color: "#ffffff88", fontSize: 13 }}>
-            ZONA 2: {toZone}
+
+          {/* Animated loading dots */}
+          <div style={{ position: "relative", zIndex: 1, display: "flex", gap: 10 }}>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="animate-bounce"
+                style={{
+                  width:            10,
+                  height:           10,
+                  borderRadius:     "50%",
+                  background:       "#ff6600",
+                  animationDelay:   `${i * 0.18}s`,
+                  boxShadow:        "0 0 8px rgba(255,100,0,0.6)",
+                }}
+              />
+            ))}
           </div>
         </div>
       )}
 
-      {/* ── Always-visible slim loading indicator at top ────── */}
-      {/* Gives the user instant feedback that the next level is loading.    */}
-      {/* Uses a CSS animation that sweeps 0→100% in 14 s (the max timeout).*/}
-      <style>{`
-        @keyframes lvlLoad { from { width:0% } to { width:100% } }
-      `}</style>
+      {/* ── State-driven slim loading indicator at top ─────── */}
+      {/* Progress is tied to real game events: ring collection (60%),       */}
+      {/* boss defeat (30%), and outro countdown (last 10%).                 */}
       <div style={{
         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
         background: "#001a33", zIndex: 30,
       }}>
         <div style={{
-          height: "100%",
-          background: "linear-gradient(90deg, #0066cc, #ffcc00)",
-          animation: "lvlLoad 14s linear forwards",
+          height:     "100%",
+          width:      `${Math.min(100,
+            Math.round((collectedHere / Math.max(1, ringCount)) * 60) +
+            (bossDefeated ? 30 : 0) +
+            (outroVisible ? Math.round((progress / 100) * 10) : 0)
+          )}%`,
+          background:  "linear-gradient(90deg, #0066cc, #ffcc00)",
+          transition:  "width 0.3s ease",
+          boxShadow:   "0 0 6px rgba(255,204,0,0.5)",
         }} />
       </div>
 

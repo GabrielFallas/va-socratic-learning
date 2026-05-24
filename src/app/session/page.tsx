@@ -101,8 +101,9 @@ function SessionContent() {
 
   // ── Ring multiplier ──────────────────────────────────────────
   const [ringMultiplier, setRingMultiplier] = useState(1);
-  const lastMsgTimeRef = useRef(Date.now());
-  const turnCountRef   = useRef(0);
+  const lastMsgTimeRef    = useRef(Date.now());
+  const turnCountRef      = useRef(0);
+  const ringMultiplierRef = useRef(1);  // always-current ref for ring award callback
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -136,6 +137,9 @@ function SessionContent() {
   }, [taskCompleted]);
 
   // ── New message handler ──────────────────────────────────────
+  // Updates turn count, latency log, and ring multiplier.
+  // Ring award is intentionally NOT done here — it happens via onRingEarned
+  // which is only called when the LLM signals happy/encouraging (correct answer).
   const handleNewMessage = useCallback((message: ChatMessage, latencyMs: number) => {
     if (message.role !== "assistant") return;
 
@@ -145,18 +149,21 @@ function SessionContent() {
     });
     setLatencyReadings((prev) => [...prev, latencyMs]);
 
-    // Calculate multiplier BEFORE updating lastMsgTime
+    // Update multiplier; store in ref so onRingEarned can read it immediately
     const mult = calcMultiplier(lastMsgTimeRef.current, turnCountRef.current);
-    lastMsgTimeRef.current = Date.now();
+    lastMsgTimeRef.current  = Date.now();
+    ringMultiplierRef.current = mult;
     setRingMultiplier(mult);
+    setTimeout(() => { ringMultiplierRef.current = 1; setRingMultiplier(1); }, 8000);
+  }, []);
 
-    // Rings earned = mult (minimum 1)
-    const earned = mult;
-    setRingsCollected((prev) => prev + earned);
-    setRingDelta(earned);
+  // ── Ring earned handler (called only on correct/positive LLM responses) ─
+  const handleRingEarned = useCallback(() => {
+    const mult = ringMultiplierRef.current;
+    setRingsCollected((prev) => prev + mult);
+    setRingDelta(mult);
     setShowRingAnimation(true);
     setTimeout(() => setShowRingAnimation(false), 700);
-    setTimeout(() => setRingMultiplier(1), 8000); // reset after 8s idle
   }, []);
 
   // ── Task complete handler ────────────────────────────────────
@@ -352,6 +359,7 @@ function SessionContent() {
               errorDescription: task.errorDescription,
             }}
             onNewMessage={handleNewMessage}
+            onRingEarned={handleRingEarned}
             onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
             ringsCollected={ringsCollected}
             timeRemainingSeconds={timeRemaining}
