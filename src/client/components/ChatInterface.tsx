@@ -32,7 +32,10 @@ interface ChatInterfaceProps {
     errorDescription: string;
   };
   onNewMessage?: (message: ChatMessage, latencyMs: number) => void;
-  ringsCollected?: number;
+  ringsCollected?:       number;
+  timeRemainingSeconds?: number;
+  taskCompleted?:        boolean;
+  ringMultiplier?:       number;
 }
 
 function formatTime(ts: number): string {
@@ -54,6 +57,9 @@ export default function ChatInterface({
   taskContext,
   onNewMessage,
   ringsCollected = 0,
+  timeRemainingSeconds = 600,
+  taskCompleted = false,
+  ringMultiplier = 1,
 }: ChatInterfaceProps) {
   const [messages, setMessages]             = useState<ChatMessage[]>([]);
   const [inputText, setInputText]           = useState("");
@@ -338,8 +344,25 @@ export default function ChatInterface({
             avatarState={avatarState}
             isSpeaking={isSpeakingTTS}
             ringsCollected={ringsCollected}
+            timeRemainingSeconds={timeRemainingSeconds}
+            taskCompleted={taskCompleted}
             className="w-full h-full"
           />
+
+          {/* Multiplier badge — shows inside canvas header when >1x */}
+          {ringMultiplier > 1 && (
+            <div
+              className="absolute top-2 left-2 z-10 px-2 py-1 rounded-lg font-mono font-black text-sm animate-pulse"
+              style={{
+                background: ringMultiplier >= 3 ? "#ff4400" : ringMultiplier >= 2 ? "#ff8800" : "#ffcc00",
+                color: "#000",
+                boxShadow: `0 0 12px ${ringMultiplier >= 3 ? "#ff4400" : "#ffcc00"}`,
+                fontSize: "13px",
+              }}
+            >
+              x{ringMultiplier} COMBO!
+            </div>
+          )}
 
           {/* "Press Start" overlay */}
           {!soundUnlocked && (
