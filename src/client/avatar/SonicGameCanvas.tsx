@@ -380,10 +380,11 @@ export default function SonicGameCanvas({
                 break;
               case "thinking":
                 // Freeze Sonic in place while he "thinks" — pause anim on frame 0
-                sonic.scale.x = 2 + Math.sin(k.time() * 4) * 0.05; // subtle bob
+                // Only apply scale bob and pause when grounded; in-air = no squish
                 if (sonic.isGrounded()) {
-                  sonic.paused = true;
-                  sonic.frame  = 0;  // first frame = standing pose
+                  sonic.scale.x = 2 + Math.sin(k.time() * 4) * 0.05; // subtle bob
+                  sonic.paused  = true;
+                  sonic.frame   = 0;  // first frame = standing pose
                 }
                 break;
               case "speaking":
@@ -395,19 +396,22 @@ export default function SonicGameCanvas({
                 }
                 break;
               case "empathetic":
-                sonic.paused = false;
+                sonic.scale.x = 2;
+                sonic.paused  = false;
                 if (sonic.isGrounded() && sonic.curAnim() !== "run") sonic.play("run");
                 break;
               default:
-                sonic.paused = false;
+                // Reset scale.x to neutral when transitioning from thinking/other states
+                sonic.scale.x = 2;
+                sonic.paused  = false;
                 if (motoActive) destroyMotobug();
                 if (sonic.isGrounded() && sonic.curAnim() !== "run") sonic.play("run");
                 break;
             }
           }
 
-          // Speaking bob
-          sonic.scale.y = sig.speaking ? 2 + Math.sin(k.time() * 18) * 0.09 : 2;
+          // Speaking bob — ONLY apply when grounded so jumps stay clean (no mid-air squish)
+          sonic.scale.y = (sig.speaking && sonic.isGrounded()) ? 2 + Math.sin(k.time() * 18) * 0.09 : 2;
 
           // State label
           label.text  = sig.timeLeft < 30 && !sig.completed ? "⚠ TIEMPO CRÍTICO" : stateLabels[sig.state] ?? "Listo";

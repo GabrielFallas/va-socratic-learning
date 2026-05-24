@@ -49,6 +49,19 @@ export async function createKaplay(
   // 5. Check again — the async import can take a few ms
   if (!canvas.isConnected) return null;
 
-  active = kaplay({ canvas, ...config });
+  // Kaplay 3001.x emits a "KAPLAY already initialized" console.warn even after
+  // quit() because its module-level `a.k` flag isn't fully cleared by quit().
+  // We've already destroyed the previous instance above; suppress just that one
+  // spurious warning to keep the console clean.
+  const _origWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    if (typeof args[0] === "string" && args[0].includes("already initialized")) return;
+    _origWarn.apply(console, args);
+  };
+  try {
+    active = kaplay({ canvas, ...config });
+  } finally {
+    console.warn = _origWarn;
+  }
   return active;
 }

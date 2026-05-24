@@ -212,6 +212,12 @@ function SessionContent() {
       setShowSummary(false);
       setShowTransition(true);
     } else {
+      // Close session before navigating to results — finalises endTime + latency stats
+      fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "close", sessionId }),
+      }).catch((err) => console.error("[session] Failed to close session:", err));
       router.push(`/session/complete?id=${sessionId}&condition=${condition}`);
     }
   };
@@ -229,6 +235,7 @@ function SessionContent() {
     setTaskCompleted(false);
     router.push(`/session?id=${sessionId}&condition=${condition}&task=task-2-algorithm-complexity`);
   };
+
 
   // ── Derived values ────────────────────────────────────────────
   const minutes     = Math.floor(timeRemaining / 60);
