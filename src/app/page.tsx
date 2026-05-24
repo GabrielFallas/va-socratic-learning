@@ -221,7 +221,7 @@ export default function HomePage() {
         >
           <Ring size={22} />
           <span className="text-yellow-300 font-bold text-sm font-mono">
-            Recolecta anillos → Derrota al Dr. Eggman → ¡Aprende a programar!
+            Recolecta anillos para avanzar en tu aprendizaje
           </span>
           <Ring size={22} />
         </div>
@@ -241,7 +241,6 @@ export default function HomePage() {
             <div className="flex items-center gap-2 mb-3">
               {/* Mini ring sprite */}
               <Ring size={24} />
-              <span className="text-yellow-300 font-bold font-mono text-xs">[A]</span>
             </div>
             <h3 className="text-yellow-300 font-bold text-base mb-2 font-mono">
               Condición A — Sonic + Voz
@@ -321,7 +320,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <p className="text-center text-white/30 text-xs mt-6 font-mono">
+        <p className="text-center text-xs mt-6 font-mono">
           Powered by Ollama Gemma 3 12B · Piper TTS · Whisper STT
         </p>
       </div>

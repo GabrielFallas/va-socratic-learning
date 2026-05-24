@@ -60,9 +60,12 @@ export default function TaskTransitionGame({
   // ── Timeline ──────────────────────────────────────────────────
   useEffect(() => {
     const t0 = setTimeout(() => setHeaderVisible(true), 150);
-    const t1 = setTimeout(() => startOutro(), 14000); // max 14s fallback
+    // Condition B has no game to play — fire outro quickly (2 s to show the
+    // loading screen briefly then transition).
+    // Condition A: 12 s max fallback if user doesn't collect all rings / beat boss.
+    const t1 = setTimeout(() => startOutro(), isConditionA ? 12000 : 2000);
     return () => { clearTimeout(t0); clearTimeout(t1); };
-  }, [startOutro]);
+  }, [startOutro, isConditionA]);
 
   // ── Kaplay scene ─────────────────────────────────────────────
   useEffect(() => {
@@ -136,9 +139,11 @@ export default function TaskTransitionGame({
         for (let i = 0; i < TILE_COUNT * 2; i++) {
           platTiles.push(k.add([
             k.sprite("platforms", { frame: i % 8 }),
-            k.pos(i * TILE_W, GROUND_Y - 2),
+            // anchor "top" → pos.y is the TOP edge of the tile, aligned with
+            // GROUND_Y so Sonic appears to walk ON TOP of the tiles.
+            k.pos(i * TILE_W, GROUND_Y),
             k.scale(1),
-            k.anchor("bot"),
+            k.anchor("top"),
             k.z(4),
           ]));
         }
@@ -437,24 +442,36 @@ export default function TaskTransitionGame({
       )}
 
       {/* ── State-driven slim loading indicator at top ─────── */}
-      {/* Progress is tied to real game events: ring collection (60%),       */}
-      {/* boss defeat (30%), and outro countdown (last 10%).                 */}
-      <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: "3px",
-        background: "#001a33", zIndex: 30,
-      }}>
-        <div style={{
-          height:     "100%",
-          width:      `${Math.min(100,
-            Math.round((collectedHere / Math.max(1, ringCount)) * 60) +
-            (bossDefeated ? 30 : 0) +
-            (outroVisible ? Math.round((progress / 100) * 10) : 0)
-          )}%`,
-          background:  "linear-gradient(90deg, #0066cc, #ffcc00)",
-          transition:  "width 0.3s ease",
-          boxShadow:   "0 0 6px rgba(255,204,0,0.5)",
-        }} />
-      </div>
+      {/* Condition A: tracks ring collection (0→60%) + boss defeat (+30%).   */}
+      {/* During outro both conditions fill to 100% in sync with the outro    */}
+      {/* loading bar below, so the two bars always finish together.          */}
+      {(() => {
+        // Game-based progress: rings (max 60%) + boss defeat (30%) = 90%
+        const gameProgress = Math.min(90,
+          Math.round((collectedHere / Math.max(1, ringCount)) * 60) +
+          (bossDefeated ? 30 : 0)
+        );
+        // Once outro fires, drive BOTH bars with the same `progress` value so
+        // they are always in sync. Math.max prevents the bar from going backwards
+        // if gameProgress is already ahead.
+        const topBarPct = outroVisible
+          ? Math.max(gameProgress, Math.round(progress))
+          : gameProgress;
+        return (
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+            background: "#001a33", zIndex: 30,
+          }}>
+            <div style={{
+              height:     "100%",
+              width:      `${topBarPct}%`,
+              background:  "linear-gradient(90deg, #0066cc, #ffcc00)",
+              transition:  "width 0.3s ease",
+              boxShadow:   "0 0 6px rgba(255,204,0,0.5)",
+            }} />
+          </div>
+        );
+      })()}
 
       {/* ── Outro / loading panel ──────────────────────────── */}
       {outroVisible && (

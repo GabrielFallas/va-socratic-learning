@@ -134,9 +134,11 @@ export default function SonicGameCanvas({
         for (let i = 0; i < TILE_COUNT * 2; i++) {
           platTiles.push(k.add([
             k.sprite("platforms", { frame: i % 8 }),
-            k.pos(i * TILE_W, GROUND_Y - 1),
+            // anchor "top" → pos.y is the TOP edge of the tile, which aligns with
+            // Sonic's feet at GROUND_Y so he appears ON TOP of the platform tiles.
+            k.pos(i * TILE_W, GROUND_Y),
             k.scale(1),
-            k.anchor("bot"),
+            k.anchor("top"),
             k.z(3),
           ]));
         }

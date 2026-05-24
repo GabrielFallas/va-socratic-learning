@@ -220,7 +220,13 @@ function SessionContent() {
     // IMPORTANT: reset before navigating — same SessionContent instance stays mounted
     // after a soft-navigation to the same page, so showTransition must be cleared or
     // the early-return re-renders TaskTransitionGame for task-2 too.
+    //
+    // Also reset taskCompleted NOW so that when SonicGameCanvas mounts for task-2
+    // it sees completed=false. Without this, the canvas initialises with the task-1
+    // "completed" flag still true, immediately enters victoryMode, and Sonic jumps
+    // non-stop throughout all of task-2.
     setShowTransition(false);
+    setTaskCompleted(false);
     router.push(`/session?id=${sessionId}&condition=${condition}&task=task-2-algorithm-complexity`);
   };
 
@@ -284,23 +290,6 @@ function SessionContent() {
         </div>
 
         <div className="h-6 w-px bg-white/20" />
-
-        {/* Ring counter + multiplier */}
-        <div className="relative">
-          <RingHUD rings={ringsCollected} multiplier={ringMultiplier} />
-          {showRingAnimation && (
-            <div
-              className="absolute -top-7 left-0 font-bold text-sm pointer-events-none"
-              style={{
-                color: ringDelta >= 3 ? "#ff4400" : ringDelta >= 2 ? "#ff8800" : "#ffcc00",
-                animation: "float-up 0.7s ease-out forwards",
-                fontFamily: "'Courier New', monospace",
-              }}
-            >
-              +{ringDelta} {ringDelta >= 2 ? "💍×" + ringDelta : "💍"}
-            </div>
-          )}
-        </div>
 
         <div className="flex-1" />
 
@@ -435,8 +424,8 @@ function SessionContent() {
               }}
             >
               {taskId === "task-1-infinite-loop"
-                ? "CORRER A LA ZONA 2 →"
-                : "VER RESULTADO FINAL →"}
+                ? "CORRER A LA ZONA 2"
+                : "VER RESULTADO FINAL"}
             </button>
           </div>
         </div>
