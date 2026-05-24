@@ -1,27 +1,31 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────
-// TaskTransitionGame — Fullscreen Kaplay runner between tasks
+// TaskTransitionGame — Interactive Kaplay mini-runner between tasks
 //
-// Plays a ~7-second automated Sonic mini-game showing:
-//   • "ZONA 1 COMPLETADA" slide-in header
-//   • Sonic auto-runs, collecting rings equal to earned rings
-//   • A big motobug spawns → Sonic auto-jumps to defeat it
-//   • "CARGANDO ZONA 2..." + animated progress bar
-//   • Fade to black → calls onComplete()
+// The player controls Sonic with SPACE / click to jump.
+// Rings are placed in the path: walk/jump to collect them.
+// The motobug must be defeated by jumping on it.
+// Rings collected here count toward the session total.
 //
-// This component is mounted as a fixed fullscreen overlay.
+// Timeline:
+//   0s   — header slides in, game is active
+//   ─    — player runs, collects rings, defeats motobug
+//   auto — when all rings + motobug done, outro appears automatically
+//         OR after 12s timeout, outro fires anyway
+//   outro — progress bar fills 2.5s → fade → onComplete()
 // ─────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useState } from "react";
-import { playSFX, startBGMusic } from "@/client/audio/sfx";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { playSFX } from "@/client/audio/sfx";
 
 interface TaskTransitionGameProps {
-  earnedRings:    number;   // rings from completed task (shown collected)
-  fromZone:       string;   // "BUCLE INFINITO"
-  toZone:         string;   // "OPTIMIZACIÓN ALGORÍTMICA"
-  condition:      "A" | "B";
-  onComplete:     () => void;
+  earnedRings:      number;
+  fromZone:         string;
+  toZone:           string;
+  condition:        "A" | "B";
+  onComplete:       () => void;
+  onRingCollected?: () => void;  // called once per ring collected
 }
 
 export default function TaskTransitionGame({
@@ -30,41 +34,45 @@ export default function TaskTransitionGame({
   toZone,
   condition,
   onComplete,
+  onRingCollected,
 }: TaskTransitionGameProps) {
-  const canvasRef   = useRef<HTMLCanvasElement>(null);
-  const [phase, setPhase] = useState<"intro" | "game" | "outro" | "fade">("intro");
-  const [progress, setProgress]   = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const kaplayRef = useRef<any>(null);
+
   const [headerVisible, setHeaderVisible] = useState(false);
   const [outroVisible,  setOutroVisible]  = useState(false);
   const [fadeOut,       setFadeOut]       = useState(false);
+  const [progress,      setProgress]      = useState(0);
+  const [collectedHere, setCollectedHere] = useState(0);
 
   const isConditionA = condition === "A";
+  const ringCount    = Math.min(earnedRings, 10);
 
-  useEffect(() => {
-    // Sequence timeline
-    const t0  = setTimeout(() => setHeaderVisible(true),      100);
-    const t1  = setTimeout(() => setPhase("game"),            800);
-    const t2  = setTimeout(() => setPhase("outro"),          4500);
-    const t3  = setTimeout(() => setOutroVisible(true),      4600);
-    const t4  = setTimeout(() => setFadeOut(true),           6800);
-    const t5  = setTimeout(() => onComplete(),               7400);
-
-    // Progress bar fills from t3 → t4 (2.2s)
+  // ── Start outro sequence ─────────────────────────────────────
+  const startOutro = useCallback(() => {
+    setOutroVisible(true);
     let prog = 0;
-    const progInterval = setInterval(() => {
-      prog = Math.min(100, prog + 2.2);
+    const iv = setInterval(() => {
+      prog = Math.min(100, prog + 2);
       setProgress(prog);
-    }, 48);
-    const t6 = setTimeout(() => clearInterval(progInterval), 2400);
+    }, 50);
+    setTimeout(() => {
+      clearInterval(iv);
+      setProgress(100);
+    }, 2500);
+    setTimeout(() => setFadeOut(true), 3000);
+    setTimeout(() => onComplete(),     3600);
+  }, [onComplete]);
 
-    return () => {
-      [t0,t1,t2,t3,t4,t5,t6].forEach(clearTimeout);
-      clearInterval(progInterval);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // ── Header in, then auto-outro after 12s max ─────────────────
+  useEffect(() => {
+    const t0 = setTimeout(() => setHeaderVisible(true), 100);
+    const t1 = setTimeout(() => startOutro(), 12000); // max 12s
+    return () => { clearTimeout(t0); clearTimeout(t1); };
+  }, [startOutro]);
 
-  // ── Kaplay mini-game (only for Condition A) ───────────────────
+  // ── Kaplay mini-game (Condition A) ───────────────────────────
   useEffect(() => {
     if (!isConditionA || !canvasRef.current) return;
     let mounted = true;
@@ -72,8 +80,14 @@ export default function TaskTransitionGame({
     import("kaplay").then(({ default: kaplay }) => {
       if (!mounted || !canvasRef.current) return;
 
+      // Destroy any pre-existing instance first
+      if (kaplayRef.current) {
+        try { kaplayRef.current.quit(); } catch { /**/ }
+        kaplayRef.current = null;
+      }
+
       const k = kaplay({
-        canvas:     canvasRef.current!,
+        canvas:     canvasRef.current,
         width:      800,
         height:     300,
         letterbox:  true,
@@ -81,6 +95,7 @@ export default function TaskTransitionGame({
         global:     false,
         debug:      false,
       });
+      kaplayRef.current = k;
 
       k.loadSprite("sonic", "/sprites/sonic.png", {
         sliceX: 8, sliceY: 2,
@@ -98,16 +113,15 @@ export default function TaskTransitionGame({
         anims: { run: { from: 0, to: 4, loop: true, speed: 8 } },
       });
       k.loadSprite("bg", "/sprites/chemical-bg.png");
-      k.loadSprite("platform", "/sprites/platforms.png");
 
       k.scene("transition", () => {
         k.setGravity(2400);
         const GROUND_Y = 250;
         const BG_W     = 1600;
 
-        // ── Scrolling backgrounds ──────────────────────────────
+        // Scrolling backgrounds
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),   k.scale(2.67), k.z(0)]);
+        const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),    k.scale(2.67), k.z(0)]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2.67), k.z(0)]);
 
@@ -115,58 +129,81 @@ export default function TaskTransitionGame({
         k.add([k.rect(800, 60), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#1a3d1a")), k.body({ isStatic: true }), k.area(), k.z(1)]);
         k.add([k.rect(800, 10), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#4caf50")), k.z(2)]);
 
-        // ── Sonic ──────────────────────────────────────────────
+        // ── Sonic (player-controlled) ─────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sonic: any = k.add([
           k.sprite("sonic", { anim: "run" }),
-          k.pos(120, GROUND_Y - 5),
-          k.scale(3.5),
-          k.anchor("botleft"),
+          k.pos(100, GROUND_Y),
+          k.scale(2),
+          k.anchor("bot"),
           k.body(),
-          k.area({ shape: new k.Rect(k.vec2(-4, -40), 22, 40) }),
+          k.area(),
           k.z(5),
+          "sonic",
         ]);
 
-        // ── Pre-spawn rings in a row ahead of Sonic ────────────
-        const ringCount = Math.min(earnedRings, 12);
+        // ── Controls: SPACE / UP / click to jump ──────────────
+        function tryJump() {
+          if (sonic.isGrounded()) {
+            sonic.jump(1700);
+            sonic.play("jump");
+            playSFX("jump", 0.5);
+          }
+        }
+        k.onKeyPress("space",   tryJump);
+        k.onKeyPress("up",      tryJump);
+        k.onKeyPress("w",       tryJump);
+        k.onClick(tryJump);
+
+        // Land → run
+        sonic.onGround(() => {
+          if (sonic.curAnim() !== "run") sonic.play("run");
+        });
+
+        // ── Hint text ─────────────────────────────────────────
+        k.add([
+          k.text("ESPACIO / CLICK para saltar", { size: 13, font: "monospace" }),
+          k.pos(400, 18),
+          k.anchor("top"),
+          k.color(k.Color.fromHex("#ffcc00aa")),
+          k.z(10),
+        ]);
+
+        // ── Rings placed in path ──────────────────────────────
+        // Spread rings at different heights: ground-level and elevated
+        let ringsLeft = ringCount;
+        let totalDefeated = 0;
+        let ringsCollectedLocal = 0;
+
         for (let i = 0; i < ringCount; i++) {
+          // Alternate between ground level and elevated
+          const elevated  = i % 3 === 2;
+          const ringY     = elevated ? GROUND_Y - 100 : GROUND_Y - 40;
+          const ringX     = 280 + i * 58;
+
           k.add([
             k.sprite("ring-sprite", { anim: "spin" }),
-            k.pos(280 + i * 55, GROUND_Y - 55),
-            k.scale(2.8),
+            k.pos(ringX, ringY),
+            k.scale(2.5),
             k.anchor("center"),
-            k.area({ shape: new k.Rect(k.vec2(-10, -10), 20, 20) }),
+            k.area({ shape: new k.Rect(k.vec2(-12, -12), 24, 24) }),
             k.z(4),
             "ring",
           ]);
         }
 
-        // ── Motobug (appears at t=2.5s) ───────────────────────
-        let moto: ReturnType<typeof k.add> | null = null;
-        let motoSpawned = false;
-        let motoDefeated = false;
-        let autoJumped = false;
-
-        setTimeout(() => {
-          if (!mounted) return;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          moto = k.add([
-            k.sprite("motobug", { anim: "run" }),
-            k.pos(820, GROUND_Y - 5),
-            k.scale(3.5),
-            k.anchor("botleft"),
-            k.area({ shape: new k.Rect(k.vec2(-4, -30), 18, 30) }),
-            k.z(4),
-            "motobug",
-          ]) as any;
-          motoSpawned = true;
-        }, 2500);
-
-        // Auto collect rings
+        // Collect rings on overlap
         sonic.onCollide("ring", (ring: ReturnType<typeof k.add>) => {
-          playSFX("ring", 0.6);
-          // Burst upward
-          const burst = k.add([
+          k.destroy(ring);
+          ringsLeft--;
+          ringsCollectedLocal++;
+          setCollectedHere(ringsCollectedLocal);
+          playSFX("ring", 0.65);
+          onRingCollected?.();
+
+          // Burst animation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const burst: any = k.add([
             k.sprite("ring-sprite", { anim: "spin" }),
             k.pos((ring as any).pos.clone()),
             k.scale(3.5),
@@ -175,71 +212,89 @@ export default function TaskTransitionGame({
             k.opacity(1),
           ]);
           let bt = 0;
-          k.onUpdate(() => {
-            if (!burst.exists()) return;
+          const ctrl = k.onUpdate(() => {
+            if (!burst.exists()) { ctrl.cancel(); return; }
             bt += k.dt();
-            (burst as any).pos.y -= 80 * k.dt();
-            (burst as any).opacity = Math.max(0, 1 - bt * 2.5);
-            if (bt > 0.45) k.destroy(burst);
+            burst.pos.y  -= 75 * k.dt();
+            burst.opacity = Math.max(0, 1 - bt * 2.5);
+            if (bt > 0.4) { k.destroy(burst); ctrl.cancel(); }
           });
-          k.destroy(ring);
+
+          // Auto-trigger outro when all objectives done
+          if (ringsLeft <= 0 && totalDefeated >= 1) {
+            setTimeout(() => { if (mounted) startOutro(); }, 800);
+          }
         });
 
-        // ── Main update loop ───────────────────────────────────
-        const bgSpeed = 200;
+        // ── Motobug (appears at x=750, moves left) ────────────
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const moto: any = k.add([
+          k.sprite("motobug", { anim: "run" }),
+          k.pos(820, GROUND_Y),
+          k.scale(2),
+          k.anchor("bot"),
+          k.area(),
+          k.z(4),
+          "motobug",
+        ]);
+
+        // Defeat motobug when Sonic lands on top (Sonic above it, overlapping)
+        sonic.onCollide("motobug", (bug: ReturnType<typeof k.add>) => {
+          // Only defeat if Sonic is falling (above the bug)
+          if (sonic.vel.y > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const ex: any = k.add([
+              k.text("💥", { size: 36 }),
+              k.pos((bug as any).pos.clone()),
+              k.anchor("center"),
+              k.z(9),
+            ]);
+            setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 500);
+            k.destroy(bug);
+            totalDefeated++;
+            playSFX("destroy", 0.75);
+            // Bouncy jump after defeat
+            sonic.jump(1400);
+
+            if (ringsLeft <= 0 && totalDefeated >= 1) {
+              setTimeout(() => { if (mounted) startOutro(); }, 800);
+            }
+          }
+        });
+
+        // ── Main update ───────────────────────────────────────
         k.onUpdate(() => {
+          // Fix rotation
+          sonic.angle           = 0;
+          sonic.angularVelocity = 0;
+
           // Scroll bg
           [bg1, bg2].forEach((bg) => {
-            bg.pos.x -= bgSpeed * k.dt();
+            bg.pos.x -= 200 * k.dt();
             if (bg.pos.x <= -BG_W) bg.pos.x = BG_W;
           });
 
-          // Move motobug left
-          if (moto?.exists()) {
-            (moto as any).pos.x -= 150 * k.dt();
-
-            // Auto-jump when motobug is close
-            const dist = (moto as any).pos.x - sonic.pos.x;
-            if (!autoJumped && motoSpawned && dist < 200 && sonic.isGrounded()) {
-              autoJumped = true;
-              sonic.jump(1600);
-              sonic.play("jump");
-              playSFX("jump", 0.5);
-            }
-
-            // Defeat motobug if Sonic is above it
-            if (!motoDefeated && sonic.pos.y < (moto as any).pos.y - 30 && dist < 80 && dist > -60) {
-              motoDefeated = true;
-              const ex = k.add([
-                k.text("💥", { size: 36 }),
-                k.pos((moto as any).pos.clone()),
-                k.anchor("center"),
-                k.z(9),
-              ]);
-              setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 500);
-              k.destroy(moto as any);
-              moto = null;
-              playSFX("destroy", 0.7);
-            }
+          // Move motobug left (if still alive)
+          if (moto.exists()) {
+            moto.pos.x -= 160 * k.dt();
+            // flip motobug: faces left naturally
           }
 
-          // Land → run anim
-          if (sonic.isGrounded() && sonic.curAnim() !== "run") {
-            sonic.play("run");
-            autoJumped = false;
-          }
+          // Camera: keep Sonic roughly in left third
+          // (we don't scroll; rings are pre-placed and motobug moves in)
         });
       });
 
       k.go("transition");
-
-      return () => {
-        mounted = false;
-        try { k.quit(); } catch { /**/ }
-      };
     });
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      if (kaplayRef.current) {
+        try { kaplayRef.current.quit(); } catch { /**/ }
+        kaplayRef.current = null;
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -249,18 +304,19 @@ export default function TaskTransitionGame({
       className="fixed inset-0 z-50 flex flex-col"
       style={{
         background: "#000810",
-        opacity: fadeOut ? 0 : 1,
+        opacity:    fadeOut ? 0 : 1,
         transition: "opacity 0.6s ease",
+        pointerEvents: fadeOut ? "none" : "auto",
       }}
     >
-      {/* ── Zone 1 complete header ────────────────────────────── */}
+      {/* ── Zone 1 header ─────────────────────────────────────── */}
       <div
         style={{
-          transform: headerVisible ? "translateY(0)" : "translateY(-100%)",
+          transform:  headerVisible ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
           background: "linear-gradient(90deg, #003366, #0066cc, #003366)",
           borderBottom: "4px solid #ffcc00",
-          padding: "14px 32px",
+          padding: "12px 28px",
           display: "flex",
           alignItems: "center",
           gap: "16px",
@@ -270,37 +326,48 @@ export default function TaskTransitionGame({
         <div
           style={{
             fontFamily: "'Courier New', monospace",
-            fontSize: "22px",
+            fontSize:   "20px",
             fontWeight: 900,
-            color: "#ffcc00",
-            letterSpacing: "0.1em",
+            color:      "#ffcc00",
             textShadow: "2px 2px 0 #cc6600",
+            letterSpacing: "0.08em",
           }}
         >
-          ✓ ZONA 1: {fromZone}
+          ✓ ZONA 1 COMPLETADA: {fromZone}
         </div>
-        <div
-          style={{
-            marginLeft: "auto",
-            fontFamily: "'Courier New', monospace",
-            fontSize: "13px",
-            color: "#ffcc0099",
-            letterSpacing: "0.2em",
-          }}
-        >
-          {earnedRings} RINGS COLLECTED
+        {/* Live ring counter for this game */}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            style={{
+              width: 22, height: 22,
+              backgroundImage:  "url(/sprites/ring.png)",
+              backgroundSize:   "1600% 100%",
+              imageRendering:   "pixelated",
+              animation:        "ringSheetSpin 0.6s steps(16) infinite",
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "'Courier New', monospace",
+              fontWeight: 700,
+              color:      "#ffcc00",
+              fontSize:   "16px",
+            }}
+          >
+            +{collectedHere} / {ringCount}
+          </span>
         </div>
       </div>
 
-      {/* ── Kaplay canvas (Condition A) ────────────────────────── */}
+      {/* ── Game canvas (Condition A) or BG strip (Condition B) ── */}
       {isConditionA ? (
         <canvas
           ref={canvasRef}
           className="flex-1 w-full"
-          style={{ imageRendering: "pixelated", display: "block" }}
+          style={{ imageRendering: "pixelated", display: "block", outline: "none" }}
+          tabIndex={0}
         />
       ) : (
-        /* Condition B: simple animated bg strip */
         <div
           className="flex-1 flex items-center justify-center"
           style={{
@@ -313,39 +380,37 @@ export default function TaskTransitionGame({
           }}
         >
           <style>{`@keyframes bgScrollCondB{from{background-position-x:0}to{background-position-x:-480px}}`}</style>
+          <div style={{ fontFamily: "'Courier New'", color: "#ffcc00", fontSize: 20 }}>
+            Preparando Zona 2...
+          </div>
         </div>
       )}
 
       {/* ── Outro panel ───────────────────────────────────────── */}
-      {phase === "outro" && (
+      {outroVisible && (
         <div
           style={{
-            transform: outroVisible ? "translateY(0)" : "translateY(100%)",
-            transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
             background: "linear-gradient(90deg, #001a33, #002244, #001a33)",
             borderTop: "4px solid #ffcc00",
-            padding: "20px 32px",
+            padding: "18px 28px",
             flexShrink: 0,
           }}
         >
           <div
             style={{
-              fontFamily: "'Courier New', monospace",
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "#ffffff",
-              letterSpacing: "0.15em",
-              marginBottom: "12px",
+              fontFamily:    "'Courier New', monospace",
+              fontSize:      "17px",
+              fontWeight:    700,
+              color:         "#ffffff",
+              letterSpacing: "0.12em",
+              marginBottom:  "10px",
             }}
           >
             CARGANDO ZONA 2: {toZone}...
           </div>
-
-          {/* Progress bar */}
           <div
             style={{
-              width: "100%",
-              height: "12px",
+              width: "100%", height: "12px",
               background: "#0a1a2a",
               borderRadius: "6px",
               border: "2px solid #0066cc",
@@ -354,22 +419,21 @@ export default function TaskTransitionGame({
           >
             <div
               style={{
-                height: "100%",
-                width: `${progress}%`,
-                background: "linear-gradient(90deg, #0066cc, #ffcc00)",
+                height:       "100%",
+                width:        `${progress}%`,
+                background:   "linear-gradient(90deg, #0066cc, #ffcc00)",
                 borderRadius: "6px",
-                transition: "width 0.05s linear",
-                boxShadow: "0 0 8px rgba(255,204,0,0.5)",
+                transition:   "width 0.05s linear",
+                boxShadow:    "0 0 8px rgba(255,204,0,0.5)",
               }}
             />
           </div>
-
           <div
             style={{
-              marginTop: "8px",
+              marginTop:  "6px",
               fontFamily: "'Courier New', monospace",
-              fontSize: "11px",
-              color: "#ffcc0088",
+              fontSize:   "11px",
+              color:      "#ffcc0099",
               letterSpacing: "0.2em",
             }}
           >

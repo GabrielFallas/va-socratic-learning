@@ -252,6 +252,24 @@ function SessionContent() {
   const timeWarning = timeRemaining < 120;
   const timeCritical = timeRemaining < 60;
 
+  // ── CRASH FIX: when transition runs, render ONLY the mini-game ─
+  // This ensures the SonicGameCanvas (Kaplay instance) is fully
+  // unmounted BEFORE TaskTransitionGame creates its own instance.
+  // Two simultaneous Kaplay instances on different canvases freeze
+  // the browser due to conflicting WebGL/RAF loops.
+  if (showTransition) {
+    return (
+      <TaskTransitionGame
+        earnedRings={ringsCollected}
+        fromZone="BUCLE INFINITO"
+        toZone="OPTIMIZACIÓN ALGORÍTMICA"
+        condition={condition}
+        onComplete={handleTransitionComplete}
+        onRingCollected={() => setRingsCollected((prev) => prev + 1)}
+      />
+    );
+  }
+
   // ─────────────────────────────────────────────────────────────
   return (
     <div className="h-screen flex flex-col" style={{ background: "#0a0a1a" }}>
@@ -262,17 +280,6 @@ function SessionContent() {
           zoneName={zone.name}
           actNumber={zone.act}
           onDone={() => setShowZoneTitle(false)}
-        />
-      )}
-
-      {/* ── Task transition mini-game ─────────────────────────── */}
-      {showTransition && (
-        <TaskTransitionGame
-          earnedRings={ringsCollected}
-          fromZone="BUCLE INFINITO"
-          toZone="OPTIMIZACIÓN ALGORÍTMICA"
-          condition={condition}
-          onComplete={handleTransitionComplete}
         />
       )}
 
