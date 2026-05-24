@@ -54,32 +54,6 @@ function RingHUD({ rings, multiplier }: { rings: number; multiplier: number }) {
   );
 }
 
-// ── Eggman health bar ────────────────────────────────────────────
-function EggmanBar({ ringsCollected, maxRings = 20 }: { ringsCollected: number; maxRings?: number }) {
-  const pct      = Math.min(100, (ringsCollected / maxRings) * 100);
-  const defeated = pct >= 100;
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs font-mono" style={{ color: defeated ? "#ff2222" : "#ff6600" }}>
-        🥚 {defeated ? "¡DERROTADO!" : "Eggman"}
-      </span>
-      <div className="w-20 h-3 bg-gray-800 rounded-full border border-red-900 overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{
-            width: `${100 - pct}%`,
-            background: defeated ? "#ff2222" : "linear-gradient(90deg, #ff6600, #cc0000)",
-          }}
-        />
-      </div>
-      {defeated && (
-        <span className="text-xs text-red-400 animate-bounce">💀</span>
-      )}
-    </div>
-  );
-}
-
 // ── Zone name map ────────────────────────────────────────────────
 const ZONE_NAMES: Record<string, { name: string; act: number }> = {
   "task-1-infinite-loop":        { name: "BUCLE INFINITO",            act: 1 },
@@ -244,12 +218,6 @@ function SessionContent() {
   };
 
   // ── Derived values ────────────────────────────────────────────
-  const avgLatency = latencyReadings.length > 0
-    ? Math.round(latencyReadings.reduce((a, b) => a + b, 0) / latencyReadings.length)
-    : 0;
-  const latencyOk   = latencyReadings.filter((l) => l < 1500).length;
-  const latencyFail = latencyReadings.filter((l) => l >= 1500).length;
-
   const minutes     = Math.floor(timeRemaining / 60);
   const seconds     = timeRemaining % 60;
   const timeStr     = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
@@ -304,7 +272,7 @@ function SessionContent() {
             className="font-bold text-yellow-300 font-mono text-sm"
             style={{ textShadow: "0 0 10px rgba(255,204,0,0.5)" }}
           >
-            [SONIC] CODE
+            SONIC CODE
           </span>
         </div>
 
@@ -326,11 +294,6 @@ function SessionContent() {
             </div>
           )}
         </div>
-
-        <div className="h-6 w-px bg-white/20" />
-
-        {/* Eggman health */}
-        <EggmanBar ringsCollected={ringsCollected} />
 
         <div className="flex-1" />
 
@@ -389,6 +352,7 @@ function SessionContent() {
               errorDescription: task.errorDescription,
             }}
             onNewMessage={handleNewMessage}
+            onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
             ringsCollected={ringsCollected}
             timeRemainingSeconds={timeRemaining}
             taskCompleted={taskCompleted}
@@ -430,17 +394,16 @@ function SessionContent() {
               <p className="text-white/50 text-sm">
                 {resolvedAutonomously
                   ? `¡Encontraste el error! +10 anillos 🔔 (Total: ${ringsCollected})`
-                  : "El Dr. Eggman escapó... ¡pero habrá revancha!"}
+                  : "No te rindas — ¡la Zona 2 aún te espera!"}
               </p>
             </div>
 
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            {/* Stats grid (clean — no RQ metrics visible to participants) */}
+            <div className="grid grid-cols-3 gap-3 mb-5">
               {[
-                { label: "Anillos 💍",    value: ringsCollected, color: "#ffcc00" },
-                { label: "Turnos 💬",     value: turnCount,      color: "#4da6ff" },
-                { label: "Tiempo ⏱️",    value: `${Math.round((Date.now() - taskStartTime) / 1000)}s`, color: "#88ccff" },
-                { label: "Latencia avg",  value: `${avgLatency}ms`, color: avgLatency < 1500 ? "#4caf50" : "#f44336" },
+                { label: "Anillos 💍",  value: ringsCollected,                                    color: "#ffcc00" },
+                { label: "Turnos 💬",   value: turnCount,                                         color: "#4da6ff" },
+                { label: "Tiempo ⏱️",  value: `${Math.round((Date.now() - taskStartTime) / 1000)}s`, color: "#88ccff" },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -452,19 +415,6 @@ function SessionContent() {
                 </div>
               ))}
             </div>
-
-            {/* RQ4 latency analysis */}
-            {latencyReadings.length > 0 && (
-              <div
-                className="rounded-xl p-3 mb-4 text-xs"
-                style={{ background: "rgba(255,204,0,0.08)", border: "1px solid rgba(255,204,0,0.25)" }}
-              >
-                <p className="text-yellow-300 font-mono font-bold mb-1">⚡ RQ4: Análisis de Latencia</p>
-                <p className="text-white/60">✓ &lt;1.5s: {latencyOk}/{latencyReadings.length} ({Math.round((latencyOk / latencyReadings.length) * 100)}%)</p>
-                <p className="text-white/60">✗ ≥1.5s: {latencyFail}/{latencyReadings.length}</p>
-                <p className="text-white/60">Max: {Math.max(...latencyReadings)}ms | Min: {Math.min(...latencyReadings)}ms</p>
-              </div>
-            )}
 
             {/* Continue button */}
             <button

@@ -10,27 +10,108 @@ interface CodePanelProps {
   onTaskComplete: (resolved: boolean) => void;
 }
 
-// Improved Python syntax highlighting
-function highlightPython(code: string): string {
-  const keywords = /\b(def|return|while|for|if|else|elif|import|from|in|not|and|or|True|False|None|class|with|as|try|except|finally|raise|pass|break|continue|lambda|yield|global|nonlocal|async|await)\b/g;
-  const builtins = /\b(print|len|range|type|int|str|list|dict|set|tuple|bool|float|sum|min|max|sorted|enumerate|zip|map|filter|any|all|input|open)\b/g;
-  const strings = /(f?"[^"]*"|f?'[^']*')/g;
-  const comments = /(#[^\n]*)/g;
-  const numbers = /\b(\d+\.?\d*)\b/g;
-  const funcDef = /\bdef\s+(\w+)/g;
-  const decorators = /(@\w+)/g;
-
-  return code
+// ── Left-to-right tokenizer for Python syntax highlighting ──────────────
+// Sequential .replace() passes corrupt each other: the second pass runs on
+// the HTML already emitted by the first (e.g. the strings regex matches the
+// quote characters inside a comment span's style="..." attribute, breaking
+// the tag). A left-to-right tokenizer processes the raw source once and
+// never re-scans already-emitted HTML.
+function highlightPython(raw: string): string {
+  // 1. HTML-escape the raw source before tokenising
+  const src = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(comments,   '<span style="color:#6a9955;font-style:italic">$1</span>')
-    .replace(strings,    '<span style="color:#ce9178">$1</span>')
-    .replace(decorators, '<span style="color:#dcdcaa">$1</span>')
-    .replace(keywords,   '<span style="color:#569cd6;font-weight:bold">$1</span>')
-    .replace(builtins,   '<span style="color:#4ec9b0">$1</span>')
-    .replace(numbers,    '<span style="color:#b5cea8">$1</span>')
-    .replace(funcDef,    'def <span style="color:#dcdcaa;font-weight:bold">$1</span>');
+    .replace(/>/g, "&gt;");
+
+  // 2. Token rules — tried at each position; earliest match wins
+  const rules: Array<{ re: RegExp; emit: (m: string) => string }> = [
+    // Python comment (rest of line)
+    {
+      re:   /#[^\n]*/,
+      emit: (m) => `<span style="color:#6a9955;font-style:italic">${m}</span>`,
+    },
+    // Triple-quoted strings (single-line occurrence only)
+    {
+      re:   /"""[^]*?"""|'''[^]*?'''/,
+      emit: (m) => `<span style="color:#ce9178">${m}</span>`,
+    },
+    // f-strings and regular strings
+    {
+      re:   /f?"(?:[^"\\]|\\.)*"|f?'(?:[^'\\]|\\.)*'/,
+      emit: (m) => `<span style="color:#ce9178">${m}</span>`,
+    },
+    // Decorator
+    {
+      re:   /@\w+/,
+      emit: (m) => `<span style="color:#dcdcaa">${m}</span>`,
+    },
+    // `def funcname` — two colours in one token
+    {
+      re: /\bdef\s+\w+/,
+      emit: (m) => {
+        const sp = m.match(/\s+/);
+        if (!sp || sp.index === undefined) {
+          return `<span style="color:#569cd6;font-weight:bold">${m}</span>`;
+        }
+        const kw   = m.slice(0, sp.index);
+        const name = m.slice(sp.index + sp[0].length);
+        return (
+          `<span style="color:#569cd6;font-weight:bold">${kw}</span>` +
+          sp[0] +
+          `<span style="color:#dcdcaa;font-weight:bold">${name}</span>`
+        );
+      },
+    },
+    // Keywords
+    {
+      re:   /\b(return|while|for|if|else|elif|import|from|in|not|and|or|True|False|None|class|with|as|try|except|finally|raise|pass|break|continue|lambda|yield|global|nonlocal|async|await)\b/,
+      emit: (m) => `<span style="color:#569cd6;font-weight:bold">${m}</span>`,
+    },
+    // Built-ins
+    {
+      re:   /\b(print|len|range|type|int|str|list|dict|set|tuple|bool|float|sum|min|max|sorted|enumerate|zip|map|filter|any|all|input|open|randint|random)\b/,
+      emit: (m) => `<span style="color:#4ec9b0">${m}</span>`,
+    },
+    // Numbers
+    {
+      re:   /\b\d+(?:\.\d+)?\b/,
+      emit: (m) => `<span style="color:#b5cea8">${m}</span>`,
+    },
+  ];
+
+  let out = "";
+  let pos = 0;
+
+  while (pos < src.length) {
+    let bestStart = src.length;
+    let bestLen   = 0;
+    let bestEmit  = "";
+
+    for (const rule of rules) {
+      const sub = src.slice(pos);
+      const m   = sub.match(rule.re);
+      if (m && m.index !== undefined) {
+        const start = pos + m.index;
+        // Prefer earlier; break ties by longer match
+        if (start < bestStart || (start === bestStart && m[0].length > bestLen)) {
+          bestStart = start;
+          bestLen   = m[0].length;
+          bestEmit  = rule.emit(m[0]);
+        }
+      }
+    }
+
+    if (bestLen === 0) {
+      out += src.slice(pos);
+      break;
+    }
+
+    out += src.slice(pos, bestStart);
+    out += bestEmit;
+    pos  = bestStart + bestLen;
+  }
+
+  return out;
 }
 
 export default function CodePanel({

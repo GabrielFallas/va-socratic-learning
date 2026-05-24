@@ -129,10 +129,10 @@ export default function TaskTransitionGame({
           "sonic",
         ]);
 
-        // Controls
+        // Controls — jump height halved so Sonic stays on screen
         function tryJump() {
           if (sonic.isGrounded()) {
-            sonic.jump(1700);
+            sonic.jump(820);
             sonic.play("jump");
             // Reset rotation immediately after jump impulse
             sonic.angle           = 0;
@@ -230,7 +230,7 @@ export default function TaskTransitionGame({
             setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 600);
             k.destroy(bug);
             playSFX("destroy", 0.75);
-            sonic.jump(1500); // bounce
+            sonic.jump(750); // bounce — halved to stay on screen
             sonic.angle           = 0;
             sonic.angularVelocity = 0;
 
@@ -359,6 +359,23 @@ export default function TaskTransitionGame({
           </div>
         </div>
       )}
+
+      {/* ── Always-visible slim loading indicator at top ────── */}
+      {/* Gives the user instant feedback that the next level is loading.    */}
+      {/* Uses a CSS animation that sweeps 0→100% in 14 s (the max timeout).*/}
+      <style>{`
+        @keyframes lvlLoad { from { width:0% } to { width:100% } }
+      `}</style>
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+        background: "#001a33", zIndex: 30,
+      }}>
+        <div style={{
+          height: "100%",
+          background: "linear-gradient(90deg, #0066cc, #ffcc00)",
+          animation: "lvlLoad 14s linear forwards",
+        }} />
+      </div>
 
       {/* ── Outro / loading panel ──────────────────────────── */}
       {outroVisible && (
