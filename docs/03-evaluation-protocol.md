@@ -7,6 +7,24 @@
 **Fecha de entrega:** 25 de mayo de 2026  
 **Ciclo:** I Semestre 2026
 
+---
+
+## 📋 Cronograma Experimental (Ambas Condiciones A y B)
+
+| Fase | Duración |
+|---|---|
+| Consentimiento + Demográfico | ~3 min |
+| PANAS-SF (PRE) | ~1 min |
+| **Tarea 1 (print_numbers, Chemical Plant)** | **10 min** |
+| TaskTransitionGame (Condición A solo) | ~0.5 min |
+| **Tarea 2 (find_duplicates, Speed Highway)** | **10 min** |
+| Cuestionarios POST | ~5 min |
+| Entrevista Cualitativa | ~5 min |
+| **TOTAL** | **~34–35 min** |
+| **Interacción pura con tareas** | **20 min** |
+
+---
+
 ## Apartado A: Definición de Condiciones Experimentales
 
 ### Condición A — Experimental: Sonic (Tutor Socrático Multimodal Multimodal)

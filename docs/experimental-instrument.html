@@ -310,7 +310,7 @@
             <p style="margin:0; font-size:0.9rem;">Agente <strong>Sonic</strong>: avatar Kaplay.js 2D con sprite de Sonic the Hedgehog (8 estados expresivos reactivos al diálogo: idle, thinking, speaking, listening, happy, curious, empathetic, encouraging), temática de zonas (Zona 1: Chemical Plant — Tarea 1; Zona 2: Speed Highway — Tarea 2), TTS neuronal <strong>Piper</strong> (español de alta calidad, Docker local) con fallback Web Speech API, STT <strong>Whisper</strong> local, sistema de gamificación de anillos (indicador de progreso socrático), mini-juego Kaplay de transición entre tareas, SFX y música de fondo. Interacción mediante voz y/o texto.</p>
         </div>
         <div class="group-box group-b">
-            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control (Baseline) — Sonic Texto Plano</div>
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control (Baseline) — chat de texto</div>
             <p style="margin:0; font-size:0.9rem;">El mismo tutor socrático presentado como <strong>chat de texto plano</strong>. Mismo LLM socrático (Ollama + Gemma 3 12B), mismo protocolo ZPD de tres niveles, mismas tareas, pero sin canvas de juego, sin voz, sin anillos, sin música. Input solo por teclado. Se elimina deliberadamente toda la capa de embodiment multimodal para aislar su efecto.</p>
         </div>
 
@@ -318,20 +318,20 @@
             <span class="icon">🎯</span>
             <div class="content">
                 <strong>Objetivo científico (NO revelar al participante)</strong>
-                Medir si la presencia del embodiment multimodal  (avatar Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas) mejora la presencia social percibida, el perceived pedagogical support, la usabilidad y el estado afectivo en comparación con la interfaz de chat de texto puro (Condición B — Sonic texto plano), manteniendo constante el contenido de la tutoría socrática (LLM idéntico, tareas idénticas, protocolo ZPD idéntico).
+                Medir si la presencia del embodiment multimodal  (avatar Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas) mejora la presencia social percibida, el perceived pedagogical support, la usabilidad y el estado afectivo en comparación con la interfaz de chat de texto puro (Condición B — chat de texto), manteniendo constante el contenido de la tutoría socrática (LLM idéntico, tareas idénticas, protocolo ZPD idéntico).
             </div>
         </div>
 
         <h3>Checklist de Materiales — Antes de Iniciar Cada Sesión</h3>
         <ul class="checkbox-list">
             <li>Formulario de Consentimiento Informado impreso (2 copias por participante).</li>
-            <li>Computadora de laboratorio configurada: plataforma cargada en la URL correspondiente, audio probado, micrófono funcional. <strong>Condición A:</strong> verificar que el servidor Piper TTS (Docker) esté corriendo (<code>docker ps | grep piper</code>) y que Ollama esté activo (<code>docker ps | grep ollama</code>). <strong>Condición B:</strong> solo requiere Ollama.</li>
+            <li>Computadora de laboratorio configurada: plataforma cargada en la URL correspondiente, audio probado, micrófono funcional.
             <li>Audífonos con micrófono desinfectados y cargados.</li>
             <li>Tabla de asignación aleatoria impresa (sobre cerrado por participante: Grupo A / Grupo B).</li>
             <li>Tablet o segunda computadora con enlaces a cuestionarios (PANAS-SF pre, Demográfico).</li>
             <li>Bitácora del investigador con hoja de registro por participante.</li>
             <li>AMPO o carpeta física para guardar los consentimientos firmados.</li>
-            <li>Cronómetro o temporizador para controlar el tiempo de cada tarea (15 min máx. por tarea).</li>
+            <li>Cronómetro o temporizador para controlar el tiempo de cada tarea (10 min máx. por tarea, 20 min total de interacción).</li>
             <li>Verificar que el backend del agente está activo y registra logs correctamente bajo el ID del participante.</li>
         </ul>
     </div>
@@ -351,7 +351,7 @@
             <p><strong>Título del estudio:</strong> Evaluación de un Sistema de Tutoría Socrática de Programación basado en Inteligencia Artificial.</p>
             <p><strong>Investigador Principal:</strong> Gabriel Isaías Fallas López — ECCI, Universidad de Costa Rica.</p>
             <p><strong>Propósito:</strong> Este estudio busca evaluar la experiencia de interactuar con un sistema de tutoría socrática basado en inteligencia artificial. El sistema le guiará mediante preguntas reflexivas en la resolución de tareas de programación, sin proporcionarle soluciones directas.</p>
-            <p><strong>Procedimiento:</strong> La sesión tendrá una duración aproximada de 40 a 55 minutos e incluye: (1) completar cuestionarios iniciales, (2) interactuar con el sistema de tutoría durante dos tareas de programación de <strong>10 minutos cada una</strong>, y (3) completar cuestionarios finales sobre su experiencia.</p>
+            <p><strong>Procedimiento:</strong> La sesión tendrá una duración aproximada de 35 a 40 minutos e incluye: (1) consentimiento y cuestionario demográfico (~3 min), (2) PANAS-SF PRE (~1 min), (3) Tarea 1 de programación (10 minutos, Chemical Plant zone), (4) mini-juego de transición (~0.5 min, Condición A solo), (5) Tarea 2 de programación (10 minutos, Speed Highway zone), (6) cuestionarios POST (~5 min: Godspeed, SUS, NASA-TLX, SIMS, Perceived Pedagogical Support), y (7) entrevista breve cualitativa (~5 min). **Duración total de interacción pura con las tareas: 20 minutos** (10 min + 10 min).</p>
             <p><strong>Riesgos:</strong> El estudio no implica riesgos físicos, psicológicos ni legales. La única incomodidad posible es leve frustración ante las tareas de programación, similar a la experimentada en cualquier sesión de estudio.</p>
             <p><strong>Beneficios:</strong> Su participación contribuirá al avance científico en el campo de la tutoría inteligente. No hay beneficio económico directo para los participantes.</p>
             <p><strong>Confidencialidad:</strong> Toda la información recolectada será anonimizada. Sus respuestas y los logs de conversación quedarán vinculados únicamente a un código numérico (ej. P-001), sin nombre ni información de identificación personal. Los datos se almacenarán en un servidor cifrado de acceso restringido.</p>
@@ -400,7 +400,7 @@
         </div>
 
         <div class="group-box group-b">
-            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control — Sonic Texto Plano</div>
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control — chat de texto</div>
             <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/?condition=B</code> o seleccione <strong>Condición B</strong> en la landing page.<br>
             <strong>Verificar antes de iniciar:</strong><br>
             ① Interfaz de chat activa: campo de texto habilitado, sin canvas de juego, sin anillos, sin música.<br>

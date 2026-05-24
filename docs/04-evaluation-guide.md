@@ -70,8 +70,8 @@
 
 3. **Instrucciones Neutras de las Tareas:**
    Se entregan instrucciones neutras redactadas para evitar priming sobre "embodiment", "presencia" o "avatar". Las tareas son:
-   - **Tarea 1:** Depuración de bucle infinito en Python (max. ~10 minutos)
-   - **Tarea 2:** Análisis de complejidad y optimización algorítmica (max. ~10 minutos)
+   - **Tarea 1:** Depuración de bucle infinito en Python (max. 10 minutos / 600 segundos)
+   - **Tarea 2:** Análisis de complejidad y optimización algorítmica (max. 10 minutos / 600 segundos)
 
 4. **Fase de Interacción (Debugging):**
    El participante intenta resolver el problema interactuando de forma multimodal (voz vía Whisper STT o texto escrito) con el agente en un navegador web. El sistema (Sonic Kaplay 2D + Piper TTS neuronal + Whisper STT + anillos s) aplicará técnicas de andamiaje y preguntas reflexivas sin entregar el código corregido. En Condición A, el avatar Sonic reacciona visualmente (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) y el sistema otorga/retira anillos según el avance socrático del participante; Piper TTS vocaliza las respuestas del agente con prosodia natural. Tras 60 s de inactividad, se envía automáticamente un mensaje proactivo (pool de 4 pistas específicas por tarea, sin repetición). El participante responde a Perceived Pedagogical Support después de completar o agotar el tiempo de cada tarea.
@@ -86,7 +86,24 @@
    - Latencia registrada automáticamente por el sistema en backend
 
 6. **Cierre de Tareas:**
-   Cada sesión de tarea finaliza cuando el participante identifica el error lógico **o** cuando se alcanza el tiempo máximo (~10 minutos por tarea, máximo 20 minutos total).
+   Cada sesión de tarea finaliza cuando el participante identifica el error lógico **o** cuando se alcanza el tiempo máximo (10 minutos por tarea, máximo 20 minutos total de interacción con las 2 tareas).
+   
+   ---
+   
+   ## **CRONOGRAMA TOTAL DE LA SESIÓN EXPERIMENTAL (Ambas Condiciones A y B)**
+   
+   | Componente | Duración | Descripción |
+   |---|---|---|
+   | **1. Consentimiento Informado + Cuestionario Demográfico** | ~3 minutos | Lectura de consentimiento, firma digital, preguntas demográficas y experiencia previa |
+   | **2. PANAS-SF (PRE)** | ~1 minuto | Línea base del estado afectivo |
+   | **3. TAREA 1 — Depuración de bucle infinito (print_numbers)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B) |
+   | **4. TaskTransitionGame (mini-juego Kaplay)** | ~0.5 minutos | Transición gamificada entre tareas (Condición A solo) |
+   | **5. TAREA 2 — Optimización algoritmo (find_duplicates)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B) |
+   | **6. Cuestionarios POST (Godspeed, SUS, NASA-TLX, SIMS, Pedagogical Support)** | ~5 minutos | Evaluación de percepción, usabilidad, carga cognitiva y motivación |
+   | **7. Entrevista Breve Cualitativa** | ~5 minutos | Preguntas semi-estructuradas sobre experiencia |
+   | **TOTAL POR PARTICIPANTE** | **~34–35 minutos** | Ambas condiciones (A y B) siguen el mismo protocolo temporal |
+   
+   > **Nota crítica:** La duración de **interacción pura con las tareas es de 20 minutos** (10 min + 10 min = 20 min, sin incluir transiciones y cuestionarios).
 
 7. **Evaluación Post-Interacción (Cuestionarios):**
    El participante completa los siguientes cuestionarios en orden:

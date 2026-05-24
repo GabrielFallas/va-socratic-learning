@@ -23,7 +23,7 @@ El agente virtual **Sonic** será el núcleo del experimento. No será un simple
 - Enviará mensajes proactivos (pistas específicas por tarea) tras 60 s de inactividad del participante.
 - Mantendrá un estado de memoria de la sesión: historial completo de conversación para el ZPD de 3 niveles.
 
-**Condición B (Control — Sonic Texto Plano):**
+**Condición B (Control — chat de texto):**
 - Mismo tutor socrático, mismo LLM (Ollama + Gemma 3 12B), mismo protocolo ZPD de 3 niveles, mismas tareas.
 - Sin canvas de juego, sin voz, sin anillos, sin música, sin elementos visuales s.
 - Input solo por teclado, output solo por texto.

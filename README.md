@@ -58,7 +58,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 ### Flujo de Interacción
 
-1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal ) o B (Sonic texto plano).
+1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal ) o B (chat de texto).
 2. El sistema inicializa la sesión con un ID único, carga el consentimiento informado, y presenta la Tarea 1 (depuración `print_numbers()` bucle infinito, Chemical Plant zone).
 3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
 4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
@@ -66,6 +66,19 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 6. Tras completar Tarea 1, TaskTransitionGame (mini-juego Kaplay ~15 s) presenta Sonic colectando anillos y derrotando un Motobug.
 7. Tarea 2 (`find_duplicates()` O(n³) → optimizar, Speed Highway zone) con el mismo flujo.
 8. Al completar ambas tareas, resumen de sesión con análisis de latencia, turnos, resolución autónoma, y anillos acumulados (RQ2–RQ4).
+
+### Cronograma Total de la Sesión Experimental
+
+| Fase | Duración | Notas |
+|---|---|---|
+| **1. Consentimiento + Demográfico** | ~3 min | Firma digital, experiencia previa con programación/IA |
+| **2. PANAS-SF (PRE)** | ~1 min | Línea base afectiva |
+| **3. TAREA 1 (print_numbers)** | **10 min** | Depuración de bucle infinito, Chemical Plant zone |
+| **4. TaskTransitionGame** | ~0.5 min | Mini-juego Kaplay entre tareas (Condición A solo) |
+| **5. TAREA 2 (find_duplicates)** | **10 min** | Optimización O(n³)→O(n), Speed Highway zone |
+| **6. Cuestionarios POST** | ~5 min | Godspeed, SUS, NASA-TLX, SIMS, Pedagogical Support |
+| **7. Entrevista Cualitativa** | ~5 min | Semi-estructurada, feedback del participante |
+| **TOTAL** | **~34–35 min** | **Interacción pura con tareas: 20 minutos** |
 
 ---
 
@@ -199,7 +212,7 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 
 ## Condiciones Experimentales
 
-| | Condición A — Sonic Embodied | Condición B — Sonic Texto Plano |
+| | Condición A — Sonic Embodied | Condición B — chat de texto |
 |---|---|---|
 | **Avatar (Canvas)** | ✓ Kaplay 2D Sonic, 16 frames, 8 estados reactivos | ✗ Sin avatar |
 | **Voz (TTS)** | ✓ Piper TTS neuronal (Docker, español) + fallback Web Speech | ✗ Deshabilitada |
