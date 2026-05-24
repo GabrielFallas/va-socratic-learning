@@ -1,10 +1,10 @@
-# Ada — Tutora Socrática Corporizada (M-ITS)
+# Sonic — Tutor Socrático Gamificado Corporizado (AVTS/M-ITS)
 
 > **PF-3311 · Agentes Virtuales Inteligentes · Universidad de Costa Rica · I Semestre 2026**
 
 ## Resumen
 
-Repositorio del proyecto de investigación sobre un agente virtual de tutoría socrática para el desarrollo de lógica de programación y resolución de problemas en entornos STEM. El objetivo es evaluar si una interacción basada en preguntas reflexivas y pistas graduales —complementada con un avatar 2D afectivo y síntesis de voz— mejora la comprensión y la autonomía del estudiante, en comparación con un chatbot de texto plano, sin entregar soluciones de código directas.
+Repositorio del proyecto de investigación sobre un agente virtual de tutoría socrática gamificado para el desarrollo de lógica de programación y resolución de problemas en entornos STEM. El objetivo es evaluar si una interacción basada en preguntas reflexivas y pistas graduales —complementada con un avatar 2D reactivo (Sonic Kaplay), síntesis de voz neuronal (Piper TTS), reconocimiento de voz local (Whisper STT) y gamificación de anillos— mejora la comprensión y la autonomía del estudiante, en comparación con un chatbot de texto plano, sin entregar soluciones de código directas.
 
 ## 🎥 Video de Demostración
 
@@ -21,17 +21,18 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 | RQ | Pregunta |
 |---|---|
-| **RQ1** | ¿Cómo afecta la presencia del avatar 2D afectivo con voz paraverbal frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
-| **RQ2** | ¿En qué medida la modalidad corpórea influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
-| **RQ3** | ¿Qué relación existe entre la modalidad del agente y la carga cognitiva percibida (NASA-TLX) y el estado afectivo (PANAS-SF) durante la tarea? |
+| **RQ1** | ¿Cómo afecta la presencia del avatar corporizado gamificado (Sonic Kaplay 2D, Piper TTS, Whisper STT, anillos, zonas temáticas) frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
+| **RQ2** | ¿En qué medida la modalidad corpórea y gamificada influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
+| **RQ3** | ¿Qué relación existe entre la modalidad del agente (Condición A vs B) y la carga cognitiva percibida (NASA-TLX) y el estado afectivo (PANAS-SF) durante la sesión? |
 | **RQ4** | ¿Se mantiene la latencia de respuesta multimodal por debajo de 1.5 segundos de forma consistente? |
 
-## Rol del Agente — Ada
+## Rol del Agente — Sonic
 
 - Analiza el contexto del estudiante (enunciado o código) para detectar discrepancias lógicas.
 - Mantiene memoria del progreso conversacional para ajustar la dificultad de las preguntas (ZPD — Zona de Desarrollo Próximo, Vygotsky).
 - Guía con preguntas reflexivas en tres niveles de andamiaje, sin proporcionar código directo.
-- En la Condición A: reacciona visualmente (avatar 2D, 8 estados expresivos) y vocalmente (TTS paraverbal).
+- En la **Condición A**: reacciona visualmente mediante sprite Sonic en canvas Kaplay.js (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`), vocaliza con Piper TTS neuronal en español, detecta voz del estudiante vía Whisper STT local, y gamifica el progreso mediante un sistema de anillos (ganados cuando la respuesta aproxima la solución, perdidos ante frustración).
+- En la **Condición B**: interfaz de chat de texto plano, mismo tutor socrático, sin avatar, sin voz, sin gamificación.
 
 ## Arquitectura Técnica
 
@@ -39,28 +40,32 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 | Capa / Componente | Tecnología | Razón principal |
 |---|---|---|
-| **Avatar 2D** | CSS/SVG Animado (sin librerías externas) | Avatar expresivo que evita el Valle Inquietante, sin dependencias de terceros ni servicios de pago. Reemplaza Ready Player Me (descontinuado en ene. 2026). |
-| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (local) | Sin API keys externas. Inferencia GPU local. Reproducible sin cuentas de servicios en la nube. |
-| **Síntesis de Voz (TTS)** | Web Speech API — SpeechSynthesis (nativa del navegador) | Sin costo, sin API keys, latencia de inicio <200 ms. Disponible en Chrome, Edge y Safari. |
-| **Reconocimiento de Voz (STT)** | Web Speech API — SpeechRecognition (nativa del navegador) | Resultados intermedios en tiempo real, español latinoamericano, sin dependencias externas. |
+| **Avatar 2D (Kaplay.js)** | Kaplay.js canvas 2D + sprite Sonic (16 frames) | Motor de juegos 2D ligero, 8 estados reactivos, animaciones fluidas (run/jump/idle), evita Valle Inquietante. Integración con backend via `[AVATAR_STATE]` tags. |
+| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (local, Q4_K_M ~7.3 GB) | Sin API keys externas. Inferencia GPU NVIDIA (RTX 5070 Ti 16 GB). Reproducible sin cuentas en la nube. |
+| **Síntesis de Voz (TTS)** | Piper TTS neuronal (Docker local, español) + fallback Web Speech API | Calidad de audio neuronal natural, baja latencia (~300–500 ms), español de alta calidad, fallback automático si Piper no está disponible. |
+| **Reconocimiento de Voz (STT)** | Whisper STT (local via `/api/stt` Next.js) | Reconocimiento de voz local sin dependencias de nube, español, baja latencia, integrado en backend. |
+| **Gamificación** | Sistema de anillos + TaskTransitionGame (Kaplay mini-juego) | Anillos visuales (ring burst anim) ganados/perdidos según progreso socrático; mini-juego ~15 s entre tareas; SFX/BGM por zona temática. |
 | **Framework / Orquestación** | Next.js 14 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
-| **Telemetría** | Módulo logger.ts (en memoria, servidor) | Registra latencia extremo a extremo, turnos, tiempo por tarea y resolución autónoma (RQ4). |
+| **Telemetría** | Módulo logger.ts (en memoria, servidor) | Registra latencia extremo a extremo, turnos, tiempo por tarea, resolución autónoma, estado del avatar (RQ2–RQ4). |
 
 ### Componentes Principales
 
-- **Cliente web:** Avatar 2D (CSS/SVG), entrada de texto y voz, panel de código con syntax highlighting.
-- **Servidor de orquestación:** Estado de sesión, telemetría log-based, enrutamiento al LLM.
-- **Servicios de IA locales:** Ollama (LLM) + Web Speech API (TTS/STT).
-- **Flujo de streaming:** Server-Sent Events (SSE) para latencia percibida reducida.
+- **Cliente web:** Avatar Sonic Kaplay 2D (canvas), entrada de texto y voz (Whisper STT), panel de código con syntax highlighting, timer por tarea.
+- **Servidor de orquestación:** Estado de sesión, telemetría log-based (latencia, turnos, resolución, estado avatar), enrutamiento al LLM, endpoints `/api/tts`, `/api/stt`.
+- **Servicios de IA locales:** Ollama (LLM) + Piper TTS (Docker) + Whisper STT (backend).
+- **Gamificación:** Sistema de anillos, TaskTransitionGame (mini-juego Kaplay entre tareas), SFX/BGM, zonas temáticas (Chemical Plant / Speed Highway).
+- **Flujo de streaming:** Server-Sent Events (SSE) para latencia percibida reducida, `[AVATAR_STATE]` tags para sincronía visual.
 
 ### Flujo de Interacción
 
-1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (avatar multimodal) o B (texto plano).
-2. El sistema inicializa la sesión con un ID único y carga el contexto de la Tarea 1 (depuración de bucle infinito).
-3. El participante interactúa con Ada mediante texto (ambas condiciones) o voz (solo Condición A).
-4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON.
-5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A, se activa TTS y se sincroniza el estado del avatar.
-6. Al completar ambas tareas, se presenta un resumen de sesión con análisis de latencia (RQ4).
+1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal gamificado) o B (Sonic texto plano).
+2. El sistema inicializa la sesión con un ID único, carga el consentimiento informado, y presenta la Tarea 1 (depuración `print_numbers()` bucle infinito, Chemical Plant zone).
+3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
+4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
+5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A: Piper TTS vocaliza la respuesta, el canvas Kaplay anima el sprite Sonic al estado indicado, y el sistema de anillos se actualiza (ganado/perdido). En Condición B: solo texto.
+6. Tras completar Tarea 1, TaskTransitionGame (mini-juego Kaplay ~15 s) presenta Sonic colectando anillos y derrotando un Motobug.
+7. Tarea 2 (`find_duplicates()` O(n³) → optimizar, Speed Highway zone) con el mismo flujo.
+8. Al completar ambas tareas, resumen de sesión con análisis de latencia, turnos, resolución autónoma, y anillos acumulados (RQ2–RQ4).
 
 ---
 
@@ -73,8 +78,17 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
   - Instalar Ollama: [https://ollama.com/download](https://ollama.com/download)
   - Descargar el modelo: `ollama pull gemma3:12b`
   - Verificar que el servidor esté corriendo: `ollama serve` (por defecto en `http://localhost:11434`)
-- **GPU NVIDIA** con VRAM suficiente (≥8 GB recomendado para Gemma 3 12B Q4_K_M).  
-  Si no se dispone de GPU, Ollama usará CPU (latencia significativamente mayor).
+- **Docker** (para ejecutar Piper TTS neuronal en local).
+  - Instalar Docker: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+  - Descargar y ejecutar Piper TTS español:  
+    ```bash
+    docker run -d --name piper-tts -p 8000:8000 \
+      -v $(pwd)/piper:/app/piper \
+      rhasspy/piper:latest --model-dir /app/piper
+    ```
+    O use la imagen con soporte CUDA si dispone de GPU.
+- **GPU NVIDIA** con VRAM suficiente (≥8 GB recomendado para Gemma 3 12B Q4_K_M + Piper.js).  
+  Si no se dispone de GPU, Ollama y Piper usarán CPU (latencia significativamente mayor).
 
 ### 2. Clonar el Repositorio e Instalar Dependencias
 
@@ -94,6 +108,12 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 # Modelo Ollama a utilizar
 OLLAMA_MODEL=gemma3:12b
+
+# URL del servidor Piper TTS (por defecto: http://localhost:8000)
+PIPER_TTS_URL=http://localhost:8000
+
+# Idioma/modelo Piper (ej. es_ES-josemi-medium.onnx)
+PIPER_VOICE=es_ES-josemi-medium
 ```
 
 > **Nota de seguridad:** No se requieren API keys externas para la PoC. No subas credenciales al repositorio.
@@ -108,12 +128,23 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 
 ### 5. Ejecutar la Sesión Experimental
 
-1. Abre `http://localhost:3000` en Chrome, Edge o Safari (navegadores con soporte completo de Web Speech API).
-2. Selecciona **"Iniciar Sesión (Aleatoria)"** para asignación automática de condición, o fuerza la Condición A o B para pruebas internas.
-3. Completa las dos tareas de depuración interactuando con Ada.
-4. Al finalizar, el resumen de sesión muestra métricas de latencia (RQ4) y resultados por tarea.
+1. Abre `http://localhost:3000` en Chrome, Edge o Safari (navegadores con soporte Web Speech API para Whisper fallback).
+2. Verifica en la consola que **Ollama**, **Piper TTS** (Docker) y **Whisper STT** estén disponibles:
+   - `curl http://localhost:11434/api/tags` (Ollama)
+   - `curl http://localhost:8000/health` (Piper TTS)
+3. Selecciona **"Iniciar Sesión (Aleatoria)"** para asignación automática de condición (A = Sonic multimodal, B = texto plano).
+4. **Condición A:** Lee/escucha instrucción inicial, interactúa con Sonic via texto o voz (micrófono), gana/pierde anillos, visualiza avatar reactivo.
+5. **Condición B:** Interfaz de chat de texto plano, sin voz, sin avatar, sin anillos (control baseline).
+6. Completa Tarea 1 (depuración bucle infinito `print_numbers()`, Chemical Plant, ~10 min).
+7. TaskTransitionGame: Sonic colecta anillos, derrota Motobug, transición a Tarea 2.
+8. Tarea 2 (análisis y optimización `find_duplicates()` O(n³)→O(n), Speed Highway, ~10 min).
+9. Resumen de sesión con métricas de latencia, turnos conversacionales, % resolución autónoma, anillos acumulados (Condición A).
 
-> **Sobre TTS/STT:** La síntesis de voz y el reconocimiento de voz funcionan únicamente en la Condición A y requieren permiso de micrófono en el navegador. Si el navegador no soporta Web Speech API, la condición A funcionará en modo solo texto.
+> **Sobre TTS/STT (Condición A):** 
+> - **Piper TTS** (Docker): síntesis de voz neuronal español, latencia ~300–500 ms. Requiere `docker run` de Piper.
+> - **Whisper STT** (backend): reconocimiento de voz local via `/api/stt`, requiere micrófono en navegador.
+> - **Fallback:** Si Piper no está disponible, Whisper fallará (sin fallback automático a Web Speech API en la ruta `/api/stt`).
+> - **Condición B:** Sin entrada de voz (teclado solo).
 
 ---
 
@@ -143,13 +174,16 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`src/app/session/complete/page.tsx`](src/app/session/complete/page.tsx) | Página de resumen post-sesión con métricas. |
 | [`src/app/api/chat/route.ts`](src/app/api/chat/route.ts) | API de chat — orchestra LLM y streaming SSE. |
 | [`src/app/api/session/route.ts`](src/app/api/session/route.ts) | API de sesión — telemetría y gestión de estado. |
-| [`src/client/avatar/AvatarSprite.tsx`](src/client/avatar/AvatarSprite.tsx) | Avatar 2D CSS/SVG animado con 8 estados expresivos. |
-| [`src/client/components/ChatInterface.tsx`](src/client/components/ChatInterface.tsx) | Interfaz de chat — Condición A y B, TTS, STT. |
-| [`src/client/components/CodePanel.tsx`](src/client/components/CodePanel.tsx) | Panel de código con syntax highlighting y timer. |
-| [`src/services/llm/ollamaClient.ts`](src/services/llm/ollamaClient.ts) | Cliente Ollama — streaming NDJSON, extracción de estado del avatar. |
-| [`src/services/tts/webSpeechTTS.ts`](src/services/tts/webSpeechTTS.ts) | Servicio TTS — Web Speech API. |
-| [`src/services/stt/webSpeechSTT.ts`](src/services/stt/webSpeechSTT.ts) | Servicio STT — Web Speech API. |
-| [`src/prompts/ada-system.ts`](src/prompts/ada-system.ts) | System prompt socrático de Ada con protocolo ZPD de 3 niveles. |
+| [`src/client/avatar/SonicGameCanvas.tsx`](src/client/avatar/SonicGameCanvas.tsx) | Canvas Kaplay.js con sprite Sonic, 8 estados reactivos, ring burst, hurt flash, motobug enemy, victory sequence. |
+| [`src/client/components/ChatInterface.tsx`](src/client/components/ChatInterface.tsx) | Interfaz de chat — Condición A y B, Piper TTS, Whisper STT, WELCOME_A greeting, proactive message pool. |
+| [`src/client/components/TaskTransitionGame.tsx`](src/client/components/TaskTransitionGame.tsx) | Mini-juego Kaplay entre tareas (~15 s): Sonic colecta anillos, derrota Motobug, outro con progress bar. |
+| [`src/client/components/CodePanel.tsx`](src/client/components/CodePanel.tsx) | Panel de código con syntax highlighting, timer de tarea, indicador de progreso. |
+| [`src/services/llm/ollamaClient.ts`](src/services/llm/ollamaClient.ts) | Cliente Ollama — streaming NDJSON, extracción de `[AVATAR_STATE:estado]` tags. |
+| [`src/services/tts/piperTTS.ts`](src/services/tts/piperTTS.ts) | Servicio TTS — Piper TTS neuronal (Docker local, español) con fallback Web Speech API. |
+| [`src/services/stt/whisperSTT.ts`](src/services/stt/whisperSTT.ts) | Servicio STT — Whisper local via `/api/stt` Next.js route, español. |
+| [`src/services/audio/sfx.ts`](src/services/audio/sfx.ts) | Gestor de efectos de sonido (ring, jump, hurt, victory) y música de fondo por zona. |
+| [`src/prompts/sonic-system.ts`](src/prompts/sonic-system.ts) | System prompt socrático de Sonic con personalidad energética, protocolo ZPD 3 niveles, detección de frustración, `[AVATAR_STATE]` control tags. |
+| [`src/prompts/ada-system.ts`](src/prompts/ada-system.ts) | System prompt de baseline (utilizado en Condición B: mismo tutor socrático, sin embodiment). |
 | [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Definición de las dos tareas experimentales de depuración. |
 | [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) | Módulo de telemetría — logs de latencia y métricas por sesión. |
 
@@ -165,22 +199,25 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 
 ## Condiciones Experimentales
 
-| | Condición A — Experimental | Condición B — Control |
+| | Condición A — Sonic Embodied | Condición B — Sonic Texto Plano |
 |---|---|---|
-| **Avatar** | ✓ CSS/SVG 2D animado, 8 estados | ✗ Sin avatar |
-| **Voz (TTS)** | ✓ Web Speech API paraverbal | ✗ Deshabilitada |
-| **Reconocimiento de voz (STT)** | ✓ Web Speech API | ✗ Deshabilitado |
-| **Modelo LLM** | ✓ Ollama + Gemma 3 12B | ✓ Idéntico |
-| **System Prompt** | ✓ Socrático ZPD 3 niveles | ✓ Idéntico |
-| **Tareas** | ✓ Bucle + Algoritmo | ✓ Idénticas |
+| **Avatar (Canvas)** | ✓ Kaplay 2D Sonic, 16 frames, 8 estados reactivos | ✗ Sin avatar |
+| **Voz (TTS)** | ✓ Piper TTS neuronal (Docker, español) + fallback Web Speech | ✗ Deshabilitada |
+| **Reconocimiento de voz (STT)** | ✓ Whisper STT (backend `/api/stt`) | ✗ Deshabilitado (teclado solo) |
+| **Gamificación** | ✓ Sistema de anillos, TaskTransitionGame, SFX/BGM, zonas temáticas | ✗ Sin anillos, sin mini-juego |
+| **Modelo LLM** | ✓ Ollama + Gemma 3 12B (Q4_K_M) | ✓ Idéntico |
+| **System Prompt** | ✓ sonic-system.ts: Socrático ZPD 3 niveles, `[AVATAR_STATE]` tags | ✓ ada-system.ts: Idéntico ZPD, sin control de avatar |
+| **Tareas** | ✓ Tarea 1: print_numbers() (Chemical Plant) · Tarea 2: find_duplicates() (Speed Highway) | ✓ Idénticas |
+| **Latencia objetivo** | ✓ < 1.5 s extremo a extremo (registro automático) | ✓ Idéntica |
 
 ---
 
 ## Consideraciones de Seguridad
 
-- **API Keys:** No se requieren API keys externas para la PoC. Ollama corre completamente local.
-- **Datos de sesión:** Los logs de conversación se almacenan en memoria en el servidor bajo un ID alfanumérico único, sin nombre legal ni correo del participante.
+- **API Keys:** No se requieren API keys externas para la PoC. Ollama, Piper TTS y Whisper STT corren completamente local.
+- **Datos de sesión:** Los logs de conversación, telemetría (latencia, turnos, resolución, anillos acumulados) se almacenan en memoria en el servidor bajo un ID alfanumérico único (ej. `P-001`), sin nombre legal ni correo del participante.
 - **`.env.local`:** El archivo de variables de entorno está incluido en `.gitignore` y nunca debe subirse al repositorio.
+- **Reproducibilidad:** Todos los servicios (Ollama, Piper, Next.js) corren en máquinas locales del laboratorio. No hay dependencias de nube. Las sesiones pueden ser replicadas con idéntico hardware y configuración.
 
 ---
 
