@@ -1,16 +1,8 @@
 "use client";
 
-// ─────────────────────────────────────────────────────────────────
-// SonicGameCanvas — Kaplay-powered live avatar panel
-//
-// Bugs fixed in this version:
-//  • Rotation: sonic.angle = 0 every frame (physics was spinning Sonic)
-//  • Ground visibility: anchor("bot"), scale 2, GROUND_Y = 215
-//  • Crash prevention: canvas gets a unique id; destroyRef is used cleanly
-// ─────────────────────────────────────────────────────────────────
-
 import { useEffect, useRef } from "react";
 import type { AvatarState } from "@/shared/types/session";
+import { createKaplay, destroyKaplay } from "@/client/avatar/kaplayManager";
 
 interface SonicGameCanvasProps {
   avatarState:           AvatarState;
@@ -38,8 +30,8 @@ export default function SonicGameCanvas({
   taskCompleted        = false,
   className            = "",
 }: SonicGameCanvasProps) {
-  const canvasRef  = useRef<HTMLCanvasElement>(null);
-  const signals    = useRef<GameSignals>({
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const signals   = useRef<GameSignals>({
     state:     avatarState,
     speaking:  isSpeaking,
     rings:     ringsCollected,
@@ -47,10 +39,8 @@ export default function SonicGameCanvas({
     timeLeft:  timeRemainingSeconds,
     completed: taskCompleted,
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const kaplayRef  = useRef<any>(null);
 
-  // Sync signals every render (no re-mount)
+  // Sync props → signals each render (no re-mount)
   useEffect(() => {
     signals.current.prevRings = signals.current.rings;
     signals.current.state     = avatarState;
@@ -64,27 +54,17 @@ export default function SonicGameCanvas({
     if (!canvasRef.current) return;
     let mounted = true;
 
-    import("kaplay").then(({ default: kaplay }) => {
-      if (!mounted || !canvasRef.current) return;
+    createKaplay(canvasRef.current, {
+      width:      480,
+      height:     260,
+      letterbox:  true,
+      background: [0, 10, 25],
+      global:     false,
+      debug:      false,
+    }).then((k) => {
+      if (!k || !mounted) return;
 
-      // Destroy any previous instance before creating a new one
-      if (kaplayRef.current) {
-        try { kaplayRef.current.quit(); } catch { /**/ }
-        kaplayRef.current = null;
-      }
-
-      const k = kaplay({
-        canvas:     canvasRef.current,
-        width:      480,
-        height:     260,
-        letterbox:  true,
-        background: [0, 10, 25],
-        global:     false,
-        debug:      false,
-      });
-      kaplayRef.current = k;
-
-      // ── Sprites ───────────────────────────────────────────────
+      // ── Sprites ────────────────────────────────────────────
       k.loadSprite("sonic", "/sprites/sonic.png", {
         sliceX: 8, sliceY: 2,
         anims: {
@@ -104,38 +84,28 @@ export default function SonicGameCanvas({
 
       k.scene("main", () => {
         k.setGravity(2200);
-
-        // Ground at bottom of 260px canvas
-        // We leave ~45px for the ground rect so GROUND_Y = 215
         const GROUND_Y = 215;
         const BG_W     = 960;
 
-        // ── Scrolling background ──────────────────────────────
+        // Scrolling BG
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),    k.scale(2), k.z(0)]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2), k.z(0)]);
 
-        // ── Red tint (critical timer) ─────────────────────────
-        const redTint = k.add([
+        // Red tint overlay (critical timer)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const redTint: any = k.add([
           k.rect(480, 260), k.pos(0, 0),
           k.color(k.Color.fromHex("#ff0000")),
           k.opacity(0), k.z(15), k.fixed(),
         ]);
 
-        // ── Ground ────────────────────────────────────────────
-        k.add([
-          k.rect(480, 50), k.pos(0, GROUND_Y),
-          k.color(k.Color.fromHex("#1a3a1a")),
-          k.body({ isStatic: true }), k.area(), k.z(1),
-        ]);
-        k.add([
-          k.rect(480, 8), k.pos(0, GROUND_Y),
-          k.color(k.Color.fromHex("#4caf50")), k.z(2),
-        ]);
+        // Ground
+        k.add([k.rect(480, 50), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#1a3a1a")), k.body({ isStatic: true }), k.area(), k.z(1)]);
+        k.add([k.rect(480, 8),  k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#4caf50")), k.z(2)]);
 
-        // ── Sonic ─────────────────────────────────────────────
-        // scale=2, anchor="bot" → bottom of sprite sits at GROUND_Y
+        // Sonic — anchor bot so pos.y = ground top
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sonic: any = k.add([
           k.sprite("sonic", { anim: "run" }),
@@ -143,7 +113,7 @@ export default function SonicGameCanvas({
           k.scale(2),
           k.anchor("bot"),
           k.body(),
-          k.area(),       // default area: auto-fits sprite frame
+          k.area(),
           k.z(5),
           "sonic",
         ]);
@@ -153,174 +123,125 @@ export default function SonicGameCanvas({
         let victoryMode  = false;
         let victoryTimer = 0;
 
-        // ── Ring HUD ──────────────────────────────────────────
-        k.add([
-          k.sprite("ring-sprite", { anim: "spin" }),
-          k.pos(390, 8), k.scale(1.3), k.z(11), k.fixed(),
-        ]);
+        // Ring HUD
+        k.add([k.sprite("ring-sprite", { anim: "spin" }), k.pos(390, 8), k.scale(1.3), k.z(11), k.fixed()]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ringText: any = k.add([
           k.text(`${signals.current.rings}`, { size: 16, font: "monospace" }),
-          k.pos(412, 11),
-          k.color(k.Color.fromHex("#ffcc00")),
-          k.z(11), k.fixed(),
+          k.pos(412, 11), k.color(k.Color.fromHex("#ffcc00")), k.z(11), k.fixed(),
         ]);
 
-        // ── Timer bar (bottom edge of canvas) ─────────────────
+        // Timer bar
         k.add([k.rect(480, 6), k.pos(0, 254), k.color(k.Color.fromHex("#001a33")), k.z(12), k.fixed()]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const timerBar: any = k.add([k.rect(480, 6), k.pos(0, 254), k.color(k.Color.fromHex("#0066cc")), k.z(13), k.fixed()]);
 
-        // ── Ring burst ────────────────────────────────────────
+        // Ring burst
         function spawnRingBurst(x: number, y: number) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const r: any = k.add([
-            k.sprite("ring-sprite", { anim: "spin" }),
-            k.pos(x, y), k.scale(2.5), k.anchor("center"), k.z(8), k.opacity(1),
-          ]);
+          const r: any = k.add([k.sprite("ring-sprite", { anim: "spin" }), k.pos(x, y), k.scale(2.5), k.anchor("center"), k.z(8), k.opacity(1)]);
           let t = 0;
           const ctrl = k.onUpdate(() => {
             if (!r.exists()) { ctrl.cancel(); return; }
-            t += k.dt();
-            r.pos.y  -= 60 * k.dt();
-            r.opacity = Math.max(0, 1 - t * 2.2);
+            t += k.dt(); r.pos.y -= 60 * k.dt(); r.opacity = Math.max(0, 1 - t * 2.2);
             if (t > 0.5) { k.destroy(r); ctrl.cancel(); }
           });
         }
 
-        // ── Motobug ───────────────────────────────────────────
+        // Motobug
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let motobugObj: any = null;
-        let motoActive  = false;
-        let motoTimer   = 0;
+        let motoActive = false;
+        let motoTimer  = 0;
 
         function spawnMotobug() {
           if (motoActive) return;
           motoActive = true;
-          motobugObj = k.add([
-            k.sprite("motobug", { anim: "run" }),
-            k.pos(510, GROUND_Y),
-            k.scale(2), k.anchor("bot"), k.z(4), "motobug",
-          ]);
+          motobugObj = k.add([k.sprite("motobug", { anim: "run" }), k.pos(510, GROUND_Y), k.scale(2), k.anchor("bot"), k.z(4), "motobug"]);
         }
-
         function destroyMotobug(explode = true) {
           if (!motobugObj?.exists()) { motoActive = false; return; }
           if (explode) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const ex: any = k.add([
-              k.text("💥", { size: 28 }),
-              k.pos(motobugObj.pos.clone()),
-              k.anchor("center"), k.z(9),
-            ]);
+            const ex: any = k.add([k.text("💥", { size: 28 }), k.pos(motobugObj.pos.clone()), k.anchor("center"), k.z(9)]);
             setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 380);
           }
-          k.destroy(motobugObj);
-          motobugObj = null;
-          motoActive = false;
-          motoTimer  = 0;
+          k.destroy(motobugObj); motobugObj = null; motoActive = false; motoTimer = 0;
         }
 
-        // ── Victory stars ─────────────────────────────────────
+        // Victory stars
         function spawnVictoryStar(x: number, y: number) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const star: any = k.add([
-            k.text("⭐", { size: 22 }),
-            k.pos(x, y), k.anchor("center"), k.z(9), k.opacity(1),
-          ]);
+          const star: any = k.add([k.text("⭐", { size: 22 }), k.pos(x, y), k.anchor("center"), k.z(9), k.opacity(1)]);
           let t = 0;
           const ctrl = k.onUpdate(() => {
             if (!star.exists()) { ctrl.cancel(); return; }
-            t += k.dt();
-            star.pos.y -= 45 * k.dt();
-            star.pos.x += Math.sin(t * 8) * 2;
-            star.opacity = Math.max(0, 1 - t * 1.6);
+            t += k.dt(); star.pos.y -= 45 * k.dt(); star.pos.x += Math.sin(t * 8) * 2; star.opacity = Math.max(0, 1 - t * 1.6);
             if (t > 0.65) { k.destroy(star); ctrl.cancel(); }
           });
         }
 
-        // Land → switch to run
         sonic.onGround(() => {
           isJumping = false;
-          if (hurtTimer <= 0 && !victoryMode && sonic.curAnim() !== "run") {
-            sonic.play("run");
-          }
+          if (hurtTimer <= 0 && !victoryMode && sonic.curAnim() !== "run") sonic.play("run");
         });
 
-        // ── State label ───────────────────────────────────────
         const stateLabels: Record<AvatarState, string> = {
-          idle:        "Listo",
-          thinking:    "Pensando...",
-          speaking:    "Hablando",
-          listening:   "Escuchando",
-          happy:       "¡Genial!",
-          curious:     "Curioso",
-          empathetic:  "Comprensivo",
-          encouraging: "¡Vamos!",
+          idle: "Listo", thinking: "Pensando...", speaking: "Hablando",
+          listening: "Escuchando", happy: "¡Genial!", curious: "Curioso",
+          empathetic: "Comprensivo", encouraging: "¡Vamos!",
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const label: any = k.add([
           k.text("", { size: 10, font: "monospace" }),
-          k.pos(90, GROUND_Y + 12),
-          k.anchor("top"),
-          k.color(k.Color.fromHex("#ffcc00")),
-          k.z(10), k.fixed(),
+          k.pos(90, GROUND_Y + 12), k.anchor("top"),
+          k.color(k.Color.fromHex("#ffcc00")), k.z(10), k.fixed(),
         ]);
 
-        // ── Main update ───────────────────────────────────────
         k.onUpdate(() => {
           const sig = signals.current;
 
-          // ── FIX: Reset rotation every frame ─────────────────
-          sonic.angle            = 0;
-          sonic.angularVelocity  = 0;
+          // FIX: prevent Kaplay physics from rotating Sonic
+          sonic.angle           = 0;
+          sonic.angularVelocity = 0;
 
-          // ── Background speed ─────────────────────────────────
-          const speedBoost =
-            sig.state === "encouraging" || sig.state === "happy" || victoryMode
-              ? 2 : 1;
-          const bgSpeed = Math.min(220, 80 + Math.floor(sig.rings / 5) * 10) * speedBoost;
+          // Background speed (more rings = faster, boosted on happy/encouraging)
+          const boost   = sig.state === "encouraging" || sig.state === "happy" || victoryMode ? 2 : 1;
+          const bgSpeed = Math.min(220, 80 + Math.floor(sig.rings / 5) * 10) * boost;
           [bg1, bg2].forEach((bg) => {
             bg.pos.x -= bgSpeed * k.dt();
             if (bg.pos.x <= -BG_W) bg.pos.x = BG_W;
           });
 
-          // ── Timer bar ─────────────────────────────────────────
-          const pct = Math.max(0, sig.timeLeft / 600);
-          timerBar.width = 480 * pct;
+          // Timer bar
+          timerBar.width = 480 * Math.max(0, sig.timeLeft / 600);
           timerBar.color =
             sig.timeLeft < 30  ? k.Color.fromHex("#ff2222") :
             sig.timeLeft < 60  ? k.Color.fromHex("#ff8800") :
             sig.timeLeft < 120 ? k.Color.fromHex("#ffcc00") :
                                  k.Color.fromHex("#0066cc");
 
-          // ── Critical timer red tint ───────────────────────────
-          redTint.opacity =
-            sig.timeLeft < 30 && !sig.completed
-              ? 0.07 * Math.abs(Math.sin(k.time() * 4))
-              : 0;
+          // Red tint pulse when critical
+          redTint.opacity = sig.timeLeft < 30 && !sig.completed
+            ? 0.07 * Math.abs(Math.sin(k.time() * 4)) : 0;
 
-          // ── Motobug timer ─────────────────────────────────────
+          // Motobug timer
           if (!sig.completed && !victoryMode) {
             const motoInterval =
               sig.timeLeft < 30  ? 2.5 :
               sig.timeLeft < 60  ? 5.0 :
-              sig.state === "empathetic" ? 8.0 :
-              999;
+              sig.state === "empathetic" ? 8.0 : 999;
             motoTimer += k.dt();
             if (motoTimer > motoInterval) { spawnMotobug(); motoTimer = 0; }
           }
-
-          // ── Move motobug ──────────────────────────────────────
           if (motobugObj?.exists()) {
             motobugObj.pos.x -= 130 * k.dt();
             if (motobugObj.pos.x < -50) destroyMotobug(false);
           }
 
-          // ── Ring collect ──────────────────────────────────────
+          // Ring collect burst
           if (sig.rings > sig.prevRings) {
-            const diff = sig.rings - sig.prevRings;
-            for (let i = 0; i < diff; i++) {
+            for (let i = 0; i < sig.rings - sig.prevRings; i++) {
               spawnRingBurst(95 + k.rand(-18, 18), GROUND_Y - 50 + k.rand(-15, 0));
             }
             ringText.text = `${sig.rings}`;
@@ -328,10 +249,9 @@ export default function SonicGameCanvas({
           }
           if (ringText.text !== `${sig.rings}`) ringText.text = `${sig.rings}`;
 
-          // ── Hurt timer ────────────────────────────────────────
           if (hurtTimer > 0) hurtTimer -= k.dt();
 
-          // ── Victory mode ──────────────────────────────────────
+          // Victory mode
           if (sig.completed && !victoryMode) {
             victoryMode = true;
             destroyMotobug(false);
@@ -341,27 +261,20 @@ export default function SonicGameCanvas({
             }, 220);
             setTimeout(() => clearInterval(iv), 4000);
           }
-
           if (victoryMode) {
             victoryTimer += k.dt();
-            if (sonic.isGrounded() && victoryTimer % 0.9 < k.dt() * 2) {
-              sonic.jump(1100); sonic.play("jump");
-            }
+            if (sonic.isGrounded() && victoryTimer % 0.9 < k.dt() * 2) { sonic.jump(1100); sonic.play("jump"); }
             label.text  = "¡ZONA COMPLETADA!";
             label.color = k.Color.fromHex("#ffcc00");
             return;
           }
 
-          // ── Avatar state → behaviour ──────────────────────────
+          // Avatar state → Sonic behaviour
           if (hurtTimer <= 0) {
             switch (sig.state) {
-              case "happy":
-              case "encouraging":
+              case "happy": case "encouraging":
                 if (!isJumping && sonic.isGrounded()) {
-                  isJumping = true;
-                  sonic.jump(1350);
-                  sonic.play("jump");
-                  destroyMotobug();
+                  isJumping = true; sonic.jump(1350); sonic.play("jump"); destroyMotobug();
                 }
                 break;
               case "thinking":
@@ -378,20 +291,12 @@ export default function SonicGameCanvas({
             }
           }
 
-          // ── Speaking bob ──────────────────────────────────────
-          sonic.scale.y = sig.speaking
-            ? 2 + Math.sin(k.time() * 18) * 0.09
-            : 2;
+          // Speaking bob
+          sonic.scale.y = sig.speaking ? 2 + Math.sin(k.time() * 18) * 0.09 : 2;
 
-          // ── State label ───────────────────────────────────────
-          label.text  =
-            sig.timeLeft < 30 && !sig.completed
-              ? "⚠ TIEMPO CRÍTICO"
-              : stateLabels[sig.state] ?? "Listo";
-          label.color =
-            sig.timeLeft < 30 && !sig.completed
-              ? k.Color.fromHex("#ff4444")
-              : k.Color.fromHex("#ffcc00");
+          // State label
+          label.text  = sig.timeLeft < 30 && !sig.completed ? "⚠ TIEMPO CRÍTICO" : stateLabels[sig.state] ?? "Listo";
+          label.color = sig.timeLeft < 30 && !sig.completed ? k.Color.fromHex("#ff4444") : k.Color.fromHex("#ffcc00");
         });
       });
 
@@ -400,10 +305,7 @@ export default function SonicGameCanvas({
 
     return () => {
       mounted = false;
-      if (kaplayRef.current) {
-        try { kaplayRef.current.quit(); } catch { /**/ }
-        kaplayRef.current = null;
-      }
+      destroyKaplay();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
