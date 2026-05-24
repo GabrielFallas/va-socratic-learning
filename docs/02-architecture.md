@@ -1,4 +1,4 @@
-**UNIVERSIDAD DE COSTA RICA**  
+﻿**UNIVERSIDAD DE COSTA RICA**  
 **SISTEMA DE ESTUDIOS DE POSGRADO**
 
 **Implementación de un Agente Virtual de Tutoría Socrática para el Desarrollo de Lógica de Programación y Resolución de Problemas en Entornos STEM**
@@ -79,23 +79,23 @@ La literatura sobre Agentes Pedagógicos Incorporados (EPAs) explora el Efecto P
 
 A pesar del avance en modelos socráticos y en la visualización de avatares, existe una brecha significativa en la integración de ambos en un sistema cohesivo para la educación en computación. La mayoría de los ITS socráticos actuales son interfaces de texto. Aquellos que utilizan avatares a menudo emplean guiones predefinidos o animaciones limitadas que no reaccionan dinámicamente al estado emocional o cognitivo del estudiante.
 
-Esta investigación pretende abordar esta brecha mediante la implementación de un Agente Virtual Corporizado de Tutoría Socrática (AVTS) que utilice LLMs no solo para el diálogo, sino para orquestar una respuesta multimodal (voz, gestos, expresiones) que refuerce el andamiaje pedagógico.
+Esta investigación pretende abordar esta brecha mediante la implementación de un Agente Virtual Corporizado de Tutoría Socrática que utilice LLMs no solo para el diálogo, sino para orquestar una respuesta multimodal (voz, gestos, expresiones) que refuerce el andamiaje pedagógico.
 
 ### El Giro Socrático: Alineación Pedagógica y Reinforcement Learning en LLMs
 
-Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo es fundamental para alinear los LLMs con principios pedagógicos específicos, implementando internamente el concepto de Zona de Desarrollo Próximo de Vygotsky. En el sistema Ada, este principio se implementa mediante un protocol de escalado de pistas en tres niveles dentro del system prompt.
+Jurenka et al. (2024) proponen que el uso de Aprendizaje por Refuerzo es fundamental para alinear los LLMs con principios pedagógicos específicos, implementando internamente el concepto de Zona de Desarrollo Próximo de Vygotsky. En el sistema, este principio se implementa mediante un protocolo de escalado de pistas en tres niveles dentro del system prompt (sonic-system.ts).
 
 ### Personalización Adaptativa y Memoria a Largo Plazo
 
-Dong et al. (2026) argumentan que la memoria a largo plazo y la planificación del diálogo adaptativo son vitales para mantener el compromiso durante interacciones prolongadas. El servidor de orquestación de Ada mantiene el historial completo de la sesión, ajustando la complejidad socrática según el avance observado.
+Dong et al. (2026) argumentan que la memoria a largo plazo y la planificación del diálogo adaptativo son vitales para mantener el compromiso durante interacciones prolongadas. El servidor de orquestación de Sonic (Next.js + logger.ts) mantiene el historial completo de la sesión, ajustando la complejidad socrática según el avance observado.
 
 ---
 
 ## Preguntas de Investigación (RQs)
 
-> **Nota:** Las RQs fueron actualizadas en el Entregable 2 para incorporar la corrección del feedback del E1. El término "fluidez pedagógica" fue sustituido por **"perceived pedagogical support"** y se añadió la condición de control "sin avatar" (Condición B).
+> **Nota:** Las RQs fueron actualizadas en el Entregable 2 para incorporar la corrección del feedback del E1. El término "fluidez pedagógica" fue sustituido por **"perceived pedagogical support"** y se añadió la condición de control "texto plano" (Condición B — mismo tutor socrático sin embodiment multimodal).
 
-- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (avatar 2D afectivo + sincronía paraverbal) versus una interfaz de chat en texto plano sobre la percepción de **naturalidad**, **presencia social** y ***perceived pedagogical support*** de los participantes durante sesiones de tutoría socrática de programación? Métricas: Godspeed, escala PPS ad hoc, SUS.
+- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + gamificación) versus el mismo tutor en modo texto plano sobre la percepción de **naturalidad**, **presencia social** y ***perceived pedagogical support*** de los participantes durante sesiones de tutoría socrática de programación? Métricas: Godspeed, escala PPS ad hoc, SUS.
 
 - **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código? Métricas: métricas log-based automáticas.
 
@@ -115,11 +115,11 @@ El papel principal del agente es el de un **Tutor Socrático**. A diferencia de 
 
 El agente se compone mediante *system prompting* y *prompt engineering*:
 
-1. **Perfil del Personaje: Ada**  
-   Ada fue creada en el año 2147 como parte de la Neural Nexus Initiative, un sistema educativo de espacio profundo. Su misión no es escribir código, sino guiar la arquitectura cognitiva del usuario, impulsándolo a pensar como diseñador de soluciones en lugar de depender de sistemas automatizados.
+1. **Perfil del Personaje: Sonic the Hedgehog** (Condición A)
+   Sonic es el tutor socrático de programación más veloz del mundo — energético, directo, confiado. Su misión no es escribir código, sino guiar al estudiante con preguntas reflexivas hasta que descubra la solución por sí mismo. Usa expresiones características de Sonic y celebra los logros con energía. Detecta la frustración y baja el ritmo para apoyar al estudiante.
 
 2. **Estilo de Comunicación**  
-   Tono calmado, analítico, motivador y socrático. Respuestas breves y precisas, terminando siempre con una pregunta reflexiva. Usa metáforas técnicas: "compilar", "latencia", "arquitectura cognitiva", "ruta de ejecución".
+   Tono energético, directo, motivador y socrático. Respuestas breves (máximo 3-4 oraciones), terminando siempre con una pregunta reflexiva. Nunca usa emojis. Las respuestas incluyen etiqueta `[AVATAR_STATE:estado]` al final para controlar el canvas Kaplay.
 
 3. **Restricciones Absolutas del Sistema**
    - Prohibido generar código directamente.
@@ -129,13 +129,13 @@ El agente se compone mediante *system prompting* y *prompt engineering*:
 
 ### Contexto de Uso y Usuario Objetivo
 
-El AVTS interactúa con el usuario en un entorno web enfocado en tareas de depuración (*debugging*). El usuario objetivo es un estudiante universitario de ingeniería o ciencias de la computación en las etapas iniciales de aprendizaje de lógica algorítmica.
+El sistema interactúa con el usuario en un entorno web enfocado en tareas de depuración (*debugging*). El usuario objetivo es un estudiante universitario de ingeniería o ciencias de la computación en las etapas iniciales de aprendizaje de lógica algorítmica.
 
 ### Objetivos Específicos de Comportamiento
 
 - **Análisis de Contexto:** El agente lee el código actual del estudiante (inyectado en el system prompt) y detecta las discrepancias lógicas.
 - **Gestión de Memoria y Escalado de Andamiaje (ZPD):** Mantiene el historial de la conversación y escala progresivamente el nivel de las pistas en tres niveles.
-- **Multimodalidad Reactiva (Condición A):** Sincroniza comportamientos visuales (estados del avatar) con la voz TTS (pausas y entonación paraverbal).
+- **Multimodalidad Reactiva (Condición A):** Sincroniza comportamientos del canvas Kaplay (estados de Sonic: idle, thinking, speaking, listening, happy, curious, empathetic, encouraging) con la voz TTS Piper + STT Whisper + anillos + SFX/BGM.
 
 ---
 
@@ -143,21 +143,22 @@ El AVTS interactúa con el usuario en un entorno web enfocado en tareas de depur
 
 ### Stack Tecnológico y Justificación
 
-> **Nota:** La arquitectura fue actualizada en el Entregable 2. El motor de avatar Ready Player Me fue reemplazado por un sistema CSS/SVG animado propio. El LLM fue migrado de Google Gemini a Ollama local con Gemma 3 12B. TTS y STT migraron de Whisper/Gemini TTS a Web Speech API nativa del navegador.
+> **Nota:** La arquitectura fue actualizada sucesivamente en el Entregable 2 y la PoC final. El motor de avatar Ready Player Me (VRM 3D) fue reemplazado por un canvas Kaplay.js 2D con el sprite de Sonic the Hedgehog. El LLM fue migrado de Google Gemini a Ollama local con Gemma 3 12B. TTS migró de Web Speech API a Piper TTS neuronal (Docker local) con fallback Web Speech. STT migró de Web Speech API a Whisper STT local.
 
 | Capa / Componente | Tecnología Implementada | Justificación Técnica y Académica |
 |:---|:---|:---|
-| **Motor Visual / Avatar 2D** | CSS/SVG Animado (sin librerías externas) | Avatar 2D expresivo que evita el Valle Inquietante, sin dependencias de terceros ni servicios de pago. Reemplaza Ready Player Me (descontinuado en enero de 2026). |
-| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (Q4_K_M) — local | Sin API keys externas. Inferencia GPU local (~7.3 GB en RTX 5070 Ti 16 GB VRAM). Reproducible sin cuentas de nube. |
-| **Servicio de Voz (TTS)** | Web Speech API — SpeechSynthesis (nativa del navegador) | Sin costo, sin API keys, latencia de inicio <200 ms, disponible en Chrome y Edge. |
-| **Reconocimiento de Voz (STT)** | Web Speech API — SpeechRecognition (nativa del navegador) | Resultados intermedios en tiempo real, español latinoamericano, sin dependencias. |
-| **Sincronización Reactiva** | Control de estados del avatar desde el LLM (etiquetas `[AVATAR_STATE]`) | El LLM incluye una etiqueta de estado al final de cada respuesta; el cliente la interpreta y actualiza el avatar y sus animaciones CSS. |
-| **Entorno de Despliegue** | Web local (Next.js dev server) | Acceso inmediato sin instalación adicional para el participante. |
-| **Orquestación** | Next.js 14 + React + TailwindCSS | Entrega segura, manejo de configuración en el servidor, streaming SSE nativo, despliegue sencillo. |
+| **Avatar / Motor de Juego (Condición A)** | Kaplay.js 2D + Sprite Sonic the Hedgehog (16 frames, animaciones run/jump) | Canvas side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea: Chemical Plant (Tarea 1) y Speed Highway (Tarea 2). Sistema de anillos gamificado. Evita el Valle Inquietante (Mori, 1970). |
+| **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (Q4_K_M) — inferencia GPU local | Sin API keys externas. ~7.3 GB en RTX 5070 Ti 16 GB VRAM. System prompt sonic-system.ts con ZPD de 3 niveles, detección de frustración y control de avatar via [AVATAR_STATE]. |
+| **Síntesis de Voz (TTS)** | Piper TTS neuronal (Docker local) + fallback Web Speech API | Piper: español de alta calidad, latencia <200 ms. Fallback automático a Web Speech API. Activo solo en Condición A. |
+| **Reconocimiento de Voz (STT)** | Whisper STT local (vía /api/stt en Next.js) | Transcripción de voz del participante en tiempo real. Español latinoamericano. Activo solo en Condición A. |
+| **Gamificación** | Sistema de anillos + mini-juego Kaplay de transición + SFX/BGM | Anillos como indicador de progreso socrático. TaskTransitionGame (~15 s) entre tareas. sfx.ts: efectos de sonido y música por zona. Solo Condición A. |
+| **Mensajes Proactivos** | Pool de pistas por tarea, disparo tras 60 s de inactividad | Sonic envía pistas específicas por tarea-1 y tarea-2 cuando el participante está inactivo. Refuerza ZPD sin intervención del investigador. |
+| **Sincronización Reactiva** | Control de estados del avatar desde el LLM (etiquetas `[AVATAR_STATE]`) | El LLM incluye una etiqueta al final de cada respuesta; el cliente la interpreta y actualiza el comportamiento del canvas Kaplay (estados Sonic). |
+| **Orquestación** | Next.js 14 (App Router) + React + TailwindCSS | Rutas API integradas: /api/chat, /api/tts, /api/stt, /api/session. Streaming SSE nativo. |
 
 ### Flujo de Interacción y Orquestación de Baja Latencia
 
-Para cumplir con el requisito de baja latencia inferior a 1.5 segundos, el sistema utiliza un flujo de streaming de tokens mediante Server-Sent Events (SSE). A medida que Ollama genera la respuesta socrática, los tokens se transmiten al cliente en tiempo real. El motor visual 2D actualiza su estado al recibir la etiqueta `[AVATAR_STATE]` al final del stream. La síntesis de voz (TTS) inicia en cuanto el texto completo está disponible, sincronizando la animación de la boca con el estado de reproducción de la Web Speech API.
+Para cumplir con el requisito de baja latencia inferior a 1.5 segundos, el sistema utiliza un flujo de streaming de tokens mediante Server-Sent Events (SSE). A medida que Ollama genera la respuesta socrática, los tokens se transmiten al cliente en tiempo real. El motor visual 2D actualiza su estado al recibir la etiqueta `[AVATAR_STATE]` al final del stream. La síntesis de voz (TTS Piper o fallback Web Speech API) inicia en cuanto el texto completo está disponible. El estado del avatar (canvas Kaplay) se actualiza al recibir la etiqueta [AVATAR_STATE] extraída del stream. El sistema de anillos y los efectos de sonido se disparan según el estado del avatar.
 
 ```
 Usuario → [texto o voz]

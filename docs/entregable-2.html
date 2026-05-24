@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entregable 2 — Ada: Tutora Socrática Corporizada — PF-3311</title>
+  <title>Entregable 2 — Sonic: Tutor Socrático Multimodal — PF-3311</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     @page { size: letter portrait; margin: 2.54cm; }
@@ -83,8 +83,8 @@
 <hr>
 <h2>Entregable 2: Avance de Agente e Investigación</h2>
 
-<p class="cover-info"><strong>Título:</strong> Implementación de un Agente Virtual de Tutoría Socrática para el Desarrollo de Lógica de Programación y Resolución de Problemas en Entornos STEM</p>
-<p class="cover-info"><strong>Nombre del Agente:</strong> Ada — Tutora Socrática Corporizada (M-ITS)</p>
+<p class="cover-info"><strong>Título:</strong> Implementación de un Agente Virtual de Tutoría Socrática Multimodal para el Desarrollo de Lógica de Programación y Resolución de Problemas en Entornos STEM</p>
+<p class="cover-info"><strong>Nombre del Agente:</strong> Sonic — Tutor Socrático Corporizado y Multimodal</p>
 <p class="cover-info"><strong>Estudiante:</strong> Gabriel Isaías Fallas López</p>
 <p class="cover-info"><strong>Profesor:</strong> Alexander Barquero Elizondo</p>
 <p class="cover-info"><strong>Curso:</strong> PF-3311 · Temas Especiales: Agentes Virtuales Inteligentes · Grupo G1</p>
@@ -146,10 +146,10 @@
 
 <h3>1.2 Cambios Realizados y Justificación</h3>
 
-<h4>Cambio 1 — Migración del Motor de Avatar (corrección crítica)</h4>
-<p><strong>Problema:</strong> Ready Player Me cerró su servicio en enero de 2026, eliminando el pilar visual de la arquitectura original (avatares VRM 3D, lip-sync mediante visemas).</p>
-<p><strong>Solución adoptada:</strong> Se migró completamente hacia un <strong>avatar 2D reactivo implementado en CSS y SVG animado</strong>, sin dependencia de ninguna biblioteca externa de terceros ni servicios de pago. El avatar de Ada opera mediante estados expresivos discretos (<em>idle, thinking, speaking, listening, happy, curious, empathetic, encouraging</em>), controlados programáticamente desde el modelo de lenguaje mediante etiquetas <code>[AVATAR_STATE:estado]</code>. La animación de la boca se sincroniza con la síntesis de voz del navegador (Web Speech API).</p>
-<p><strong>Justificación teórica:</strong> Esta decisión está respaldada por El Hajji et al. (2025), quienes documentan que los avatares 2D estilizados logran el mismo anclaje de atención pedagógica que los avatares 3D con una fracción del costo computacional. Adicionalmente, el diseño 2D tipo <em>cartoon</em> neutraliza el riesgo del Valle Inquietante (Mori, 1970) y reduce la carga cognitiva externa durante tareas de alta demanda, en línea con la Teoría de Carga Cognitiva (Sweller, 1988).</p>
+<h4>Cambio 1 — Migración del Motor de Avatar y Pivote a Gamificación (corrección crítica + evolución)</h4>
+<p><strong>Problema original:</strong> Ready Player Me cerró su servicio en enero de 2026, eliminando el pilar visual de la arquitectura original (avatares VRM 3D, lip-sync mediante visemas).</p>
+<p><strong>Solución adoptada (evolución final):</strong> Se migró hacia un <strong>avatar 2D gamificado implementado en Kaplay.js</strong>, usando el sprite de Sonic the Hedgehog (16 frames, 2 animaciones: <em>run</em> / <em>jump</em>) como representación visual del tutor socrático. El avatar opera mediante 8 estados expresivos reactivos (<em>idle, thinking, speaking, listening, happy, curious, empathetic, encouraging</em>) que se mapean a comportamientos de juego en tiempo real (Sonic corre, salta, se congela, activa modo victoria). El sistema incluye dos zonas temáticas que cambian por tarea: <strong>Chemical Plant</strong> (Tarea 1, fondo azul-verde) y <strong>Speed Highway</strong> (Tarea 2, tinte cálido naranja). Un sistema de anillos gamifica el progreso socrático: se gana un anillo cuando la respuesta del usuario se aproxima a la solución, y se pierde cuando el agente detecta frustración. Un mini-juego de transición Kaplay entre tareas refuerza la experiencia lúdica.</p>
+<p><strong>Justificación teórica:</strong> El Hajji et al. (2025) documentan que avatares 2D estilizados logran el mismo anclaje de atención pedagógica que los 3D con menor costo computacional. La estética <em>cartoon</em> de Sonic neutraliza el Valle Inquietante (Mori, 1970) y opera en el territorio de representación claramente artificial pero altamente expresiva. La gamificación con anillos añade un componente de motivación intrínseca (autodeterminación, Deci &amp; Ryan, 2000) que el diseño CSS/SVG original no ofrecía.</p>
 
 <h4>Cambio 2 — Actualización de RQ1: "Perceived Pedagogical Support"</h4>
 <p><strong>Problema:</strong> El término "fluidez pedagógica" no corresponde a ningún constructo validado en la literatura HCI ni educativa.</p>
@@ -161,57 +161,64 @@
 
 <h4>Cambio 4 — Conexión Explícita entre Andamiaje Pedagógico y Arquitectura Técnica</h4>
 <p><strong>Problema:</strong> La teoría del andamiaje (Vygotsky, ZPD) no estaba vinculada formalmente con la lógica técnica del agente en el Entregable 1.</p>
-<p><strong>Solución adoptada:</strong> El system prompt de Ada implementa un <strong>protocolo de escalado de pistas en tres niveles</strong> alineado con la Zona de Desarrollo Próximo: (1) preguntas exploratorias de alto nivel, (2) orientación conceptual, y (3) pista estructural específica sin proporcionar el código. El nivel de andamiaje aumenta únicamente si el participante lleva tres o más turnos sin avance. La justificación teórica HCI (Cassell et al., 2000; Bickmore &amp; Picard, 2005; Yee &amp; Bailenson, 2007) fue incorporada en el documento de protocolo de evaluación (<code>docs/03-evaluation-protocol.md</code>).</p>
+<p><strong>Solución adoptada:</strong> El system prompt socrático (sonic-system.ts) implementa un <strong>protocolo de escalado de pistas en tres niveles</strong> alineado con la Zona de Desarrollo Próximo: (1) preguntas exploratorias de alto nivel, (2) orientación conceptual, y (3) pista estructural específica sin proporcionar el código. El nivel de andamiaje aumenta únicamente si el participante lleva tres o más turnos sin avance. La justificación teórica HCI (Cassell et al., 2000; Bickmore &amp; Picard, 2005; Yee &amp; Bailenson, 2007) fue incorporada en el documento de protocolo de evaluación (<code>docs/03-evaluation-protocol.md</code>).</p>
 
-<h4>Cambio 5 — Migración del LLM a Infraestructura Local (Ollama + Gemma 3)</h4>
-<p>Para garantizar la reproducibilidad de la PoC sin dependencias de API externas, el motor de razonamiento se migró de Google Gemini a <strong>Ollama corriendo Gemma 3 12B localmente</strong>. Esta decisión no afecta la calidad del diálogo socrático y permite que el profesor pueda ejecutar la PoC de forma autónoma sin necesidad de claves de API.</p>
+<h4>Cambio 5 — Migración del LLM a Infraestructura Local (Ollama + Gemma 3 12B)</h4>
+<p>Para garantizar la reproducibilidad de la PoC sin dependencias de API externas, el motor de razonamiento se migró de Google Gemini a <strong>Ollama corriendo Gemma 3 12B localmente</strong> (Q4_K_M, ~7.3 GB, GPU RTX 5070 Ti 16 GB). Esta decisión no afecta la calidad del diálogo socrático y permite ejecutar la PoC de forma autónoma sin claves de API.</p>
 
-<h4>Cambio 6 — Ampliación del README con Instrucciones de Configuración</h4>
-<p>El README del repositorio fue actualizado con instrucciones detalladas para instalar Ollama, descargar el modelo Gemma 3, configurar variables de entorno y lanzar el servidor de desarrollo.</p>
+<h4>Cambio 6 — Migración de TTS y STT a Motores Locales de Alta Calidad</h4>
+<p>La síntesis de voz migró de Web Speech API a <strong>Piper TTS neuronal</strong> (Docker local, español de alta calidad) con fallback automático a Web Speech API cuando el servidor Piper no está disponible. El reconocimiento de voz migró a <strong>Whisper STT local</strong> via ruta Next.js <code>/api/stt</code>. Ambas decisiones mejoran la calidad de la experiencia multimodal y mantienen la arquitectura completamente local sin dependencias de nube.</p>
+
+<h4>Cambio 7 — Ampliación del README con Instrucciones de Configuración</h4>
+<p>El README del repositorio fue actualizado con instrucciones detalladas para instalar Ollama, descargar el modelo Gemma 3, configurar el servidor Piper TTS con Docker, configurar variables de entorno y lanzar el servidor de desarrollo Next.js.</p>
 
 <!-- ═══════════ SECCIÓN 2 ═══════════ -->
 <h2>2. Estado Actual del Agente — Prueba de Concepto (PoC)</h2>
 
 <h3>2.1 Descripción General de la PoC</h3>
-<p>La Prueba de Concepto corresponde a una <strong>aplicación web funcional completa</strong> construida con Next.js 14 que implementa los dos brazos del diseño experimental: la Condición A (Ada multimodal con avatar 2D, síntesis de voz y reconocimiento de voz) y la Condición B (chat de texto plano como baseline). El sistema demuestra la integración real de todos los componentes principales de la arquitectura M-ITS propuesta.</p>
+<p>La Prueba de Concepto corresponde a una <strong>aplicación web funcional completa</strong> construida con Next.js 14 (App Router) que implementa los dos brazos del diseño experimental: la <strong>Condición A</strong> — Sonic corporizado con canvas de juego Kaplay 2D, TTS Piper neuronal, STT Whisper, gamificación de anillos, zonas temáticas (Chemical Plant / Speed Highway), mini-juego de transición y SFX/BGM — y la <strong>Condición B</strong> — el mismo tutor socrático presentado como chat de texto plano sin elementos de embodiment. El sistema demuestra la integración real de todos los componentes principales de la arquitectura M-ITS propuesta.</p>
 
 <h3>2.2 Diagrama de Arquitectura</h3>
 <div class="arch">
-┌─────────────────────────────────────────────────────────────┐
-│                     NAVEGADOR WEB (Cliente)                 │
-│                                                             │
-│   ┌─────────────────┐      ┌────────────────────────────┐   │
-│   │  CodePanel.tsx  │      │   ChatInterface.tsx         │   │
-│   │  ─────────────  │      │   ─────────────────────     │   │
-│   │  • Código buggy │      │  [Cond.A] AvatarSprite.tsx  │   │
-│   │  • Timer 10 min │      │   • CSS/SVG 2D animado      │   │
-│   │  • Syntax HL    │      │   • 8 estados expresivos    │   │
-│   │  • Botón resolve│      │   • Parpadeo y animac. boca │   │
-│   └─────────────────┘      │                             │   │
-│                            │  [Cond.A] WebSpeechTTS      │   │
-│                            │   • Síntesis de voz nativa  │   │
-│                            │  [Cond.A] WebSpeechSTT      │   │
-│                            │   • Reconocimiento de voz   │   │
-│                            │  Streaming SSE en tiempo real│  │
-│                            └────────────────────────────┘   │
-└────────────────────────────────┬────────────────────────────┘
-                                 │ HTTP / Server-Sent Events
-┌────────────────────────────────▼────────────────────────────┐
-│              SERVIDOR NEXT.JS 14 (Node.js)                  │
-│   ┌──────────────────────┐   ┌──────────────────────────┐   │
-│   │   /api/chat          │   │  /api/session            │   │
-│   │   • System prompt    │   │  • initSession           │   │
-│   │   • Ollama client    │   │  • logTaskResult         │   │
-│   │   • SSE streaming    │   │  • getSessionSummary     │   │
-│   │   • Avatar state tag │   │  • Telemetría log-based  │   │
-│   └──────────┬───────────┘   └──────────────────────────┘   │
-└──────────────┼──────────────────────────────────────────────┘
-               │ HTTP NDJSON Streaming
-┌──────────────▼──────────────────────────────────────────────┐
-│            OLLAMA SERVER (http://localhost:11434)           │
-│            Modelo: gemma3:12b (Q4_K_M ≈ 7.3 GB)            │
-│            GPU: NVIDIA RTX 5070 Ti 16 GB VRAM               │
-└─────────────────────────────────────────────────────────────┘</div>
++------------------------------------------------------------------+
+|                      NAVEGADOR WEB (Cliente)                     |
+|                                                                  |
+|  [page.tsx]              [ChatInterface.tsx]                     |
+|  - Landing page          - [Cond.A] SonicGameCanvas.tsx          |
+|  - Seleccion condicion     - Kaplay.js 2D game canvas            |
+|                            - Sonic sprite 16 frames              |
+|  [session/page.tsx]        - 8 estados expresivos                |
+|  - Codigo buggy            - Zona 1: Chemical Plant (azul)       |
+|  - Timer 10 min            - Zona 2: Speed Highway (naranja)     |
+|  - Ring counter HUD        - Timer bar + ring HUD overlay        |
+|  - Boton resolve         - [Cond.A] piperTTS.ts                  |
+|                            - Piper neuronal (Docker local)       |
+|  [TaskTransitionGame]      - Fallback: Web Speech API            |
+|  - Mini-juego Kaplay     - [Cond.A] whisperSTT.ts                |
+|    entre tareas            - Whisper via /api/stt                |
+|    (~15 s)               - [Cond.A] sfx.ts                      |
+|                            - SFX + BGM (rings, jump...)          |
+|                          - Streaming SSE en tiempo real          |
++-----------------------------------+------------------------------+
+                                    | HTTP / Server-Sent Events
++-----------------------------------v------------------------------+
+|               SERVIDOR NEXT.JS 14 (Node.js)                     |
+|  /api/chat              /api/tts            /api/stt             |
+|  - sonic-system.ts      - Piper TTS proxy   - Whisper STT proxy  |
+|  - ollamaClient.ts      /api/session                            |
+|  - SSE streaming        - initSession       - logTaskResult      |
+|  - Avatar state tag     - getSessionSummary - logger.ts          |
++-----------------------------------+------------------------------+
+                                    | HTTP NDJSON Streaming
++-----------------------------------v------------------------------+
+|           OLLAMA SERVER (http://localhost:11434)                 |
+|           Modelo: gemma3:12b (Q4_K_M aprox. 7.3 GB)             |
+|           GPU: NVIDIA RTX 5070 Ti 16 GB VRAM                    |
++------------------------------------------------------------------+
+|           PIPER TTS SERVER (Docker, puerto local)               |
+|           Modelo de voz: espanol alta calidad                   |
+|           Latencia: menor a 200 ms para respuestas cortas       |
++------------------------------------------------------------------+</div>
 
 <h3>2.3 Stack Tecnológico Implementado</h3>
 <table>
@@ -220,34 +227,44 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Avatar 2D</strong></td>
-      <td>CSS/SVG Animado (sin librerías externas)</td>
-      <td>Evita el Valle Inquietante, zero dependencias externas, latencia de renderizado mínima, 8 estados expresivos reactivos al LLM.</td>
+      <td><strong>Avatar / Motor de Juego (Condición A)</strong></td>
+      <td>Kaplay.js 2D + Sprite Sonic the Hedgehog (16 frames, 2 animaciones: run / jump)</td>
+      <td>Canvas de juego side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea (Chemical Plant / Speed Highway). Sistema de anillos como indicador gamificado de progreso socrático. Estética cartoon que evita el Valle Inquietante (Mori, 1970).</td>
     </tr>
     <tr>
       <td><strong>Motor de Razonamiento (LLM)</strong></td>
-      <td>Ollama + Gemma 3 12B (Q4_K_M) local</td>
-      <td>Sin API keys externas, inferencia GPU local, sin latencia de red para el LLM. Reproducible sin cuentas de servicios en la nube.</td>
+      <td>Ollama + Gemma 3 12B (Q4_K_M) — inferencia GPU local</td>
+      <td>Sin API keys externas. Inferencia GPU local (~7.3 GB en RTX 5070 Ti 16 GB VRAM). System prompt socrático (sonic-system.ts) con protocolo ZPD de 3 niveles, detección de frustración y control de avatar via [AVATAR_STATE].</td>
     </tr>
     <tr>
       <td><strong>Síntesis de Voz (TTS)</strong></td>
-      <td>Web Speech API — SpeechSynthesis (nativa del navegador)</td>
-      <td>Sin costo, sin API keys, latencia de inicio &lt;200 ms. Disponible en Chrome, Edge y Safari modernos.</td>
+      <td>Piper TTS neuronal (Docker local) + fallback Web Speech API</td>
+      <td>Piper ofrece voz en español de alta calidad con latencia &lt;200 ms. Fallback automático a Web Speech API si Piper no está disponible. Activo únicamente en Condición A.</td>
     </tr>
     <tr>
       <td><strong>Reconocimiento de Voz (STT)</strong></td>
-      <td>Web Speech API — SpeechRecognition (nativa del navegador)</td>
-      <td>Resultados intermedios en tiempo real, detección de errores de permiso de micrófono, español latinoamericano.</td>
+      <td>Whisper STT local (vía /api/stt en Next.js)</td>
+      <td>Transcripción de voz del participante. Resultados en tiempo real. Español latinoamericano. Activo únicamente en Condición A.</td>
+    </tr>
+    <tr>
+      <td><strong>Gamificación</strong></td>
+      <td>Sistema de anillos + zonas temáticas + mini-juego Kaplay + SFX/BGM</td>
+      <td>Anillos gamifican el progreso socrático: se ganan al aproximarse a la solución, se pierden al detectar frustración. Mini-juego de transición (~15 s) entre tareas. Efectos de sonido y música de fondo por zona. Exclusivo Condición A.</td>
+    </tr>
+    <tr>
+      <td><strong>Mensajes Proactivos</strong></td>
+      <td>Sistema de pistas automáticas tras 60 s de inactividad</td>
+      <td>Sonic envía mensajes proactivos específicos por tarea (pool de 4 pistas, selección no repetida) cuando el participante no interactúa durante 60 s. Refuerza el andamiaje ZPD sin intervención del investigador.</td>
     </tr>
     <tr>
       <td><strong>Framework / Orquestación</strong></td>
-      <td>Next.js 14 + React + TailwindCSS</td>
-      <td>SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo, despliegue sencillo.</td>
+      <td>Next.js 14 (App Router) + React + TailwindCSS</td>
+      <td>SSR para proteger la configuración del servidor, rutas API integradas (/api/chat, /api/tts, /api/stt, /api/session), streaming SSE nativo.</td>
     </tr>
     <tr>
       <td><strong>Telemetría / Logs</strong></td>
-      <td>Módulo logger.ts (en memoria, lado servidor)</td>
-      <td>Registra latencia extremo a extremo, turnos, tiempo por tarea y resolución autónoma de forma automática.</td>
+      <td>Módulo logger.ts (en memoria, lado servidor Next.js)</td>
+      <td>Registra latencia extremo a extremo, turnos, tiempo por tarea, resolución autónoma (sí/no) y anillos acumulados (Condición A) de forma automática.</td>
     </tr>
   </tbody>
 </table>
@@ -259,74 +276,82 @@
   </thead>
   <tbody>
     <tr>
-      <td>Avatar 2D reactivo (8 estados)</td>
+      <td>Canvas Kaplay 2D — Sonic (8 estados expresivos)</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Animaciones CSS (float, pulse, bounce), parpadeo de ojos aleatorio, sincronización de boca con TTS.</td>
+      <td>Sprite 16 frames (run/jump), 8 estados mapeados a comportamientos: corre, salta, se congela, modo victoria. Timer bar, ring HUD overlay, tinte de zona.</td>
     </tr>
     <tr>
-      <td>Síntesis de voz paraverbal (TTS)</td>
+      <td>Zonas temáticas (Chemical Plant / Speed Highway)</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Web Speech API, voz en español, activa únicamente en Condición A.</td>
+      <td>Zona 1 (fondo azul-verde) — Tarea 1; Zona 2 (tinte naranja cálido) — Tarea 2. Cambia automáticamente al iniciar cada tarea.</td>
     </tr>
     <tr>
-      <td>Reconocimiento de voz (STT)</td>
+      <td>Sistema de anillos gamificado</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Web Speech API, resultados intermedios visibles, manejo de errores de permisos de micrófono.</td>
+      <td>Ring burst animado al ganar anillo; hurt flash + blink de Sonic al perder. Contador en HUD overlay. Velocidad del fondo escala con anillos acumulados.</td>
     </tr>
     <tr>
-      <td>LLM socrático con system prompt</td>
+      <td>Mini-juego de transición Kaplay entre tareas</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Ollama + Gemma 3 12B. System prompt con protocolo ZPD de 3 niveles, detección de frustración, restricción absoluta de no dar código.</td>
+      <td>TaskTransitionGame.tsx: Sonic recoge anillos de la tarea anterior, derrota a Motobug, secuencia de outro con barra de carga y fade. ~15 s. Solo Condición A.</td>
+    </tr>
+    <tr>
+      <td>TTS Piper neuronal + fallback Web Speech</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>piperTTS.ts: preloadCheck() en mount, Piper vía /api/tts (Docker), fallback automático a Web Speech API. Elimina emojis antes de síntesis. Solo Condición A.</td>
+    </tr>
+    <tr>
+      <td>STT Whisper local</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>whisperSTT.ts vía /api/stt. Detecta disponibilidad antes de habilitar el botón de micrófono. Solo Condición A.</td>
+    </tr>
+    <tr>
+      <td>SFX y BGM por zona</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>sfx.ts: efectos de sonido (ring, jump, hurt, victory) y música de fondo por zona. Se detiene en Condición B. Solo Condición A.</td>
+    </tr>
+    <tr>
+      <td>Mensajes proactivos por tarea</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Pool de 4 pistas específicas por task-1 y task-2. Selección aleatoria no repetida. Sonic las envía al chat tras 60 s de inactividad.</td>
+    </tr>
+    <tr>
+      <td>LLM socrático — sonic-system.ts (ZPD 3 niveles)</td>
+      <td><span class="badge done">✓ Implementado</span></td>
+      <td>Personalidad Sonic energético, restricciones absolutas (sin código directo), detección de frustración, control de avatar via [AVATAR_STATE]. Ollama + Gemma 3 12B.</td>
     </tr>
     <tr>
       <td>Streaming de respuesta (SSE)</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Tokens en tiempo real con cursor animado. Latencia percibida reducida.</td>
-    </tr>
-    <tr>
-      <td>Panel de código con resaltado de sintaxis</td>
-      <td><span class="badge done">✓ Implementado</span></td>
-      <td>Python syntax highlighting sin dependencias, timer de tarea por colores, contador de turnos.</td>
+      <td>Tokens en tiempo real con cursor animado. Avatar state extraído del stream final y aplicado al canvas Kaplay.</td>
     </tr>
     <tr>
       <td>Dos tareas de depuración experimentales</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Tarea 1: bucle infinito (principiante). Tarea 2: complejidad algorítmica O(n³) → O(n) (intermedio).</td>
+      <td>Tarea 1: print_numbers() bucle infinito (principiante, 10 min). Tarea 2: find_duplicates() O(n³) → O(n) con set (intermedio, 10 min).</td>
     </tr>
     <tr>
       <td>Telemetría log-based automática</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Latencia extremo a extremo, turnos, tiempo total, indicador de resolución autónoma (sí/no).</td>
+      <td>Latencia extremo a extremo, turnos, tiempo total, resolución autónoma (sí/no), anillos acumulados (Condición A).</td>
     </tr>
     <tr>
-      <td>Condición A vs. B con asignación aleatoria</td>
+      <td>Condición A (Sonic multimodal) vs. B (texto plano)</td>
       <td><span class="badge done">✓ Implementado</span></td>
-      <td>Landing page con asignación aleatoria o manual para pruebas internas.</td>
-    </tr>
-    <tr>
-      <td>Página de resumen post-sesión (RQ4)</td>
-      <td><span class="badge done">✓ Implementado</span></td>
-      <td>Métricas globales, análisis de latencia RQ4, resultados por tarea, indicaciones de cuestionarios post-interacción.</td>
+      <td>Landing page con asignación aleatoria o manual. Condición B: mismo LLM socrático, sin canvas, sin audio, sin anillos.</td>
     </tr>
     <tr>
       <td>Cuestionarios digitales integrados en flujo web</td>
       <td><span class="badge partial">⚬ Parcial</span></td>
-      <td>Los instrumentos existen como archivos HTML en <code>/context/Cuestionarios-20260522/</code>. La integración dentro del flujo de la aplicación es parte del desarrollo futuro.</td>
+      <td>Los instrumentos existen en <code>/context/Cuestionarios-20260522/</code>. Integración en el flujo es desarrollo futuro.</td>
     </tr>
     <tr>
       <td>Reconocimiento afectivo facial (face-api.js)</td>
       <td><span class="badge pending">✗ Pendiente</span></td>
-      <td>Previsto para el estudio completo. La PoC controla el estado del avatar desde el propio LLM.</td>
-    </tr>
-    <tr>
-      <td>Screen Vision — captura del DOM del editor</td>
-      <td><span class="badge pending">✗ Pendiente</span></td>
-      <td>Previsto para versión de producción. La PoC inyecta el código problemático directamente en el system prompt.</td>
+      <td>Previsto para el estudio completo. La PoC controla el estado del avatar desde el LLM via [AVATAR_STATE].</td>
     </tr>
   </tbody>
 </table>
-
-<!-- ═══════════ SECCIÓN 3 ═══════════ -->
 <h2>3. Diseño Metodológico del Estudio</h2>
 
 <h3>3.1 Tipo de Estudio</h3>
@@ -349,13 +374,13 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Condición A — Experimental</strong><br>(Ada Multimodal)</td>
-      <td>Interacción con Ada mediante avatar 2D animado, síntesis de voz paraverbal (TTS) y reconocimiento de voz (STT).</td>
-      <td>Avatar CSS/SVG · TTS Web Speech · STT Web Speech · LLM socrático</td>
+      <td><strong>Condición A — Experimental</strong><br>(Sonic Multimodal + Multimodal)</td>
+      <td>Interacción con Sonic mediante canvas Kaplay 2D, TTS Piper neuronal (+ fallback Web Speech), STT Whisper, gamificación de anillos, zonas temáticas y SFX/BGM.</td>
+      <td>Canvas Kaplay 2D (Sonic sprite) · TTS Piper + fallback Web Speech · STT Whisper · LLM socrático (Ollama Gemma 3 12B) · Anillos + Zonas + SFX</td>
     </tr>
     <tr>
       <td><strong>Condición B — Control</strong><br>(Chatbot de Texto)</td>
-      <td>El mismo agente socrático Ada con idéntico system prompt y modelo LLM, presentado como chat de texto plano sin ninguna representación visual ni síntesis de voz.</td>
+      <td>El mismo tutor socrático con idéntico protocolo ZPD y modelo LLM, presentado como chat de texto plano sin ninguna representación visual ni síntesis de voz.</td>
       <td>LLM socrático (idéntico) · Entrada y salida de texto únicamente</td>
     </tr>
   </tbody>
@@ -543,7 +568,7 @@ print_numbers()</pre>
 
   <p><strong>Ejemplo de flujo de diálogo esperado:</strong></p>
   <table style="font-size:9.5pt;">
-    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Ada (ejemplo de respuesta socrática)</th></tr></thead>
+    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Sonic (ejemplo de respuesta socrática)</th></tr></thead>
     <tbody>
       <tr><td>1</td><td>"El programa no termina nunca."</td><td>"Anomalía detectada en la ruta de ejecución. Analicemos la condición de salida: ¿qué valor debe alcanzar <code>counter</code> para que el bucle se detenga?"</td></tr>
       <tr><td>2</td><td>"<code>counter</code> debe ser mayor a 5."</td><td>"Correcto. Ahora dime: ¿dónde exactamente, dentro del cuerpo del bucle, se actualiza el valor de <code>counter</code>?"</td></tr>
@@ -592,7 +617,7 @@ print(f"Duplicados encontrados: {len(result)}")</pre>
 
   <p><strong>Ejemplo de flujo de diálogo esperado:</strong></p>
   <table style="font-size:9.5pt;">
-    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Ada (ejemplo de respuesta socrática)</th></tr></thead>
+    <thead><tr><th style="width:8%">Turno</th><th>Participante</th><th>Sonic (ejemplo de respuesta socrática)</th></tr></thead>
     <tbody>
       <tr><td>1</td><td>"El código es lento por los dos bucles."</td><td>"Diagnóstico inicial prometedor. Si el bucle externo itera N veces y el interno itera aproximadamente N veces también, ¿cuántas comparaciones totales ocurren para N = 10 000?"</td></tr>
       <tr><td>2</td><td>"Serían unos 50 millones de comparaciones."</td><td>"Latencia crítica identificada. Ahora observa la tercera operación dentro del bucle: <code>not in duplicates</code>. ¿Qué estructura es <code>duplicates</code> y cuánto tarda en verificar si un elemento ya existe?"</td></tr>
@@ -610,7 +635,7 @@ print(f"Duplicados encontrados: {len(result)}")</pre>
   <li><strong>Instrucciones neutras:</strong> Ninguna instrucción entregada al participante menciona "avatar", "embodiment" ni "presencia social", para evitar el sesgo de expectativa.</li>
   <li><strong>Asignación ciega a condición:</strong> El investigador carga la condición (A o B) sin revelar que existe una condición alternativa ni cuál es el objetivo de la comparación.</li>
   <li><strong>Tiempo máximo por tarea:</strong> 10 minutos. Si el participante no identifica el error en ese tiempo, la tarea se registra como no resuelta y se avanza a la siguiente.</li>
-  <li><strong>Protocolo de des-escalada de frustración:</strong> Si el participante muestra signos de frustración (más de 3 turnos sin avance), Ada escala automáticamente el andamiaje al siguiente nivel sin proporcionar el código de corrección.</li>
+  <li><strong>Protocolo de des-escalada de frustración:</strong> Si el participante muestra signos de frustración (más de 3 turnos sin avance), Sonic escala automáticamente el andamiaje al siguiente nivel sin proporcionar el código de corrección.</li>
   <li><strong>Consentimiento informado:</strong> Todos los participantes firman un consentimiento informado antes de iniciar la sesión (código PF-3311, investigador: Gabriel Fallas López, unidad: ECCI/UCR). Los datos se vinculan únicamente a un ID alfanumérico anónimo.</li>
 </ul>
 

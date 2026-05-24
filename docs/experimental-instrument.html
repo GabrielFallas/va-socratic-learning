@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo Experimental — Ada AVTS | PF-3311</title>
+    <title>Protocolo Experimental — Sonic Embodied vs Chat de Texto sin Avatar | PF-3311</title>
     <style>
         :root {
             --primary: #0F3B82;
@@ -272,7 +272,7 @@
     <div class="header-institucional">
         <div class="ucr-label">Universidad de Costa Rica · Sistema de Estudios de Posgrado · ECCI</div>
         <h1>Guía de Procedimiento del Investigador</h1>
-        <p class="subtitle">Estudio AVTS — Ada: Tutora Socrática Corporeizada · Sesión de Laboratorio Controlada</p>
+        <p style="color:white">Sonic: Tutoría Socrática Multimodal (Embodied) vs Texto Plano · Sesión de Laboratorio Controlada</p>
         <div class="metadata-grid">
             <div class="meta-item">
                 <strong>Código de Proyecto</strong>
@@ -280,7 +280,7 @@
             </div>
             <div class="meta-item">
                 <strong>Código de Estudio</strong>
-                AVTS-POC-2026-01
+                POC-2026-01
             </div>
             <div class="meta-item">
                 <strong>Investigador Principal</strong>
@@ -304,28 +304,28 @@
     <!-- RESUMEN DEL ESTUDIO -->
     <div class="card">
         <h2><span class="step-badge">i</span> Resumen del Estudio y Objetivo</h2>
-        <p>Esta guía detalla el protocolo paso a paso para evaluar la interacción de los participantes con <strong>Ada</strong>, un Agente Virtual de Tutoría Socrática (AVTS), en sesión única y controlada de laboratorio. El estudio compara dos condiciones:</p>
+        <p>Esta guía detalla el protocolo paso a paso para evaluar la interacción de los participantes con <strong>Sonic</strong>, el Agente Virtual de Tutoría Socrática, en sesión única y controlada de laboratorio. El estudio compara dos condiciones de presentación del mismo agente socrático:</p>
         <div class="group-box group-a">
-            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental</div>
-            <p style="margin:0; font-size:0.9rem;">Ada como agente corporizado M-ITS: <strong>avatar 2D expresivo</strong> (Live2D/Sprites reactivos), voz TTS (Gemini Flash con SSML), sincronía acústico-visual (beats), y fusión transmodal (Screen Vision). Interacción mediante voz y/o texto.</p>
+            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental — Sonic (Multimodal)</div>
+            <p style="margin:0; font-size:0.9rem;">Agente <strong>Sonic</strong>: avatar Kaplay.js 2D con sprite de Sonic the Hedgehog (8 estados expresivos reactivos al diálogo: idle, thinking, speaking, listening, happy, curious, empathetic, encouraging), temática de zonas (Zona 1: Chemical Plant — Tarea 1; Zona 2: Speed Highway — Tarea 2), TTS neuronal <strong>Piper</strong> (español de alta calidad, Docker local) con fallback Web Speech API, STT <strong>Whisper</strong> local, sistema de gamificación de anillos (indicador de progreso socrático), mini-juego Kaplay de transición entre tareas, SFX y música de fondo. Interacción mediante voz y/o texto.</p>
         </div>
         <div class="group-box group-b">
-            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control (Baseline)</div>
-            <p style="margin:0; font-size:0.9rem;">Ada como <strong>interfaz de chat en texto plano</strong>. Mismo LLM socrático idéntico, sin representación visual, sin voz, sin animaciones. Input solo por teclado.</p>
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control (Baseline) — Sonic Texto Plano</div>
+            <p style="margin:0; font-size:0.9rem;">El mismo tutor socrático presentado como <strong>chat de texto plano</strong>. Mismo LLM socrático (Ollama + Gemma 3 12B), mismo protocolo ZPD de tres niveles, mismas tareas, pero sin canvas de juego, sin voz, sin anillos, sin música. Input solo por teclado. Se elimina deliberadamente toda la capa de embodiment multimodal para aislar su efecto.</p>
         </div>
 
         <div class="alert info" style="margin-top:16px;">
             <span class="icon">🎯</span>
             <div class="content">
                 <strong>Objetivo científico (NO revelar al participante)</strong>
-                Medir si la presencia del embodiment multimodal (avatar + voz + gestos) mejora la presencia social percibida, el perceived pedagogical support, la usabilidad y el estado afectivo en comparación con la interfaz de texto puro, manteniendo constante el contenido de la tutoría socrática.
+                Medir si la presencia del embodiment multimodal gamificado (avatar Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas) mejora la presencia social percibida, el perceived pedagogical support, la usabilidad y el estado afectivo en comparación con la interfaz de chat de texto puro (Condición B — Sonic texto plano), manteniendo constante el contenido de la tutoría socrática (LLM idéntico, tareas idénticas, protocolo ZPD idéntico).
             </div>
         </div>
 
         <h3>Checklist de Materiales — Antes de Iniciar Cada Sesión</h3>
         <ul class="checkbox-list">
             <li>Formulario de Consentimiento Informado impreso (2 copias por participante).</li>
-            <li>Computadora de laboratorio configurada: plataforma Ada cargada en la URL correspondiente, audio probado, micrófono funcional.</li>
+            <li>Computadora de laboratorio configurada: plataforma cargada en la URL correspondiente, audio probado, micrófono funcional. <strong>Condición A:</strong> verificar que el servidor Piper TTS (Docker) esté corriendo (<code>docker ps | grep piper</code>) y que Ollama esté activo (<code>docker ps | grep ollama</code>). <strong>Condición B:</strong> solo requiere Ollama.</li>
             <li>Audífonos con micrófono desinfectados y cargados.</li>
             <li>Tabla de asignación aleatoria impresa (sobre cerrado por participante: Grupo A / Grupo B).</li>
             <li>Tablet o segunda computadora con enlaces a cuestionarios (PANAS-SF pre, Demográfico).</li>
@@ -347,11 +347,11 @@
 
         <h3>1.2 Consentimiento Informado</h3>
         <div class="consent-section">
-            <h4>Formulario de Consentimiento Informado — Estudio AVTS-POC-2026-01</h4>
-            <p><strong>Título del estudio:</strong> Evaluación de un Agente Virtual de Tutoría Socrática para el aprendizaje de lógica de programación.</p>
+            <h4>Formulario de Consentimiento Informado — Estudio POC-2026-01</h4>
+            <p><strong>Título del estudio:</strong> Evaluación de un Sistema de Tutoría Socrática de Programación basado en Inteligencia Artificial.</p>
             <p><strong>Investigador Principal:</strong> Gabriel Isaías Fallas López — ECCI, Universidad de Costa Rica.</p>
-            <p><strong>Propósito:</strong> Este estudio busca evaluar la experiencia de interactuar con un sistema de tutoría socrática basado en inteligencia artificial. El agente le guiará mediante preguntas reflexivas en la resolución de tareas de programación, sin proporcionarle soluciones directas.</p>
-            <p><strong>Procedimiento:</strong> La sesión tendrá una duración aproximada de 45 a 60 minutos e incluye: (1) completar cuestionarios iniciales, (2) interactuar con el agente de tutoría durante dos tareas de programación de 15 minutos cada una, y (3) completar cuestionarios finales sobre su experiencia.</p>
+            <p><strong>Propósito:</strong> Este estudio busca evaluar la experiencia de interactuar con un sistema de tutoría socrática basado en inteligencia artificial. El sistema le guiará mediante preguntas reflexivas en la resolución de tareas de programación, sin proporcionarle soluciones directas.</p>
+            <p><strong>Procedimiento:</strong> La sesión tendrá una duración aproximada de 40 a 55 minutos e incluye: (1) completar cuestionarios iniciales, (2) interactuar con el sistema de tutoría durante dos tareas de programación de <strong>10 minutos cada una</strong>, y (3) completar cuestionarios finales sobre su experiencia.</p>
             <p><strong>Riesgos:</strong> El estudio no implica riesgos físicos, psicológicos ni legales. La única incomodidad posible es leve frustración ante las tareas de programación, similar a la experimentada en cualquier sesión de estudio.</p>
             <p><strong>Beneficios:</strong> Su participación contribuirá al avance científico en el campo de la tutoría inteligente. No hay beneficio económico directo para los participantes.</p>
             <p><strong>Confidencialidad:</strong> Toda la información recolectada será anonimizada. Sus respuestas y los logs de conversación quedarán vinculados únicamente a un código numérico (ej. P-001), sin nombre ni información de identificación personal. Los datos se almacenarán en un servidor cifrado de acceso restringido.</p>
@@ -389,24 +389,30 @@
         <p>Abra el sobre sellado correspondiente al participante (pre-asignados aleatoriamente) y cargue <strong>silenciosamente</strong> la condición correspondiente. <strong>No mencione al participante que existen dos versiones del sistema.</strong></p>
 
         <div class="group-box group-a">
-            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental — Avatar 2D Corporizado</div>
-            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/ada-embodied</code><br>
-            Verifique: avatar 2D visible, audio activo, micrófono habilitado, detección de pantalla/entorno si aplica, y sincro de animaciones respondiendo al habla.<br>
-            Confirme latencia de primer mensaje (debe ser &lt; 1.5 s).</p>
+            <div class="group-title"><span class="group-badge badge-a">Grupo A</span> Condición Experimental — Sonic (Multimodal)</div>
+            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/?condition=A</code> o seleccione <strong>Condición A</strong> en la landing page.<br>
+            <strong>Verificar antes de iniciar:</strong><br>
+            ① Canvas Kaplay visible: Sonic corriendo en Chemical Plant (Zona 1, fondo azul).<br>
+            ② Audio activo: mensaje de bienvenida de Sonic en voz Piper (español). Si Piper no está disponible, sonará Web Speech API.<br>
+            ③ Micrófono habilitado (botón de micrófono aparece activo en la interfaz).<br>
+            ④ Contador de anillos visible en esquina superior derecha del canvas (inicia en 0).<br>
+            ⑤ Latencia del primer mensaje debe ser &lt; 1.5 s (log en consola del servidor).</p>
         </div>
 
         <div class="group-box group-b">
-            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control — Chat de Texto</div>
-            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/ada-text</code><br>
-            Verifique: interfaz de chat activa, campo de texto habilitado, sin elementos visuales del avatar.<br>
-            Asegúrese de que el nombre "Ada" aparece como remitente en la interfaz de mensajes.</p>
+            <div class="group-title"><span class="group-badge badge-b">Grupo B</span> Condición de Control — Sonic Texto Plano</div>
+            <p style="margin:0; font-size:0.88rem;">Cargue la URL: <code>https://[dominio]/?condition=B</code> o seleccione <strong>Condición B</strong> en la landing page.<br>
+            <strong>Verificar antes de iniciar:</strong><br>
+            ① Interfaz de chat activa: campo de texto habilitado, sin canvas de juego, sin anillos, sin música.<br>
+            ② El tutor socrático responde en texto. No hay TTS ni micrófono.<br>
+            ③ El sistema usa el mismo LLM (Ollama + Gemma 3 12B) con idéntico protocolo ZPD de tres niveles.</p>
         </div>
 
         <div class="alert danger">
             <span class="icon">🚫</span>
             <div class="content">
                 <strong>Prohibido revelar el objetivo del estudio o la existencia de la otra condición.</strong>
-                No use palabras como "avatar", "animación", "embodiment" o "condición de control" frente al participante. Esto induciría un sesgo de demanda (demand characteristics) que contaminaría los datos.
+                No use palabras como "avatar", "animación", "embodiment", "gamificación" o "condición de control" frente al participante. Esto induciría un sesgo de demanda (demand characteristics) que contaminaría los datos.
             </div>
         </div>
     </div>
@@ -418,7 +424,7 @@
         <h3>3.1 Instrucciones Neutras al Participante</h3>
         <div class="quote">
             <strong>Investigador (leer textualmente, sin improvisación):</strong><br>
-            "A continuación, vas a interactuar con un sistema de tutoría llamado Ada. Ada te ayudará a resolver dos tareas de programación. Importante: Ada no te va a dar el código directamente. En su lugar, te va a hacer preguntas para guiarte hacia la solución. Trata de actuar con naturalidad y expresar en voz alta lo que piensas mientras trabajas en el problema. Tienes hasta 15 minutos por tarea. Cuando estés listo o cuando se acabe el tiempo, yo te indicaré el siguiente paso. Por favor, colócate los audífonos. ¿Tienes alguna pregunta antes de comenzar?"
+            "A continuación, vas a interactuar con un sistema de tutoría de programación. El sistema te ayudará a resolver dos tareas. Importante: el tutor no te va a dar el código directamente. En su lugar, te va a hacer preguntas para guiarte hacia la solución. Trata de actuar con naturalidad y expresar en voz alta lo que piensas mientras trabajas en el problema. Tienes hasta 10 minutos por tarea. Cuando estés listo o cuando se acabe el tiempo, yo te indicaré el siguiente paso. [<em>Solo Condición A</em>] Por favor, colócate los audífonos. ¿Tienes alguna pregunta antes de comenzar?"
         </div>
 
         <div class="alert warning">
@@ -429,56 +435,65 @@
             </div>
         </div>
 
-        <h3>3.2 Tarea 1 — Depuración de Bucle Infinito (15 minutos)</h3>
+        <h3>3.2 Tarea 1 — Depuración de Bucle Infinito (10 minutos · Zona 1: Chemical Plant)</h3>
         <div class="task-box">
-            <div class="task-title">🐛 Escenario: Error lógico en un bucle</div>
+            <div class="task-title">🐛 Escenario: Error lógico en un bucle (nivel principiante)</div>
             <p style="font-size:0.88rem; margin-bottom:8px;">Instrucción al participante (mostrar en pantalla, no leer en voz alta para evitar priming):</p>
-            <div class="task-code">Tienes el siguiente código en Python.
-Cuando lo ejecutas, el programa nunca termina.
-Usa a Ada para identificar y corregir el error
-lógico sin pedir que te dé el código correcto.
+            <div class="task-code">El siguiente programa debería imprimir los números del 1 al 5,
+pero parece que nunca termina.
+Encuentra y explica el problema lógico sin modificar el código todavía.
 
-i = 0
-total = 0
-while i < 10:
-    total = total + i
-    # aquí hay un error
-print("Total:", total)</div>
+def print_numbers():
+    counter = 1
+    while counter <= 5:
+        print(f"Número: {counter}")
+        # ¿Por qué nunca termina?
+
+print_numbers()</div>
             <div class="task-obj">
-                <strong>Variable medida:</strong> Eficacia pedagógica autónoma (RQ2). El sistema registra automáticamente: número de turnos, tiempo hasta resolución (o tiempo agotado), si el participante identificó el error sin código directo.
+                <strong>Variable medida:</strong> Eficacia pedagógica autónoma (RQ2). El backend registra automáticamente: número de turnos, tiempo hasta resolución (o agotado), resolución autónoma (sí/no). <strong>Error subyacente:</strong> <code>counter</code> nunca se incrementa dentro del <code>while</code>; la corrección es añadir <code>counter += 1</code>. El tutor NO revela esto directamente.<br>
+                <strong>Condición A:</strong> Sonic corre en Chemical Plant (fondo azul). Los anillos se acumulan con cada respuesta que se aproxima a la solución.
             </div>
         </div>
 
-        <p>Transcurridos 15 minutos o cuando el participante resuelva la tarea, indique:</p>
+        <p>Transcurridos <strong>10 minutos</strong> o cuando el participante resuelva la tarea, indique:</p>
         <div class="quote">
             "Muy bien, vamos a pasar a la siguiente tarea."
         </div>
 
-        <h3>3.3 Tarea 2 — Optimización Algorítmica (15 minutos)</h3>
+        <h3>3.3 Tarea 2 — Optimización Algorítmica (10 minutos · Zona 2: Speed Highway)</h3>
         <div class="task-box">
-            <div class="task-title">⚡ Escenario: Complejidad temporal y estructuras de datos</div>
+            <div class="task-title">⚡ Escenario: Complejidad temporal O(n³) y estructuras de datos (nivel intermedio)</div>
             <p style="font-size:0.88rem; margin-bottom:8px;">Instrucción al participante (mostrar en pantalla):</p>
-            <div class="task-code">El siguiente código busca si un número
-está en una lista de 10,000 elementos.
-Es muy lento. Usa a Ada para entender
-por qué es lento y cómo podrías mejorarlo.
-No le pidas el código a Ada.
+            <div class="task-code">Este algoritmo encuentra números duplicados en una lista.
+Funciona correctamente pero es muy lento para listas grandes.
+Identifica por qué es ineficiente y qué estructura de datos
+podría mejorar el rendimiento. No pidas el código directamente.
 
-datos = list(range(10000))
-objetivo = 9999
-encontrado = False
-for elemento in datos:
-    if elemento == objetivo:
-        encontrado = True
-print("Encontrado:", encontrado)</div>
+def find_duplicates(numbers):
+    """Encuentra números duplicados en una lista."""
+    duplicates = []
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            if numbers[i] == numbers[j]:
+                if numbers[i] not in duplicates:
+                    duplicates.append(numbers[i])
+    return duplicates
+
+# Test con lista grande
+import random
+big_list = [random.randint(1, 1000) for _ in range(10000)]
+result = find_duplicates(big_list)
+print(f"Duplicados encontrados: {len(result)}")</div>
             <div class="task-obj">
-                <strong>Variable medida:</strong> Eficacia pedagógica (RQ2), specifically razonamiento sobre complejidad O(n) vs O(1) y elección de estructura de datos (set/dict). El agente guía mediante preguntas sin revelar "usa un set".
+                <strong>Variable medida:</strong> Eficacia pedagógica (RQ2) — razonamiento sobre complejidad O(n³) en el peor caso (dos bucles anidados O(n²) + búsqueda <code>not in duplicates</code> O(n)) y reducción a O(n) con <code>set</code>. El tutor guía mediante preguntas sin revelar "usa un set" ni el valor de n.<br>
+                <strong>Condición A:</strong> Sonic corre en Speed Highway (tinte cálido naranja — Zona 2). La zona cambia automáticamente al iniciar Tarea 2.
             </div>
         </div>
 
         <div class="alert info">
             <span class="icon">⏱️</span>
-            <div class="content">Registre en la bitácora los timestamps de inicio y fin de cada tarea por participante bajo su ID (P-0XX).</div>
+            <div class="content">Registre en la bitácora los timestamps de inicio y fin de cada tarea por participante bajo su ID (P-0XX). <strong>Condición A:</strong> el mini-juego de transición Kaplay entre tareas dura aproximadamente 15 segundos — no interrumpir ni apurarlo.</div>
         </div>
     </div>
 
@@ -489,7 +504,7 @@ print("Encontrado:", encontrado)</div>
         <p>Una vez concluidas ambas tareas, el investigador regresa al lado del participante y le pide retirarse los audífonos.</p>
 
         <div class="quote">
-            <strong>Investigador:</strong> "¡Excelente trabajo! Ahora te pido que completes esta serie de cuestionarios cortos sobre tu experiencia con el sistema. No hay respuestas correctas o incorrectas; nos interesa genuinamente tu percepción. Cada cuestionario tiene un enlace individual."
+            <strong>Investigador:</strong> "¡Excelente trabajo! Ahora te pido que completes esta serie de cuestionarios cortos sobre tu experiencia con el tutor de programación. No hay respuestas correctas o incorrectas; nos interesa genuinamente tu percepción. Cada cuestionario tiene un enlace individual."
         </div>
 
         <p>Administrar los cuestionarios en el siguiente orden para minimizar el efecto de fatiga y sesgo de recencia:</p>
@@ -548,11 +563,11 @@ print("Encontrado:", encontrado)</div>
             <div class="content">
                 <strong>Preguntas guía (formular en este orden):</strong>
                 <ul style="margin-top:8px; padding-left:18px; font-size:0.9rem;">
-                    <li>"En términos generales, ¿cómo describirías tu experiencia hablando con Ada hoy?"</li>
+                    <li>"En términos generales, ¿cómo describirías tu experiencia interactuando con el tutor de programación hoy?"</li>
                     <li>"¿Hubo algún momento de la interacción que te gustara especialmente o que te pareciera particularmente útil?"</li>
-                    <li>"¿Hubo algún aspecto de Ada que te pareciera extraño, incómodo o frustrante?"</li>
-                    <li>"¿Notaste alguna característica particular en la forma en que Ada se comunicó contigo?" <em>(para explorar percepción de la condición sin revelar el objetivo)</em></li>
-                    <li>"¿Qué le cambiarías o mejorarías a este sistema?"</li>
+                    <li>"¿Hubo algún aspecto del sistema que te pareciera extraño, incómodo o frustrante?"</li>
+                    <li>"¿Notaste alguna característica particular en la forma en que el tutor se comunicó contigo?" <em>(para explorar percepción de la condición sin revelar el objetivo)</em></li>
+                    <li>"¿Qué le cambiarías o mejorarías a este sistema de tutoría?"</li>
                 </ul>
             </div>
         </div>
@@ -587,7 +602,7 @@ print("Encontrado:", encontrado)</div>
                     <td>Investigador + tutor</td>
                 </tr>
                 <tr>
-                    <td>Logs de conversación con Ada</td>
+                    <td>Logs de conversación con el tutor socrático</td>
                     <td>Código P-0XX (backend automático)</td>
                     <td>Servidor backend cifrado (HTTPS)</td>
                     <td>Solo investigador principal</td>
@@ -706,17 +721,17 @@ print("Encontrado:", encontrado)</div>
                 </tr>
                 <tr>
                     <td><strong>Métricas Log-Based</strong></td>
-                    <td>% resolución autónoma, N° turnos, latencia (ms)</td>
-                    <td>RQ2 / RQ3</td>
-                    <td>Automático durante sesión</td>
-                    <td>Backend AVTS</td>
+                    <td>% resolución autónoma, N° turnos, latencia (ms), anillos acumulados (Condición A)</td>
+                    <td>RQ2 / RQ3 / RQ4</td>
+                    <td>Automático durante sesión (logger.ts en servidor Next.js)</td>
+                    <td>Backend Sonic (Next.js + Ollama)</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <div class="footer">
-        <strong>Estudio AVTS-POC-2026-01</strong> · Tarea #10: Diseño del Protocolo de Evaluación<br>
+        <strong>Estudio POC-2026-01 — Sonic: Tutoría Socrática Multimodal</strong> · Tarea #10: Diseño del Protocolo de Evaluación<br>
         PF-3311 — Agentes Virtuales Inteligentes · I Ciclo 2026<br>
         Universidad de Costa Rica · ECCI · Prof. Alexander Barquero Elizondo<br>
         Investigador: Gabriel Isaías Fallas López

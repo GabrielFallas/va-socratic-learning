@@ -1,4 +1,4 @@
-# Diseño del Protocolo de Evaluación y Matriz de Consistencia
+﻿# Diseño del Protocolo de Evaluación y Matriz de Consistencia
 
 **Universidad de Costa Rica — Sistema de Estudios de Posgrado**  
 **Temas Especiales en Ingeniería de Sistemas: Agentes Virtuales Inteligentes (PF-3311)**  
@@ -9,31 +9,31 @@
 
 ## Apartado A: Definición de Condiciones Experimentales
 
-### Condición A — Experimental: Ada (Agente Pedagógico Afectivo 2D de Baja Fricción)
+### Condición A — Experimental: Sonic (Tutor Socrático Multimodal Multimodal)
 
-La **Condición A** consiste en la interacción con **Ada**, la tutora socrática multimodal. Técnicamente, Ada utiliza un modelo **2D expresivo implementado en CSS y SVG animado** (sin librerías externas) que cambia de estado según la intención socrática de la respuesta del LLM. Esta condición implementa las siguientes vías multimodales:
-1. **Canal Visual (2D):** Avatar ubicado en la zona superior derecha del panel de chat, con 8 estados expresivos reactivos (idle, thinking, speaking, listening, happy, curious, empathetic, encouraging). Diseño estilizado tipo *cartoon* que evita el Valle Inquietante y favorece tareas de alta carga cognitiva.
-2. **Canal Auditivo (Sincronía Paraverbal):** Síntesis de voz mediante Web Speech API (SpeechSynthesis, nativa del navegador) con sincronización de la animación de la boca al estado de reproducción de audio.
-3. **Control de Estado desde el LLM:** El modelo de lenguaje incluye una etiqueta `[AVATAR_STATE:estado]` al final de cada respuesta; el cliente la interpreta y actualiza las animaciones CSS del avatar en consecuencia.
+La **Condición A** consiste en la interacción con **Sonic**, el tutor socrático gamificado multimodal. Técnicamente, Sonic utiliza un **canvas Kaplay.js 2D** con sprite de 16 frames que cambia de comportamiento según los 8 estados expresivos emitidos por el LLM via `[AVATAR_STATE]`. Esta condición implementa las siguientes vías multimodales:
+1. **Canal Visual (2D):** Canvas Kaplay.js 2D con sprite de Sonic the Hedgehog (16 frames, animaciones run/jump), ubicado sobre el panel de chat, con 8 estados expresivos reactivos (idle, thinking, speaking, listening, happy, curious, empathetic, encouraging). Diseño estilizado tipo *cartoon* que evita el Valle Inquietante y favorece tareas de alta carga cognitiva.
+2. **Canal Auditivo (Sincronía Paraverbal):** Síntesis de voz mediante **Piper TTS neuronal** (Docker local, español de alta calidad) con fallback automático a Web Speech API. Sonidos sincronizados con el estado del canvas.
+3. **Control de Estado desde el LLM:** El modelo de lenguaje (sonic-system.ts) incluye una etiqueta `[AVATAR_STATE:estado]` al final de cada respuesta; el cliente la interpreta y actualiza el comportamiento del canvas Kaplay (Sonic corre, salta, se congela, etc.).
 
-El razonamiento socrático lo ejecuta **Ollama con Gemma 3 12B** (Q4_K_M, inferencia GPU local) con un *system prompt* que prohíbe explícitamente entregar código directo y escala el andamiaje en tres niveles de ZPD.
+El razonamiento socrático lo ejecuta **Ollama con Gemma 3 12B** (Q4_K_M, inferencia GPU local) con el system prompt `sonic-system.ts` que prohíbe explícitamente entregar código directo, define la personalidad de Sonic y escala el andamiaje en tres niveles de ZPD.
 
 **Características técnicas de la Condición A:**
 - **Motor visual:** CSS/SVG Animado (sin librerías externas) — 8 estados expresivos
 - **STT:** Web Speech API — SpeechRecognition (nativa del navegador), español latinoamericano
 - **LLM:** Ollama + Gemma 3 12B con *system prompt* socrático (ZPD 3 niveles)
-- **TTS:** Web Speech API — SpeechSynthesis (nativa del navegador), sincronizada con animación de boca
-- **Gestos:** Animaciones 2D (CSS keyframes) reactivas al estado emocional del diálogo
+- **TTS:** Piper TTS neuronal (Docker local, español) + fallback Web Speech API
+- **Gamificación:** Sistema de anillos (indicador progreso socrático) + mini-juego Kaplay (~15 s) entre tareas + SFX/BGM por zona
 - **Latencia objetivo:** < 1.5 s extremo a extremo (registro automático en backend)
 
 ---
 
 ### Condición B — Control (Baseline): Interfaz de Chat Socrático en Texto Plano
 
-La **Condición B** consiste en la interacción con el mismo agente socrático Ada, pero desprovisto de toda representación visual, síntesis de voz y animaciones. El participante se enfrenta a una interfaz de chat conversacional de texto plano —estilo terminal o ventana de mensajería— donde lee las respuestas de Ada en forma escrita y responde mediante teclado. El **system prompt** y las restricciones del LLM son idénticos a los de la Condición A: Ada no entrega código directo, formula preguntas reflexivas y escala las pistas de lo general a lo específico según el ZPD del participante. Lo que se elimina deliberadamente en esta condición son todos los vectores de embodiment multimodal: el avatar, la voz, el lip-sync y los gestos. El nombre "Ada" permanece visible en la interfaz como remitente del mensaje para mantener la coherencia de la identidad del agente, pero sin representación corporal.
+La **Condición B** consiste en la interacción con el mismo tutor socrático, pero desprovisto de toda representación visual, síntesis de voz y animaciones. El participante se enfrenta a una interfaz de chat conversacional de texto plano —estilo terminal o ventana de mensajería— donde lee las respuestas del tutor socrático en forma escrita y responde mediante teclado. El **system prompt** y las restricciones del LLM son idénticos a los de la Condición A: El tutor socrático no entrega código directo, formula preguntas reflexivas y escala las pistas de lo general a lo específico según el ZPD del participante. Lo que se elimina deliberadamente en esta condición son todos los vectores de embodiment multimodal y gamificación: el canvas Kaplay, la voz Piper, el STT Whisper, los anillos, las zonas temáticas, el SFX y el mini-juego de transición. La interfaz muestra solo mensajes de texto sin branding específico de personaje.
 
 **Características técnicas de la Condición B:**
-- **Interfaz:** Chat de texto plano (HTML/CSS básico, sin representaciones visuales del agente)
+- **Interfaz:** Chat de texto plano (sin canvas de juego, sin avatar, sin anillos, sin música)
 - **LLM:** Ollama + Gemma 3 12B con **idéntico** *system prompt* socrático
 - **TTS:** Deshabilitado
 - **Avatar/Gestos:** Ninguno
@@ -43,7 +43,7 @@ La **Condición B** consiste en la interacción con el mismo agente socrático A
 
 ### Justificación de la Comparación para Aislar el Efecto del Embodiment
 
-La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Ollama + Gemma 3 12B), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (avatar 2D + voz paraverbal + sensibilidad afectiva), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
+La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Ollama + Gemma 3 12B), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (sprite Sonic Kaplay 2D, 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos gamificados, zonas temáticas), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
 
 ---
 
@@ -53,7 +53,7 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 
 ### Preguntas de Investigación Actualizadas
 
-- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado (avatar 2D afectivo + sincronía paraverbal + visión computacional) versus una interfaz de chat en texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
+- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado gamificado (Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas temáticas) versus el mismo tutor en modo chat de texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
 
 - **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código?
 
@@ -68,9 +68,9 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 | **Pregunta de Investigación (RQ)** | **Variable / Constructo** | **Instrumento Validado** | **Tarea Asociada en el Guion** |
 |---|---|---|---|
 | **RQ1** — Naturalidad y Presencia Social | Anthropomorphism, Animacy, Likeability, Perceived Intelligence | **Godspeed Questionnaire** (Bartneck et al., 2009) — 5 subescalas semánticas diferenciales | Post-sesión: el participante evalúa al agente tras completar ambas tareas de debugging |
-| **RQ1** — Perceived Pedagogical Support | Apoyo pedagógico percibido, utilidad de las pistas socráticas, sensación de guía | **Escala Likert ad-hoc de 5 ítems** adaptada de Essel et al. (2024) | Post-tarea 1 (bucle infinito) y post-tarea 2 (refactorización algorítmica) |
+| **RQ1** — Perceived Pedagogical Support | Apoyo pedagógico percibido, utilidad de las pistas socráticas, sensación de guía | **Escala Likert ad-hoc de 5 ítems** adaptada de Essel et al. (2024) | Post-tarea 1 (bucle infinito print_numbers) y post-tarea 2 (find_duplicates O(n³)) |
 | **RQ1** — Usabilidad del sistema | Facilidad de uso, learnability, satisfacción de uso | **SUS — System Usability Scale** (Brooke, 1996) — 10 ítems Likert 1-5 | Cierre de la sesión completa de interacción |
-| **RQ2** — Eficacia pedagógica autónoma | % tareas resueltas sin código directo; N° de turnos hasta resolución; tiempo total (seg) | **Métricas log-based automáticas** (logs de conversación del backend) | Tarea 1: Depuración de bucle infinito en Python; Tarea 2: Análisis de complejidad y optimización algorítmica |
+| **RQ2** — Eficacia pedagógica autónoma | % tareas resueltas sin código directo; N° de turnos hasta resolución; tiempo total (seg); anillos acumulados (Condición A) | **Métricas log-based automáticas** (logger.ts — backend Next.js) | Tarea 1: Depuración print_numbers() bucle infinito (10 min); Tarea 2: find_duplicates() O(n³) → O(n) con set (10 min) |
 | **RQ2** — Motivación situacional | Motivación intrínseca, interés, esfuerzo percibido durante la tarea | **SIMS — Situational Intrinsic Motivation Scale** (Guay et al., 2000) — 16 ítems | Post-interacción con el agente (inmediatamente después de completar o agotar el tiempo de las tareas) |
 | **RQ3** — Carga cognitiva | Demanda mental, temporal, esfuerzo, frustración, performance, esfuerzo | **NASA-TLX** (Hart & Staveland, 1988) — 6 dimensiones con escala analógica | Post-interacción completa (tras la última tarea) |
 | **RQ3** — Estado afectivo | Afecto positivo (PA) y afecto negativo (NA) | **PANAS-SF** (Thompson, 2007) — 10 ítems | **PRE-interacción** (línea base) y **POST-interacción** (cambio de estado) |
@@ -96,7 +96,7 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 
 El archivo HTML adaptado incluye:
 1. **Identificación formal del estudio**: Código PF-3311, investigador principal, unidad ejecutora (ECCI/UCR).
-2. **Consentimiento informado** adaptado al estudio AVTS, con pregunta de aceptación obligatoria explícita.
+2. **Consentimiento informado** adaptado al estudio, con pregunta de aceptación obligatoria explícita.
 3. **Carga de la condición** según asignación aleatoria (Grupo A: Avatar / Grupo B: Texto), con instrucciones al investigador para cargar la interfaz correspondiente sin revelar el objetivo al participante.
 4. **Instrucciones neutras** de las tareas, redactadas para evitar priming o sesgos de inducción (no se menciona "avatar", "embodiment" ni "presencia" en las instrucciones al participante).
 5. **Listado de cuestionarios post-interacción** en orden: PANAS-SF (post), Godspeed, SUS, NASA-TLX, SIMS, Perceived Pedagogical Support.
@@ -110,17 +110,17 @@ El archivo HTML adaptado incluye:
 
 Justine Cassell y colegas (Cassell et al., 2000) constituyen la base canónica sobre los **Agentes Conversacionales Corporizados (ECAs)**. Su contribución central es demostrar que la comunicación humana es inherentemente **multimodal**: el 65% de la información social se transmite por canales no verbales —gestos, mirada, postura, expresiones faciales— que operan en sincronía con el discurso verbal para construir significado y presencia social. En consecuencia, un agente es verdaderamente "encarnado" no por el mero hecho de tener una representación visual, sino por la **integración funcional de sus comportamientos no verbales con el acto de habla**.
 
-En el diseño de Ada, la teoría de Cassell se implementa a tres niveles adaptados al M-ITS y la animación 2D:
+En el diseño de Sonic, la teoría de Cassell se implementa a tres niveles adaptados al sistema gamificado Kaplay:
 
-1. **Sincronía Paraverbal (Voice-Driven Empathy)**: Cuando Ada pregunta "¿qué valor tiene esta variable en la línea 7?", la voz incorpora marcadores SSML para pausas empáticas y un tono adaptativo sincronizado con la intención del comportamiento, lo cual transmite una "corporeidad acústica" y un lazo social potente.
+1. **Sincronía Paraverbal (Voice-Driven Empathy)**: Cuando Sonic pregunta "¿qué valor tiene esta variable en la línea 7?", la voz Piper (o Web Speech fallback) entrega el mensaje con calidad neuronal en español, creando una "corporeidad acústica" que refuerza el lazo social.
 
-2. **Beats Visuales y Respuestas 2D Reactivas**: Mediante animaciones CSS y SVG, el avatar cambia a estados de escucha activa (backchannel) o comprensión (estados *listening*, *thinking*). Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
+2. **Beats Visuales y Respuestas 2D Reactivas (Kaplay)**: El sprite Sonic cambia entre 8 estados reactivos (`idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) según el contexto conversacional, generando señales de escucha activa (backchannel) y comprensión. Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
 
-3. **Fusión Multimodal (Screen Vision) y Expresiones Afectivas**: Integrando visualización del contexto (DOM o cámara web), el agente adecúa sus microexpresiones socráticas integrando la percepción del estado del estudiante, brindando así andamiaje ajustado sin dar la respuesta directamente.
+3. **Fusión Multimodal y Expresiones Afectivas (Ring System)**: El sistema de anillos gamificado actúa como señal de retroalimentación no verbal: el estudiante recibe un anillo visual (ring burst animado en canvas Kaplay) cuando su respuesta se aproxima a la solución, y una señal de daño (hurt flash + parpadeo de Sonic) cuando el agente detecta frustración. Piper TTS vocaliza las respuestas con prosodia natural en español. Esta capa de feedback multimodal refuerza el andamiaje sin revelar la respuesta.
 
 La hipótesis derivada de Cassell es que los participantes de la **Condición A** percibirán una mayor **naturalidad** e **inteligencia percibida** del agente que los de la Condición B, medibles en las subescalas de Godspeed.
 
-Adicionalmente, Cassell conecta con la teoría de **andamiaje de Vygotsky (ZPD)** al señalar que las expresiones afectivas y el canal paraverbal funcionan como andamios no verbales que sostienen la atención del estudiante en su zona de desarrollo próximo: en lugar de dar la respuesta directamente, el agente utiliza su modelo de "Screen Vision" y pausas acústicas para señalar el punto de confusión para que el estudiante lo examine. Este vínculo corrige la brecha identificada en el E1 entre la teoría de scaffolding y la arquitectura técnica del agente.
+Adicionalmente, Cassell conecta con la teoría de **andamiaje de Vygotsky (ZPD)** al señalar que las expresiones afectivas y los canales multimodales (voz Piper + estado visual Kaplay) funcionan como andamios no verbales que sostienen la atención del estudiante en su zona de desarrollo próximo: en lugar de dar la respuesta directamente, el agente usa preguntas reflexivas, pistas proactivas (tras 60 s de inactividad) y el sistema de anillos para señalar el progreso socrático del estudiante. Este vínculo corrige la brecha identificada en el E1 entre la teoría de scaffolding y la arquitectura técnica del agente.
 
 ---
 
@@ -130,11 +130,11 @@ Timothy Bickmore y Rosalind Picard (2005) desarrollan el concepto de **agente re
 
 En el contexto de la tutoría socrática, el soporte relacional es especialmente crítico porque el método socrático genera **tensión cognitiva inevitable**: el agente no da respuestas. Si el estudiante percibe esa negativa como indiferencia o rigidez, la frustración escalará hasta abandonar la tarea. Bickmore demuestra que los lazos relacionales actúan como amortiguadores afectivos: la relación de confianza preexistente hace que el estudiante interprete la ausencia de respuesta directa como *guía deliberada*, no como incapacidad del agente.
 
-Ada implementa principios de Bickmore mediante:
+Sonic implementa principios de Bickmore mediante:
 
-- **Memoria conversacional persistente**: El agente recuerda qué pistas ya ofreció y qué conceptos el estudiante ya demostró entender, ajustando la complejidad socrática sin repetir andamios redundantes. ("Anteriormente notaste el problema con el índice fuera de rango —esta vez te propongo que identifiques cuál estructura de datos causaría el mismo síntoma si el tamaño no es fijo.")
-- **Reconocimiento afectivo del esfuerzo**: Ada incluye frases relacionales que validan el proceso sin validar la respuesta. ("Veo que llevas bastante tiempo en esto. Esa persistencia es exactamente la actitud que construye la arquitectura mental de un programador.")
-- **Protocolo de des-escalada de frustración**: Si el estudiante lleva más de 3 turnos sin avance, Ada introduce una pista de andamiaje más concreta (escala desde general hacia específica), acompañada de un reconocimiento empático: "Entiendo que esta parte puede ser contraintuitiva al principio."
+- **Memoria conversacional persistente**: El agente recuerda qué pistas ya ofreció y qué conceptos el estudiante ya demostró entender, ajustando la complejidad socrática sin repetir andamios redundantes. ("¡Antes me dijiste que el índice fallaba! Esta vez — ¿qué estructura de datos garantizaría que el tamaño sea flexible sin fallar?")
+- **Reconocimiento afectivo del esfuerzo**: Sonic incluye frases relacionales que validan el proceso sin validar la respuesta. ("Veo que llevas bastante tiempo en esto. Esa persistencia es exactamente la actitud que construye la arquitectura mental de un programador.")
+- **Protocolo de des-escalada de frustración**: Si el estudiante lleva más de 3 turnos sin avance, Sonic introduce una pista de andamiaje más concreta (proactivo o en respuesta directa) (escala desde general hacia específica), acompañada de un reconocimiento empático: "Entiendo que esta parte puede ser contraintuitiva al principio."
 
 La medición de esta dimensión se realiza mediante **PANAS-SF** (delta afectivo positivo/negativo), **SIMS** (motivación intrínseca situacional) y la subescala de *Likeability* de Godspeed. La hipótesis es que los participantes de la Condición A mostrarán un mayor delta afectivo positivo y mayor motivación intrínseca que los de la Condición B.
 
@@ -144,16 +144,16 @@ La medición de esta dimensión se realiza mediante **PANAS-SF** (delta afectivo
 
 Nick Yee y Jeremy Bailenson (2007) documentan el **Efecto Proteus**: las personas adaptan su comportamiento, actitudes y rendimiento en función de la apariencia del avatar —propio o del interlocutor— con el que interactúan. Este efecto opera a través de dos mecanismos: (1) las expectativas conductuales asociadas al aspecto del avatar activan esquemas de comportamiento compatibles, y (2) la "presencia" de un interlocutor visual modifica la autopresentación del usuario.
 
-En el diseño experimental del AVTS, el Efecto Proteus genera dos predicciones con implicaciones metodológicas directas:
+En el diseño experimental del estudio, el Efecto Proteus genera dos predicciones con implicaciones metodológicas directas:
 
 **Predicción 1 — Reducción de la ansiedad de evaluación:**  
-Un avatar con rasgos autoritarios, hiperrealistas o institucionales (traje formal, expresión seria, espacio clínico) activa el esquema cognitivo de *evaluador*, elevando la **ansiedad de evaluación** (*evaluation apprehension*) documentada por Rosenberg (1969). Esta ansiedad lleva al estudiante a priorizar dar respuestas que parezcan correctas sobre reflexionar genuinamente —lo opuesto al modo mental que el método socrático requiere. Ada, por el contrario, fue diseñada deliberadamente con una estética estilizada, colores cálidos no institucionales y una personalidad de "compañero de estudio avanzado": esto activa el esquema de *colaborador*, no de *evaluador*, reduciendo la ansiedad y habilitando el modo de exploración cognitiva segura. Esta decisión de diseño puede confirmarse en los datos de **PANAS-SF** (reducción del afecto negativo basal en Condición A).
+Un avatar con rasgos autoritarios, hiperrealistas o institucionales (traje formal, expresión seria, espacio clínico) activa el esquema cognitivo de *evaluador*, elevando la **ansiedad de evaluación** (*evaluation apprehension*) documentada por Rosenberg (1969). Esta ansiedad lleva al estudiante a priorizar dar respuestas que parezcan correctas sobre reflexionar genuinamente —lo opuesto al modo mental que el método socrático requiere. Sonic, por el contrario, fue elegido deliberadamente por su estética de personaje lúdico, familiar y positivo: esto activa el esquema de *colaborador*, no de *evaluador*, reduciendo la ansiedad y habilitando el modo de exploración cognitiva segura. Esta decisión de diseño puede confirmarse en los datos de **PANAS-SF** (reducción del afecto negativo basal en Condición A).
 
 **Predicción 2 — Incremento del compromiso conductal:**  
-Yee y Bailenson demuestran que interactuar con un agente visualmente presente —incluso sin control directo de su avatar— aumenta el compromiso comportamental del usuario: más turnos conversacionales, respuestas más elaboradas, mayor persistencia ante la dificultad. En el experimento AVTS, se predice que los participantes de la Condición A producirán más turnos conversacionales y menor tasa de abandono que los de la Condición B, efecto medible en las **métricas log-based** de RQ2.
+Yee y Bailenson demuestran que interactuar con un agente visualmente presente —incluso sin control directo de su avatar— aumenta el compromiso comportamental del usuario: más turnos conversacionales, respuestas más elaboradas, mayor persistencia ante la dificultad. En el experimento, se predice que los participantes de la Condición A producirán más turnos conversacionales y menor tasa de abandono que los de la Condición B, efecto medible en las **métricas log-based** de RQ2.
 
 **Riesgo del Uncanny Valley (Mori, 1970):**  
-El efecto inverso —conocido como el Valle Inquietante— ocurre cuando un avatar es "casi humano" pero falla en microexpresiones o sincronía temporal. En ese umbral, la respuesta emocional del usuario pasa de empatía a incomodidad, elevando la carga cognitiva y dañando la experiencia. El diseño 2D estilizado de Ada —deliberadamente de tipo 'cartoon-like' y reactivo— neutraliza este riesgo por completo al operar en el territorio seguro de la representación claramente artificial pero altamente expresiva. Esta decisión se refleja en la extrema eficiencia y baja latencia de la aplicación web, superior al renderizado 3D (Three.js/VRM), reduciendo el consumo de recursos computacionales durante la alta demanda de la tarea de programación.
+El efecto inverso —conocido como el Valle Inquietante— ocurre cuando un avatar es "casi humano" pero falla en microexpresiones o sincronía temporal. En ese umbral, la respuesta emocional del usuario pasa de empatía a incomodidad, elevando la carga cognitiva y dañando la experiencia. La estética 2D de Sonic —un sprite pixelado claramente artificial pero altamente expresivo— neutraliza este riesgo por completo al operar en el territorio seguro de la representación claramente artificial pero altamente expresiva. Esta decisión se refleja en la extrema eficiencia y baja latencia de la aplicación web, superior al renderizado 3D (Three.js/VRM), reduciendo el consumo de recursos computacionales durante la alta demanda de la tarea de programación.
 
 ---
 
