@@ -168,8 +168,9 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | Ruta | Descripción |
 |---|---|
 | [`docs/`](docs/) | Documentación principal del proyecto. |
-| [`docs/entregable-2.html`](docs/entregable-2.html) | **Documento principal del Entregable 2** (secciones a–f, imprimible como PDF). |
 | [`docs/entregable-1.pdf`](docs/entregable-1.pdf) | Documento del Entregable 1 (PDF). |
+| [`docs/entregable-2.pdf`](docs/entregable-2.pdf) | Documento del Entregable 2 (PDF). |
+| [`docs/entregable-2.html`](docs/entregable-2.html) | Documento principal del Entregable 2 (HTML). |
 | [`docs/01-overview.md`](docs/01-overview.md) | Resumen del objetivo y motivación del proyecto. |
 | [`docs/02-architecture.md`](docs/02-architecture.md) | Arquitectura y diseño del sistema. |
 | [`docs/03-evaluation-protocol.md`](docs/03-evaluation-protocol.md) | Protocolo de evaluación y matriz de consistencia metodológica. |
