@@ -236,6 +236,10 @@ function SessionContent() {
   };
 
   const handleTransitionComplete = () => {
+    // IMPORTANT: reset before navigating — same SessionContent instance stays mounted
+    // after a soft-navigation to the same page, so showTransition must be cleared or
+    // the early-return re-renders TaskTransitionGame for task-2 too.
+    setShowTransition(false);
     router.push(`/session?id=${sessionId}&condition=${condition}&task=task-2-algorithm-complexity`);
   };
 

@@ -263,7 +263,17 @@ export default function SonicGameCanvas({
           }
           if (victoryMode) {
             victoryTimer += k.dt();
-            if (sonic.isGrounded() && victoryTimer % 0.9 < k.dt() * 2) { sonic.jump(1100); sonic.play("jump"); }
+            // Jump every ~1.1 s — gate with a wider window to avoid rapid re-triggers
+            if (sonic.isGrounded() && victoryTimer % 1.1 < k.dt() * 3) {
+              sonic.jump(1100);
+              sonic.play("jump");
+              // Reset rotation RIGHT AFTER the jump impulse so physics has no window
+              sonic.angle           = 0;
+              sonic.angularVelocity = 0;
+            }
+            // Hard-lock rotation every frame (victory mode never needs tilting)
+            sonic.angle           = 0;
+            sonic.angularVelocity = 0;
             label.text  = "¡ZONA COMPLETADA!";
             label.color = k.Color.fromHex("#ffcc00");
             return;

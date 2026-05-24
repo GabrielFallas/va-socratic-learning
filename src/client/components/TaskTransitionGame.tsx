@@ -99,8 +99,12 @@ export default function TaskTransitionGame({
 
       k.scene("transition", () => {
         k.setGravity(2400);
-        const GROUND_Y = 250;
-        const BG_W     = 1600;
+        const GROUND_Y   = 250;
+        const BG_W       = 1600;
+        // World-scroll speed: rings + other objects move LEFT toward Sonic.
+        // This gives the "Sonic running through the world" feel while Sonic
+        // stays at a fixed screen X (no camera needed).
+        const WORLD_SPD  = 170;
 
         // ── Backgrounds ──────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,7 +112,7 @@ export default function TaskTransitionGame({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2.67), k.z(0)]);
 
-        // Ground
+        // Ground — wide enough so scrolling world never reveals a gap
         k.add([k.rect(800, 60), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#1a3d1a")), k.body({ isStatic: true }), k.area(), k.z(1)]);
         k.add([k.rect(800, 10), k.pos(0, GROUND_Y), k.color(k.Color.fromHex("#4caf50")), k.z(2)]);
 
@@ -116,7 +120,7 @@ export default function TaskTransitionGame({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sonic: any = k.add([
           k.sprite("sonic", { anim: "run" }),
-          k.pos(100, GROUND_Y),
+          k.pos(130, GROUND_Y),
           k.scale(2),
           k.anchor("bot"),
           k.body(),
@@ -128,7 +132,12 @@ export default function TaskTransitionGame({
         // Controls
         function tryJump() {
           if (sonic.isGrounded()) {
-            sonic.jump(1700); sonic.play("jump"); playSFX("jump", 0.5);
+            sonic.jump(1700);
+            sonic.play("jump");
+            // Reset rotation immediately after jump impulse
+            sonic.angle           = 0;
+            sonic.angularVelocity = 0;
+            playSFX("jump", 0.5);
           }
         }
         k.onKeyPress("space", tryJump);
@@ -137,6 +146,8 @@ export default function TaskTransitionGame({
         k.onClick(tryJump);
 
         sonic.onGround(() => {
+          sonic.angle           = 0;
+          sonic.angularVelocity = 0;
           if (sonic.curAnim() !== "run") sonic.play("run");
         });
 
@@ -145,17 +156,19 @@ export default function TaskTransitionGame({
           k.text("ESPACIO / CLICK para saltar", { size: 13, font: "monospace" }),
           k.pos(400, 16),
           k.anchor("top"),
-          // Note: Kaplay fromHex only supports 6-char hex — no alpha suffix
+          // Note: Kaplay fromHex only accepts 6-char hex — alpha must be a separate k.opacity()
           k.color(k.Color.fromHex("#ffcc00")),
           k.opacity(0.5),
           k.z(10),
         ]);
 
-        // ── Rings placed in path ──────────────────────────────
+        // ── Rings placed ahead in world-space ─────────────────
+        // Rings start to the right of Sonic and scroll toward him at WORLD_SPD.
+        // Layout: every 3rd ring is elevated so players must jump for it.
         for (let i = 0; i < ringCount; i++) {
           const elevated = i % 3 === 2;
-          const y = elevated ? GROUND_Y - 110 : GROUND_Y - 45;
-          const x = 270 + i * 60;
+          const y = elevated ? GROUND_Y - 115 : GROUND_Y - 48;
+          const x = 350 + i * 65;          // first ring at x=350, spreads rightward
           k.add([
             k.sprite("ring-sprite", { anim: "spin" }),
             k.pos(x, y),
@@ -175,7 +188,7 @@ export default function TaskTransitionGame({
           playSFX("ring", 0.65);
           onRingCollected?.();
 
-          // Burst
+          // Burst effect at ring position
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const burst: any = k.add([
             k.sprite("ring-sprite", { anim: "spin" }),
@@ -194,11 +207,13 @@ export default function TaskTransitionGame({
           }
         });
 
-        // ── Motobug boss (enters from right) ─────────────────
+        // ── Motobug boss ──────────────────────────────────────
+        // Spawns far to the right; the world scroll plus its own chase speed
+        // bring it to Sonic at roughly the same time as the last ring.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const moto: any = k.add([
           k.sprite("motobug", { anim: "run" }),
-          k.pos(860, GROUND_Y),
+          k.pos(1050, GROUND_Y),
           k.scale(2.5),
           k.anchor("bot"),
           k.area(),
@@ -206,7 +221,7 @@ export default function TaskTransitionGame({
           "motobug",
         ]);
 
-        // Defeat motobug by landing on top
+        // Defeat motobug by stomping (falling vel must be positive = downward)
         sonic.onCollide("motobug", (bug: ReturnType<typeof k.add>) => {
           if (!bossDefeatedRef.current && sonic.vel.y > 30) {
             bossDefeatedRef.current = true;
@@ -215,7 +230,9 @@ export default function TaskTransitionGame({
             setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 600);
             k.destroy(bug);
             playSFX("destroy", 0.75);
-            sonic.jump(1500); // bounce off
+            sonic.jump(1500); // bounce
+            sonic.angle           = 0;
+            sonic.angularVelocity = 0;
 
             if (localRings >= ringCount) {
               setTimeout(() => { if (mounted) startOutro(); }, 600);
@@ -225,22 +242,27 @@ export default function TaskTransitionGame({
 
         // ── Update ────────────────────────────────────────────
         k.onUpdate(() => {
-          // Fix rotation
+          // ① Rotation lock — prevent physics from tilting Sonic
           sonic.angle           = 0;
           sonic.angularVelocity = 0;
 
-          // Scroll bg
+          // ② Scroll background (slightly faster than world for parallax)
           [bg1, bg2].forEach((bg) => {
-            bg.pos.x -= 200 * k.dt();
+            bg.pos.x -= (WORLD_SPD + 40) * k.dt();
             if (bg.pos.x <= -BG_W) bg.pos.x = BG_W;
           });
 
-          // Move motobug toward Sonic until stopped
+          // ③ Scroll all rings toward Sonic (world-runner effect)
+          k.get("ring").forEach((ring: ReturnType<typeof k.add>) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (ring as any).pos.x -= WORLD_SPD * k.dt();
+          });
+
+          // ④ Motobug: world scroll + chase speed; flip to face left
           if (moto.exists()) {
-            moto.pos.x -= 150 * k.dt();
-            // Flip sprite to face left (scaleX negative)
+            moto.pos.x -= (WORLD_SPD + 60) * k.dt();
             moto.scale.x = -2.5;
-            if (moto.pos.x < -50) k.destroy(moto);
+            if (moto.pos.x < -60) k.destroy(moto);
           }
         });
       });

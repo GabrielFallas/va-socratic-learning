@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import type { ChatMessage, Condition, AvatarState } from "@/shared/types/session";
-import { speak, stopSpeaking, isTTSAvailable, preloadCheck } from "@/services/tts/piperTTS";
+import { speak, stopSpeaking, preloadCheck } from "@/services/tts/piperTTS";
 import { startListening, stopListening, isSTTAvailable } from "@/services/stt/whisperSTT";
 import { playSFX, preloadSFX, startBGMusic, stopBGMusic } from "@/client/audio/sfx";
 
@@ -24,14 +24,14 @@ const SonicGameCanvas = dynamic(
 );
 
 interface ChatInterfaceProps {
-  condition: Condition;
-  sessionId: string;
+  condition:             Condition;
+  sessionId:             string;
   taskContext?: {
-    taskId: string;
-    buggyCode: string;
-    errorDescription: string;
+    taskId:             string;
+    buggyCode:          string;
+    errorDescription:   string;
   };
-  onNewMessage?: (message: ChatMessage, latencyMs: number) => void;
+  onNewMessage?:         (message: ChatMessage, latencyMs: number) => void;
   ringsCollected?:       number;
   timeRemainingSeconds?: number;
   taskCompleted?:        boolean;
@@ -51,27 +51,122 @@ const WELCOME_TEXT =
 const WELCOME_TEXT_B =
   "¡Hola! Soy Sonic, tu tutor socrático. Nunca doy respuestas directas — te hago las preguntas correctas para que TÚ encuentres la solución. ¿Qué comportamiento inesperado estás viendo en tu código?";
 
+// ── Avatar state label map (shown in the dialogue name chip) ──────────
+const STATE_CHIP: Record<AvatarState, { label: string; color: string }> = {
+  idle:        { label: "SONIC",       color: "#ffcc00" },
+  thinking:    { label: "PENSANDO…",   color: "#88aaff" },
+  speaking:    { label: "SONIC",       color: "#ffcc00" },
+  listening:   { label: "ESCUCHANDO",  color: "#44ff88" },
+  happy:       { label: "¡GENIAL!",    color: "#ffcc00" },
+  curious:     { label: "SONIC?",      color: "#ff8800" },
+  empathetic:  { label: "SONIC…",      color: "#88ccff" },
+  encouraging: { label: "¡VAMOS!",     color: "#ffdd00" },
+};
+
+// ── Game-style dialogue box ────────────────────────────────────────────
+function DialogueBox({
+  text,
+  avatarState,
+  isLoading,
+  isTyping,
+}: {
+  text:        string;
+  avatarState: AvatarState;
+  isLoading:   boolean;
+  isTyping:    boolean;
+}) {
+  const chip = STATE_CHIP[avatarState] ?? STATE_CHIP.idle;
+
+  return (
+    <div
+      style={{
+        background:   "linear-gradient(180deg, rgba(0,4,24,0.97) 0%, rgba(0,10,35,0.99) 100%)",
+        borderTop:    `3px solid ${chip.color}`,
+        padding:      "10px 14px 10px 14px",
+        minHeight:    "90px",
+        position:     "relative",
+      }}
+    >
+      {/* Name chip */}
+      <div style={{
+        fontFamily:    "'Courier New', monospace",
+        fontSize:      "11px",
+        fontWeight:    900,
+        letterSpacing: "0.15em",
+        color:         chip.color,
+        marginBottom:  "6px",
+        textShadow:    `0 0 8px ${chip.color}88`,
+      }}>
+        🦔 {chip.label}
+      </div>
+
+      {/* Dialogue text */}
+      {isLoading && !text ? (
+        /* Loading dots */
+        <div className="flex gap-1 items-center pl-1" style={{ paddingTop: "4px" }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2 h-2 rounded-full animate-bounce"
+              style={{ background: chip.color, animationDelay: `${i * 0.15}s`, opacity: 0.8 }}
+            />
+          ))}
+          <span style={{
+            fontFamily: "'Courier New', monospace",
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.3)",
+            marginLeft: "6px",
+          }}>
+            Sonic está pensando…
+          </span>
+        </div>
+      ) : (
+        <p style={{
+          fontFamily:  "'Courier New', monospace",
+          fontSize:    "13px",
+          lineHeight:  "1.55",
+          color:       "#ffffff",
+          margin:      0,
+          whiteSpace:  "pre-wrap",
+          wordBreak:   "break-word",
+          // Show max 5 lines; user can read more from Condition B–style overflow
+          display:     "-webkit-box",
+          WebkitLineClamp: 5,
+          WebkitBoxOrient: "vertical",
+          overflow:    "hidden",
+        } as React.CSSProperties}>
+          {text}
+          {isTyping && (
+            <span style={{ color: chip.color, animation: "blink 0.8s infinite" }}>▌</span>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────
 export default function ChatInterface({
   condition,
   sessionId,
   taskContext,
   onNewMessage,
-  ringsCollected = 0,
+  ringsCollected       = 0,
   timeRemainingSeconds = 600,
-  taskCompleted = false,
-  ringMultiplier = 1,
+  taskCompleted        = false,
+  ringMultiplier       = 1,
 }: ChatInterfaceProps) {
-  const [messages, setMessages]             = useState<ChatMessage[]>([]);
-  const [inputText, setInputText]           = useState("");
-  const [isLoading, setIsLoading]           = useState(false);
-  const [avatarState, setAvatarState]       = useState<AvatarState>("idle");
-  const [isSpeakingTTS, setIsSpeakingTTS]   = useState(false);
-  const [isListeningSTT, setIsListeningSTT] = useState(false);
+  const [messages,          setMessages]          = useState<ChatMessage[]>([]);
+  const [inputText,         setInputText]         = useState("");
+  const [isLoading,         setIsLoading]         = useState(false);
+  const [avatarState,       setAvatarState]       = useState<AvatarState>("idle");
+  const [isSpeakingTTS,     setIsSpeakingTTS]     = useState(false);
+  const [isListeningSTT,    setIsListeningSTT]    = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
-  const [streamingText, setStreamingText]   = useState("");
-  const [sttAvailable, setSttAvailable]     = useState(false);
-  const [sttError, setSttError]             = useState<string | null>(null);
-  const [soundUnlocked, setSoundUnlocked]   = useState(false);
+  const [streamingText,     setStreamingText]     = useState("");
+  const [sttAvailable,      setSttAvailable]      = useState(false);
+  const [sttError,          setSttError]          = useState<string | null>(null);
+  const [soundUnlocked,     setSoundUnlocked]     = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef       = useRef<HTMLTextAreaElement>(null);
@@ -91,17 +186,19 @@ export default function ChatInterface({
     return () => clearTimeout(t);
   }, [sttError]);
 
-  // Auto-scroll
+  // Auto-scroll (Condition B chat list)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingText]);
+    if (!isConditionA) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, streamingText, isConditionA]);
 
   // Welcome message
   useEffect(() => {
     const welcome: ChatMessage = {
-      id: "welcome",
-      role: "assistant",
-      content: isConditionA ? WELCOME_TEXT : WELCOME_TEXT_B,
+      id:        "welcome",
+      role:      "assistant",
+      content:   isConditionA ? WELCOME_TEXT : WELCOME_TEXT_B,
       timestamp: Date.now(),
     };
     setMessages([welcome]);
@@ -114,7 +211,7 @@ export default function ChatInterface({
     return () => { stopBGMusic(); };
   }, []);
 
-  // ── Unlock audio + start BGM + speak welcome ──────────────────
+  // ── Unlock audio + start BGM + speak welcome ─────────────────────────
   const handleUnlockSound = useCallback(() => {
     setSoundUnlocked(true);
     startBGMusic(0.12);
@@ -132,7 +229,7 @@ export default function ChatInterface({
     ).catch(console.error);
   }, []);
 
-  // ── Send message ──────────────────────────────────────────────
+  // ── Send message ──────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
@@ -142,13 +239,12 @@ export default function ChatInterface({
         startBGMusic(0.12);
       }
 
-      // Jump SFX on send
       if (isConditionA) playSFX("jump", 0.5);
 
       const userMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: text.trim(),
+        id:        crypto.randomUUID(),
+        role:      "user",
+        content:   text.trim(),
         timestamp: Date.now(),
       };
 
@@ -172,9 +268,9 @@ export default function ChatInterface({
         ].filter((m) => m.role !== "system");
 
         const response = await fetch("/api/chat", {
-          method: "POST",
+          method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, condition, messages: apiMessages, taskContext }),
+          body:    JSON.stringify({ sessionId, condition, messages: apiMessages, taskContext }),
         });
 
         if (!response.ok || !response.body) {
@@ -215,10 +311,10 @@ export default function ChatInterface({
           .trim();
 
         const assistantMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: cleanText,
-          timestamp: Date.now(),
+          id:             crypto.randomUUID(),
+          role:           "assistant",
+          content:        cleanText,
+          timestamp:      Date.now(),
           latencyMs,
           totalResponseMs: Date.now() - sendStart,
         };
@@ -228,7 +324,6 @@ export default function ChatInterface({
 
         if (isConditionA) {
           setAvatarState(finalAvatarState);
-          // Ring SFX
           playSFX("ring", 0.7);
         }
 
@@ -255,9 +350,9 @@ export default function ChatInterface({
         setMessages((prev) => [
           ...prev,
           {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: `Error: ${errMsg}`,
+            id:        crypto.randomUUID(),
+            role:      "assistant",
+            content:   `Error: ${errMsg}`,
             timestamp: Date.now(),
           },
         ]);
@@ -304,9 +399,9 @@ export default function ChatInterface({
             setIsListeningSTT(false);
             if (isConditionA) setAvatarState("idle");
             setSttError(
-              error === "not-allowed"          ? "Permiso de micrófono denegado." :
-              error === "device-not-found"     ? "Dispositivo no encontrado." :
-              error.includes("network")        ? "Error de conexión STT." :
+              error === "not-allowed"      ? "Permiso de micrófono denegado." :
+              error === "device-not-found" ? "Dispositivo no encontrado."     :
+              error.includes("network")    ? "Error de conexión STT."         :
               `Error: ${error}`
             );
           },
@@ -319,27 +414,28 @@ export default function ChatInterface({
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────
-  return (
-    <div
-      className="flex flex-col h-full relative"
-      style={{
-        background: isConditionA
-          ? "linear-gradient(180deg, #000d1a 0%, #0a0a1a 100%)"
-          : "#0f0f1a",
-      }}
-      data-testid="chat-interface"
-      data-condition={condition}
-    >
-      {/* ── Condition A: Kaplay game canvas ──────────────────────── */}
-      {isConditionA && (
+  // ── Derived values for dialogue box ──────────────────────────────────
+  const lastAssistantMsg = [...messages].reverse().find((m) => m.role === "assistant");
+  const lastUserMsg      = [...messages].reverse().find((m) => m.role === "user");
+  // Show streaming text while it arrives; fall back to last committed message
+  const dialogueContent  = streamingText || lastAssistantMsg?.content || "";
+  const isTypingDialogue = isConditionA && !!streamingText;
+
+  // ── Condition A — immersive game layout ──────────────────────────────
+  if (isConditionA) {
+    return (
+      <div
+        className="flex flex-col h-full"
+        style={{ background: "linear-gradient(180deg, #000d1a 0%, #0a0a1a 100%)" }}
+        data-testid="chat-interface"
+        data-condition={condition}
+      >
+        {/* ═══ AVATAR ZONE — takes most of the vertical height ═════════ */}
         <div
-          className="relative border-b flex-shrink-0 overflow-hidden"
-          style={{
-            borderColor: "#0066cc",
-            height: "260px",
-          }}
+          className="relative flex-[3] min-h-0 overflow-hidden"
+          style={{ borderBottom: "3px solid #0066cc" }}
         >
+          {/* Kaplay game canvas */}
           <SonicGameCanvas
             avatarState={avatarState}
             isSpeaking={isSpeakingTTS}
@@ -349,22 +445,32 @@ export default function ChatInterface({
             className="w-full h-full"
           />
 
-          {/* Multiplier badge — shows inside canvas header when >1x */}
+          {/* Multiplier badge */}
           {ringMultiplier > 1 && (
             <div
-              className="absolute top-2 left-2 z-10 px-2 py-1 rounded-lg font-mono font-black text-sm animate-pulse"
+              className="absolute top-2 left-2 z-10 px-2 py-1 rounded-lg font-mono font-black animate-pulse"
               style={{
-                background: ringMultiplier >= 3 ? "#ff4400" : ringMultiplier >= 2 ? "#ff8800" : "#ffcc00",
-                color: "#000",
-                boxShadow: `0 0 12px ${ringMultiplier >= 3 ? "#ff4400" : "#ffcc00"}`,
-                fontSize: "13px",
+                background: ringMultiplier >= 3 ? "#ff4400" : "#ff8800",
+                color:      "#000",
+                fontSize:   "12px",
+                boxShadow:  `0 0 12px ${ringMultiplier >= 3 ? "#ff4400" : "#ffcc00"}`,
               }}
             >
               x{ringMultiplier} COMBO!
             </div>
           )}
 
-          {/* "Press Start" overlay */}
+          {/* ── Game dialogue box — overlaid at the bottom of the canvas ─ */}
+          <div className="absolute bottom-0 left-0 right-0 z-10">
+            <DialogueBox
+              text={dialogueContent}
+              avatarState={avatarState}
+              isLoading={isLoading}
+              isTyping={isTypingDialogue}
+            />
+          </div>
+
+          {/* ── PRESS START overlay ────────────────────────────────────── */}
           {!soundUnlocked && (
             <div
               className="absolute inset-0 flex items-center justify-center z-20"
@@ -377,7 +483,7 @@ export default function ChatInterface({
                 <span
                   className="font-black text-3xl tracking-widest animate-bounce"
                   style={{
-                    color: "#ffcc00",
+                    color:      "#ffcc00",
                     fontFamily: "'Courier New', monospace",
                     textShadow: "0 0 20px rgba(255,204,0,0.8)",
                   }}
@@ -388,9 +494,9 @@ export default function ChatInterface({
                   className="font-bold text-sm px-6 py-2 rounded-full animate-pulse"
                   style={{
                     background: "linear-gradient(90deg, #ffcc00, #ff8c00)",
-                    color: "black",
+                    color:      "black",
                     fontFamily: "'Courier New', monospace",
-                    boxShadow: "0 0 24px rgba(255,204,0,0.6)",
+                    boxShadow:  "0 0 24px rgba(255,204,0,0.6)",
                     letterSpacing: "0.1em",
                   }}
                 >
@@ -403,24 +509,161 @@ export default function ChatInterface({
             </div>
           )}
         </div>
-      )}
 
-      {/* ── Condition B: Simple header ────────────────────────────── */}
-      {!isConditionA && (
+        {/* ═══ INPUT ZONE — compact, no message history ════════════════ */}
         <div
-          className="px-4 py-3 border-b"
-          style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.5)" }}
+          className="flex-[2] flex flex-col min-h-0 px-3 pt-2 pb-3 gap-2"
+          style={{ background: "rgba(0,2,12,0.6)" }}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-white font-mono text-sm font-bold">
-              [SONIC] Chat Socrático
+          {/* Last user message (compact echo so user sees what they sent) */}
+          {lastUserMsg && !isLoading && (
+            <div className="flex justify-end">
+              <div
+                className="max-w-[85%] px-3 py-1.5 text-xs font-mono text-white rounded-xl"
+                style={{
+                  background: "rgba(26,0,102,0.7)",
+                  border:     "1px solid rgba(102,51,255,0.4)",
+                  overflow:   "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth:   "100%",
+                }}
+                title={lastUserMsg.content}
+              >
+                <span style={{ color: "rgba(255,255,255,0.35)", marginRight: "6px" }}>Tú:</span>
+                {lastUserMsg.content.length > 80
+                  ? lastUserMsg.content.slice(0, 80) + "…"
+                  : lastUserMsg.content}
+              </div>
+            </div>
+          )}
+
+          {/* STT error */}
+          {sttError && (
+            <div
+              className="text-xs text-red-300 px-3 py-1.5 rounded-lg font-mono"
+              style={{ background: "#2a0000", border: "1px solid #ff4444" }}
+            >
+              ⚠ {sttError}
+            </div>
+          )}
+
+          {/* ── Input row ─────────────────────────────────────────────── */}
+          <div className="flex gap-2 items-end mt-auto">
+            {/* Textarea */}
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                value={inputText + interimTranscript}
+                onChange={(e) => { if (!isListeningSTT) setInputText(e.target.value); }}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  isListeningSTT
+                    ? "🎙 Escuchando… habla ahora"
+                    : "Escribe o usa el micrófono… (Enter para enviar)"
+                }
+                rows={2}
+                disabled={isLoading}
+                className="w-full resize-none rounded-xl px-4 py-3 text-sm text-white outline-none transition-all font-mono disabled:opacity-50"
+                style={{
+                  background:  "rgba(255,255,255,0.07)",
+                  border:      `1px solid ${isListeningSTT ? "#ff4444" : "#0066cc"}`,
+                  caretColor:  "#ffcc00",
+                }}
+                data-testid="chat-input"
+              />
+
+              {/* Listening pulse ring */}
+              {isListeningSTT && (
+                <div
+                  className="absolute inset-0 rounded-xl pointer-events-none animate-pulse"
+                  style={{ border: "2px solid #ff4444", opacity: 0.6 }}
+                />
+              )}
+            </div>
+
+            {/* Mic button */}
+            {sttAvailable && (
+              <button
+                onClick={toggleSTT}
+                className="p-3 rounded-xl transition-all"
+                style={{
+                  background: isListeningSTT ? "#cc0000" : "rgba(0,102,204,0.5)",
+                  border:     `1px solid ${isListeningSTT ? "#ff4444" : "#4da6ff"}`,
+                  animation:  isListeningSTT ? "pulse 1s infinite" : "none",
+                  minWidth:   "48px",
+                }}
+                title={isListeningSTT ? "Detener grabación" : "Hablar con Sonic"}
+                data-testid="mic-button"
+              >
+                <span className="text-sm font-bold text-white">
+                  {isListeningSTT ? "⏹" : "🎙"}
+                </span>
+              </button>
+            )}
+
+            {/* Send button */}
+            <button
+              onClick={() => sendMessage(inputText)}
+              disabled={isLoading || !inputText.trim()}
+              className="p-3 rounded-xl font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: "linear-gradient(90deg, #ffcc00, #ff8c00)",
+                color:      "black",
+                boxShadow:  "0 3px 0 #cc6600",
+                minWidth:   "48px",
+              }}
+              data-testid="send-button"
+              aria-label="Enviar mensaje"
+            >
+              <span className="text-lg">▶</span>
+            </button>
+          </div>
+
+          {/* Status bar */}
+          <div
+            className="flex items-center gap-3 text-xs font-mono"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
+            <span>🎮 {sessionId.slice(0, 8)}</span>
+            <span>·</span>
+            <span style={{ color: soundUnlocked ? "#4caf50" : "#f59e0b" }}>
+              🔊 {soundUnlocked ? "ON" : "▶ START"}
             </span>
-            <span className="text-white/40 text-xs ml-auto">Condición B</span>
+            <span>·</span>
+            <span style={{ color: sttAvailable ? "#4caf50" : "#f44336" }}>
+              STT {sttAvailable ? "✓" : "✗"}
+            </span>
+            <span>·</span>
+            <span>Cond. A</span>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* ── Messages ─────────────────────────────────────────────── */}
+  // ── Condition B — classic chat layout ────────────────────────────────
+  return (
+    <div
+      className="flex flex-col h-full relative"
+      style={{ background: "#0f0f1a" }}
+      data-testid="chat-interface"
+      data-condition={condition}
+    >
+      {/* Header */}
+      <div
+        className="px-4 py-3 border-b flex-shrink-0"
+        style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.5)" }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-white font-mono text-sm font-bold">
+            [SONIC] Chat Socrático
+          </span>
+          <span className="text-white/40 text-xs ml-auto">Condición B</span>
+        </div>
+      </div>
+
+      {/* Messages */}
       <div
         className="flex-1 overflow-y-auto p-4 space-y-3"
         data-testid="messages-container"
@@ -440,22 +683,15 @@ export default function ChatInterface({
                 background:
                   msg.role === "user"
                     ? "linear-gradient(135deg, #1a0066, #3300cc)"
-                    : isConditionA
-                    ? "linear-gradient(135deg, #003399, #0066cc)"
                     : "#1e1e3a",
                 border:
                   msg.role === "user"
                     ? "2px solid #6633ff"
-                    : isConditionA
-                    ? "2px solid #4da6ff"
                     : "1px solid #333355",
               }}
             >
               {msg.role === "assistant" && (
-                <div
-                  className="text-xs font-mono mb-1"
-                  style={{ color: isConditionA ? "#ffcc00" : "#88aacc" }}
-                >
+                <div className="text-xs font-mono mb-1" style={{ color: "#88aacc" }}>
                   [SONIC]
                 </div>
               )}
@@ -484,17 +720,17 @@ export default function ChatInterface({
               className="max-w-[80%] px-4 py-3"
               style={{
                 borderRadius: "18px 18px 18px 4px",
-                background: isConditionA ? "linear-gradient(135deg, #003399, #0066cc)" : "#1e1e3a",
-                border: `2px solid ${isConditionA ? "#4da6ff" : "#333355"}`,
+                background:   "#1e1e3a",
+                border:       "1px solid #333355",
               }}
             >
-              <div className="text-xs font-mono mb-1" style={{ color: "#ffcc00" }}>
-                🦔 SONIC
+              <div className="text-xs font-mono mb-1" style={{ color: "#88aacc" }}>
+                [SONIC]
               </div>
               <p className="text-sm leading-relaxed text-white">{streamingText}</p>
               <span
                 className="inline-block w-2 h-4 ml-1 animate-blink"
-                style={{ background: "#ffcc00" }}
+                style={{ background: "#88aacc" }}
               />
             </div>
           </div>
@@ -505,23 +741,20 @@ export default function ChatInterface({
           <div className="flex justify-start">
             <div
               className="px-4 py-3 rounded-2xl"
-              style={{
-                background: "linear-gradient(135deg, #003399, #0066cc)",
-                border: "2px solid #4da6ff",
-              }}
+              style={{ background: "#1e1e3a", border: "1px solid #333355" }}
             >
-              <div className="text-xs font-mono mb-1" style={{ color: "#ffcc00" }}>
-                🦔 SONIC
+              <div className="text-xs font-mono mb-1" style={{ color: "#88aacc" }}>
+                [SONIC]
               </div>
               <div className="flex gap-1 items-center">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     className="w-2 h-2 rounded-full animate-bounce"
-                    style={{ background: "#ffcc00", animationDelay: `${i * 0.15}s` }}
+                    style={{ background: "#88aacc", animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
-                <span className="text-xs text-white/40 ml-2 font-mono">pensando...</span>
+                <span className="text-xs text-white/40 ml-2 font-mono">pensando…</span>
               </div>
             </div>
           </div>
@@ -530,76 +763,39 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ── Input area ───────────────────────────────────────────── */}
+      {/* Input area */}
       <div
         className="p-4 border-t"
-        style={{
-          borderColor: isConditionA ? "#0066cc" : "#1a2a3a",
-          background: "rgba(0,0,0,0.4)",
-        }}
+        style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.4)" }}
       >
         <div className="flex gap-2 items-end">
-          <div className="flex-1 relative">
+          <div className="flex-1">
             <textarea
               ref={inputRef}
               value={inputText + interimTranscript}
               onChange={(e) => { if (!isListeningSTT) setInputText(e.target.value); }}
               onKeyDown={handleKeyDown}
-              placeholder={
-                isConditionA
-                  ? "Escribe o usa el micrófono... (Enter para enviar)"
-                  : "Escribe tu pregunta... (Enter para enviar)"
-              }
+              placeholder="Escribe tu pregunta… (Enter para enviar)"
               rows={2}
               disabled={isLoading}
               className="w-full resize-none rounded-xl px-4 py-3 text-sm text-white outline-none transition-all font-mono disabled:opacity-50"
               style={{
                 background: "rgba(255,255,255,0.07)",
-                border: `1px solid ${isListeningSTT ? "#ff4444" : isConditionA ? "#0066cc" : "#333355"}`,
-                caretColor: "#ffcc00",
+                border:     "1px solid #333355",
+                caretColor: "#88aacc",
               }}
               data-testid="chat-input"
             />
           </div>
 
-          {/* Mic button — Condition A only */}
-          {isConditionA && sttAvailable && (
-            <div className="relative">
-              <button
-                onClick={toggleSTT}
-                className="p-3 rounded-xl transition-all"
-                style={{
-                  background: isListeningSTT ? "#cc0000" : "rgba(0,102,204,0.5)",
-                  border: `1px solid ${isListeningSTT ? "#ff4444" : "#4da6ff"}`,
-                  animation: isListeningSTT ? "pulse 1s infinite" : "none",
-                }}
-                title={isListeningSTT ? "Detener grabación" : "Hablar con Sonic"}
-                data-testid="mic-button"
-              >
-                <span className="text-sm font-bold text-white">
-                  {isListeningSTT ? "STOP" : "MIC"}
-                </span>
-              </button>
-              {sttError && (
-                <div
-                  className="absolute bottom-full right-0 mb-2 w-52 rounded-lg px-3 py-2 text-xs text-red-200"
-                  style={{ background: "#2a0000", border: "1px solid #ff4444" }}
-                >
-                  {sttError}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Send button */}
           <button
             onClick={() => sendMessage(inputText)}
             disabled={isLoading || !inputText.trim()}
             className="p-3 rounded-xl font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
-              background: "linear-gradient(90deg, #ffcc00, #ff8c00)",
-              color: "black",
-              boxShadow: "0 3px 0 #cc6600",
+              background: "linear-gradient(90deg, #88aacc, #4488aa)",
+              color:      "white",
+              boxShadow:  "0 3px 0 #336688",
             }}
             data-testid="send-button"
             aria-label="Enviar mensaje"
@@ -608,26 +804,13 @@ export default function ChatInterface({
           </button>
         </div>
 
-        {/* Status bar */}
         <div
           className="flex items-center gap-3 mt-2 text-xs font-mono"
           style={{ color: "rgba(255,255,255,0.2)" }}
         >
           <span>🎮 {sessionId.slice(0, 8)}</span>
           <span>·</span>
-          <span>Cond. {condition}</span>
-          {isConditionA && (
-            <>
-              <span>·</span>
-              <span style={{ color: soundUnlocked ? "#4caf50" : "#f59e0b" }}>
-                🔊 {soundUnlocked ? "voz + música ON" : "click ▶ START"}
-              </span>
-              <span>·</span>
-              <span style={{ color: sttAvailable ? "#4caf50" : "#f44336" }}>
-                STT {sttAvailable ? "✓" : "✗"}
-              </span>
-            </>
-          )}
+          <span>Cond. B</span>
         </div>
       </div>
     </div>
