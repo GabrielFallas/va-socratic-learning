@@ -22,7 +22,7 @@
 **Variable Independiente (VI):**
 
 - **Nivel de Presencia y Modalidad del Agente:**
-  Se comparará la interacción con el **Agente Virtual Sonic Embodied** (canvas Kaplay 2D, sprite Sonic 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos gamificados, zonas Chemical Plant / Speed Highway) frente a una interacción de control basada únicamente en **Texto** (mismo tutor socrático, sin canvas, sin voz, sin gamificación — Chatbot Socrático plano).
+  Se comparará la interacción con el **Agente Virtual Sonic Embodied** (canvas Kaplay 2D, sprite Sonic 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos s, zonas Chemical Plant / Speed Highway) frente a una interacción de control basada únicamente en **Texto** (mismo tutor socrático, sin canvas, sin voz, sin gamificación — Chatbot Socrático plano).
 
 **Variables Dependientes (VD):**
 
@@ -63,7 +63,7 @@
 
 2. **Asignación de Condición Experimental (Aleatorizada):**
    El participante es asignado aleatoriamente a:
-   - **Condición A (Sonic Embodied):** Interfaz con Sonic (canvas Kaplay 2D, TTS Piper neuronal, STT Whisper, anillos gamificados, zonas temáticas Chemical Plant / Speed Highway)
+   - **Condición A (Sonic Embodied):** Interfaz con Sonic (canvas Kaplay 2D, TTS Piper neuronal, STT Whisper, anillos s, zonas temáticas Chemical Plant / Speed Highway)
    - **Condición B (Texto):** Chat de texto plano sin representación visual del agente
    
    El investigador carga la interfaz sin revelar el objetivo de la comparación.
@@ -74,7 +74,7 @@
    - **Tarea 2:** Análisis de complejidad y optimización algorítmica (max. ~10 minutos)
 
 4. **Fase de Interacción (Debugging):**
-   El participante intenta resolver el problema interactuando de forma multimodal (voz vía Whisper STT o texto escrito) con el agente en un navegador web. El sistema M-ITS (Sonic Kaplay 2D + Piper TTS neuronal + Whisper STT + anillos gamificados) aplicará técnicas de andamiaje y preguntas reflexivas sin entregar el código corregido. En Condición A, el avatar Sonic reacciona visualmente (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) y el sistema otorga/retira anillos según el avance socrático del participante; Piper TTS vocaliza las respuestas del agente con prosodia natural. Tras 60 s de inactividad, se envía automáticamente un mensaje proactivo (pool de 4 pistas específicas por tarea, sin repetición). El participante responde a Perceived Pedagogical Support después de completar o agotar el tiempo de cada tarea.
+   El participante intenta resolver el problema interactuando de forma multimodal (voz vía Whisper STT o texto escrito) con el agente en un navegador web. El sistema (Sonic Kaplay 2D + Piper TTS neuronal + Whisper STT + anillos s) aplicará técnicas de andamiaje y preguntas reflexivas sin entregar el código corregido. En Condición A, el avatar Sonic reacciona visualmente (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) y el sistema otorga/retira anillos según el avance socrático del participante; Piper TTS vocaliza las respuestas del agente con prosodia natural. Tras 60 s de inactividad, se envía automáticamente un mensaje proactivo (pool de 4 pistas específicas por tarea, sin repetición). El participante responde a Perceived Pedagogical Support después de completar o agotar el tiempo de cada tarea.
 
 5. **Observación Heurística Continua (por Docentes/Senior Managers):**
    Los evaluadores con experiencia pedagógica STEM registran durante la interacción del estudiante:
@@ -116,7 +116,7 @@
 
 | Decisión del Protocolo                  | Justificación Técnica / Pedagógica                                                                 |
 |-----------------------------------------|---------------------------------------------------------------------------------------------------|
-| Comparación Avatar 2D vs. Texto (VI)    | Permite aislar si la inversión técnica en fusión multimodal de baja fricción (sprite Sonic Kaplay 2D, 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos gamificados) realmente aporta valor a la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support**. Este diseño responde directamente a la brecha identificada en investigación previa sobre embodiment en tutoría socrática. |
+| Comparación Avatar 2D vs. Texto (VI)    | Permite aislar si la inversión técnica en fusión multimodal de baja fricción (sprite Sonic Kaplay 2D, 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos s) realmente aporta valor a la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support**. Este diseño responde directamente a la brecha identificada en investigación previa sobre embodiment en tutoría socrática. |
 | Control de Variables (LLM idéntico)    | Ambas condiciones (A y B) utilizan **idéntico** system prompt socrático, modelo LLM (Ollama + Gemma 3 12B) y tareas. Esto asegura que cualquier diferencia significativa se atribuye causalmente a la **presencia del embodiment multimodal**, no a calidad de tutoría. |
 | Medición de Latencia < 1.5s             | Un retraso mayor rompería la ilusión de conversación natural, convirtiendo la interacción en un intercambio de comandos. La latencia extremo a extremo se registra automáticamente en el backend (Condición A). |
 | Prohibición Explícita de Código Directo | Es el núcleo de la metodología socrática para combatir la dependencia de la IA y fomentar el pensamiento crítico. El system prompt de Sonic (sonic-system.ts) prohíbe explícitamente generar código; todas las respuestas deben ser preguntas reflexivas. |

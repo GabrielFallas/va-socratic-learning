@@ -148,7 +148,7 @@
 
 <h4>Cambio 1 — Migración del Motor de Avatar y Pivote a Gamificación (corrección crítica + evolución)</h4>
 <p><strong>Problema original:</strong> Ready Player Me cerró su servicio en enero de 2026, eliminando el pilar visual de la arquitectura original (avatares VRM 3D, lip-sync mediante visemas).</p>
-<p><strong>Solución adoptada (evolución final):</strong> Se migró hacia un <strong>avatar 2D gamificado implementado en Kaplay.js</strong>, usando el sprite de Sonic the Hedgehog (16 frames, 2 animaciones: <em>run</em> / <em>jump</em>) como representación visual del tutor socrático. El avatar opera mediante 8 estados expresivos reactivos (<em>idle, thinking, speaking, listening, happy, curious, empathetic, encouraging</em>) que se mapean a comportamientos de juego en tiempo real (Sonic corre, salta, se congela, activa modo victoria). El sistema incluye dos zonas temáticas que cambian por tarea: <strong>Chemical Plant</strong> (Tarea 1, fondo azul-verde) y <strong>Speed Highway</strong> (Tarea 2, tinte cálido naranja). Un sistema de anillos gamifica el progreso socrático: se gana un anillo cuando la respuesta del usuario se aproxima a la solución, y se pierde cuando el agente detecta frustración. Un mini-juego de transición Kaplay entre tareas refuerza la experiencia lúdica.</p>
+<p><strong>Solución adoptada (evolución final):</strong> Se migró hacia un <strong>avatar 2D  implementado en Kaplay.js</strong>, usando el sprite de Sonic the Hedgehog (16 frames, 2 animaciones: <em>run</em> / <em>jump</em>) como representación visual del tutor socrático. El avatar opera mediante 8 estados expresivos reactivos (<em>idle, thinking, speaking, listening, happy, curious, empathetic, encouraging</em>) que se mapean a comportamientos de juego en tiempo real (Sonic corre, salta, se congela, activa modo victoria). El sistema incluye dos zonas temáticas que cambian por tarea: <strong>Chemical Plant</strong> (Tarea 1, fondo azul-verde) y <strong>Speed Highway</strong> (Tarea 2, tinte cálido naranja). Un sistema de anillos gamifica el progreso socrático: se gana un anillo cuando la respuesta del usuario se aproxima a la solución, y se pierde cuando el agente detecta frustración. Un mini-juego de transición Kaplay entre tareas refuerza la experiencia lúdica.</p>
 <p><strong>Justificación teórica:</strong> El Hajji et al. (2025) documentan que avatares 2D estilizados logran el mismo anclaje de atención pedagógica que los 3D con menor costo computacional. La estética <em>cartoon</em> de Sonic neutraliza el Valle Inquietante (Mori, 1970) y opera en el territorio de representación claramente artificial pero altamente expresiva. La gamificación con anillos añade un componente de motivación intrínseca (autodeterminación, Deci &amp; Ryan, 2000) que el diseño CSS/SVG original no ofrecía.</p>
 
 <h4>Cambio 2 — Actualización de RQ1: "Perceived Pedagogical Support"</h4>
@@ -176,7 +176,7 @@
 <h2>2. Estado Actual del Agente — Prueba de Concepto (PoC)</h2>
 
 <h3>2.1 Descripción General de la PoC</h3>
-<p>La Prueba de Concepto corresponde a una <strong>aplicación web funcional completa</strong> construida con Next.js 14 (App Router) que implementa los dos brazos del diseño experimental: la <strong>Condición A</strong> — Sonic corporizado con canvas de juego Kaplay 2D, TTS Piper neuronal, STT Whisper, gamificación de anillos, zonas temáticas (Chemical Plant / Speed Highway), mini-juego de transición y SFX/BGM — y la <strong>Condición B</strong> — el mismo tutor socrático presentado como chat de texto plano sin elementos de embodiment. El sistema demuestra la integración real de todos los componentes principales de la arquitectura M-ITS propuesta.</p>
+<p>La Prueba de Concepto corresponde a una <strong>aplicación web funcional completa</strong> construida con Next.js 14 (App Router) que implementa los dos brazos del diseño experimental: la <strong>Condición A</strong> — Sonic corporizado con canvas de juego Kaplay 2D, TTS Piper neuronal, STT Whisper, gamificación de anillos, zonas temáticas (Chemical Plant / Speed Highway), mini-juego de transición y SFX/BGM — y la <strong>Condición B</strong> — el mismo tutor socrático presentado como chat de texto plano sin elementos de embodiment. El sistema demuestra la integración real de todos los componentes principales de la arquitectura propuesta.</p>
 
 <h3>2.2 Diagrama de Arquitectura</h3>
 <div class="arch">
@@ -229,7 +229,7 @@
     <tr>
       <td><strong>Avatar / Motor de Juego (Condición A)</strong></td>
       <td>Kaplay.js 2D + Sprite Sonic the Hedgehog (16 frames, 2 animaciones: run / jump)</td>
-      <td>Canvas de juego side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea (Chemical Plant / Speed Highway). Sistema de anillos como indicador gamificado de progreso socrático. Estética cartoon que evita el Valle Inquietante (Mori, 1970).</td>
+      <td>Canvas de juego side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea (Chemical Plant / Speed Highway). Sistema de anillos como indicador  de progreso socrático. Estética cartoon que evita el Valle Inquietante (Mori, 1970).</td>
     </tr>
     <tr>
       <td><strong>Motor de Razonamiento (LLM)</strong></td>
@@ -286,7 +286,7 @@
       <td>Zona 1 (fondo azul-verde) — Tarea 1; Zona 2 (tinte naranja cálido) — Tarea 2. Cambia automáticamente al iniciar cada tarea.</td>
     </tr>
     <tr>
-      <td>Sistema de anillos gamificado</td>
+      <td>Sistema de anillos </td>
       <td><span class="badge done">✓ Implementado</span></td>
       <td>Ring burst animado al ganar anillo; hurt flash + blink de Sonic al perder. Contador en HUD overlay. Velocidad del fondo escala con anillos acumulados.</td>
     </tr>

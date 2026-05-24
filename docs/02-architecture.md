@@ -147,7 +147,7 @@ El sistema interactúa con el usuario en un entorno web enfocado en tareas de de
 
 | Capa / Componente | Tecnología Implementada | Justificación Técnica y Académica |
 |:---|:---|:---|
-| **Avatar / Motor de Juego (Condición A)** | Kaplay.js 2D + Sprite Sonic the Hedgehog (16 frames, animaciones run/jump) | Canvas side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea: Chemical Plant (Tarea 1) y Speed Highway (Tarea 2). Sistema de anillos gamificado. Evita el Valle Inquietante (Mori, 1970). |
+| **Avatar / Motor de Juego (Condición A)** | Kaplay.js 2D + Sprite Sonic the Hedgehog (16 frames, animaciones run/jump) | Canvas side-scrolling con 8 estados expresivos mapeados a comportamientos de Sonic. Zonas temáticas por tarea: Chemical Plant (Tarea 1) y Speed Highway (Tarea 2). Sistema de anillos . Evita el Valle Inquietante (Mori, 1970). |
 | **Motor de Razonamiento (LLM)** | Ollama + Gemma 3 12B (Q4_K_M) — inferencia GPU local | Sin API keys externas. ~7.3 GB en RTX 5070 Ti 16 GB VRAM. System prompt sonic-system.ts con ZPD de 3 niveles, detección de frustración y control de avatar via [AVATAR_STATE]. |
 | **Síntesis de Voz (TTS)** | Piper TTS neuronal (Docker local) + fallback Web Speech API | Piper: español de alta calidad, latencia <200 ms. Fallback automático a Web Speech API. Activo solo en Condición A. |
 | **Reconocimiento de Voz (STT)** | Whisper STT local (vía /api/stt en Next.js) | Transcripción de voz del participante en tiempo real. Español latinoamericano. Activo solo en Condición A. |

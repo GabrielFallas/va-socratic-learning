@@ -1,10 +1,10 @@
-# Sonic — Tutor Socrático Gamificado Corporizado (AVTS/M-ITS)
+# Sonic — Tutor Socrático Corporizado
 
 > **PF-3311 · Agentes Virtuales Inteligentes · Universidad de Costa Rica · I Semestre 2026**
 
 ## Resumen
 
-Repositorio del proyecto de investigación sobre un agente virtual de tutoría socrática gamificado para el desarrollo de lógica de programación y resolución de problemas en entornos STEM. El objetivo es evaluar si una interacción basada en preguntas reflexivas y pistas graduales —complementada con un avatar 2D reactivo (Sonic Kaplay), síntesis de voz neuronal (Piper TTS), reconocimiento de voz local (Whisper STT) y gamificación de anillos— mejora la comprensión y la autonomía del estudiante, en comparación con un chatbot de texto plano, sin entregar soluciones de código directas.
+Repositorio del proyecto de investigación sobre un agente virtual de tutoría socrática  para el desarrollo de lógica de programación y resolución de problemas en entornos STEM. El objetivo es evaluar si una interacción basada en preguntas reflexivas y pistas graduales —complementada con un avatar 2D reactivo (Sonic Kaplay), síntesis de voz neuronal (Piper TTS), reconocimiento de voz local (Whisper STT) y gamificación de anillos— mejora la comprensión y la autonomía del estudiante, en comparación con un chatbot de texto plano, sin entregar soluciones de código directas.
 
 ## 🎥 Video de Demostración
 
@@ -21,8 +21,8 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 | RQ | Pregunta |
 |---|---|
-| **RQ1** | ¿Cómo afecta la presencia del avatar corporizado gamificado (Sonic Kaplay 2D, Piper TTS, Whisper STT, anillos, zonas temáticas) frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
-| **RQ2** | ¿En qué medida la modalidad corpórea y gamificada influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
+| **RQ1** | ¿Cómo afecta la presencia del avatar corporizado  (Sonic Kaplay 2D, Piper TTS, Whisper STT, anillos, zonas temáticas) frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
+| **RQ2** | ¿En qué medida la modalidad corpórea y  influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
 | **RQ3** | ¿Qué relación existe entre la modalidad del agente (Condición A vs B) y la carga cognitiva percibida (NASA-TLX) y el estado afectivo (PANAS-SF) durante la sesión? |
 | **RQ4** | ¿Se mantiene la latencia de respuesta multimodal por debajo de 1.5 segundos de forma consistente? |
 
@@ -58,7 +58,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 ### Flujo de Interacción
 
-1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal gamificado) o B (Sonic texto plano).
+1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal ) o B (Sonic texto plano).
 2. El sistema inicializa la sesión con un ID único, carga el consentimiento informado, y presenta la Tarea 1 (depuración `print_numbers()` bucle infinito, Chemical Plant zone).
 3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
 4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
@@ -158,7 +158,7 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`docs/entregable-2.html`](docs/entregable-2.html) | **Documento principal del Entregable 2** (secciones a–f, imprimible como PDF). |
 | [`docs/entregable-1.pdf`](docs/entregable-1.pdf) | Documento del Entregable 1 (PDF). |
 | [`docs/01-overview.md`](docs/01-overview.md) | Resumen del objetivo y motivación del proyecto. |
-| [`docs/02-architecture.md`](docs/02-architecture.md) | Arquitectura y diseño del sistema (M-ITS). |
+| [`docs/02-architecture.md`](docs/02-architecture.md) | Arquitectura y diseño del sistema. |
 | [`docs/03-evaluation-protocol.md`](docs/03-evaluation-protocol.md) | Protocolo de evaluación y matriz de consistencia metodológica. |
 | [`docs/04-evaluation-guide.md`](docs/04-evaluation-guide.md) | Guía paso a paso para la evaluación experimental. |
 | [`docs/project-canvas.html`](docs/project-canvas.html) | Canvas del proyecto (formato interactivo). |

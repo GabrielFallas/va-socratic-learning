@@ -11,7 +11,7 @@
 
 ### Condición A — Experimental: Sonic (Tutor Socrático Multimodal Multimodal)
 
-La **Condición A** consiste en la interacción con **Sonic**, el tutor socrático gamificado multimodal. Técnicamente, Sonic utiliza un **canvas Kaplay.js 2D** con sprite de 16 frames que cambia de comportamiento según los 8 estados expresivos emitidos por el LLM via `[AVATAR_STATE]`. Esta condición implementa las siguientes vías multimodales:
+La **Condición A** consiste en la interacción con **Sonic**, el tutor socrático  multimodal. Técnicamente, Sonic utiliza un **canvas Kaplay.js 2D** con sprite de 16 frames que cambia de comportamiento según los 8 estados expresivos emitidos por el LLM via `[AVATAR_STATE]`. Esta condición implementa las siguientes vías multimodales:
 1. **Canal Visual (2D):** Canvas Kaplay.js 2D con sprite de Sonic the Hedgehog (16 frames, animaciones run/jump), ubicado sobre el panel de chat, con 8 estados expresivos reactivos (idle, thinking, speaking, listening, happy, curious, empathetic, encouraging). Diseño estilizado tipo *cartoon* que evita el Valle Inquietante y favorece tareas de alta carga cognitiva.
 2. **Canal Auditivo (Sincronía Paraverbal):** Síntesis de voz mediante **Piper TTS neuronal** (Docker local, español de alta calidad) con fallback automático a Web Speech API. Sonidos sincronizados con el estado del canvas.
 3. **Control de Estado desde el LLM:** El modelo de lenguaje (sonic-system.ts) incluye una etiqueta `[AVATAR_STATE:estado]` al final de cada respuesta; el cliente la interpreta y actualiza el comportamiento del canvas Kaplay (Sonic corre, salta, se congela, etc.).
@@ -43,7 +43,7 @@ La **Condición B** consiste en la interacción con el mismo tutor socrático, p
 
 ### Justificación de la Comparación para Aislar el Efecto del Embodiment
 
-La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Ollama + Gemma 3 12B), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (sprite Sonic Kaplay 2D, 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos gamificados, zonas temáticas), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal (M-ITS) propuesta sobre un simple generador de texto.
+La lógica experimental de esta comparación se fundamenta en el principio del **control de variables**. Al mantener constante el modelo de razonamiento (Ollama + Gemma 3 12B), el *system prompt* socrático, las tareas asignadas y el ambiente de laboratorio, cualquier diferencia estadísticamente significativa observada entre los grupos —en medidas de presencia social, perceived pedagogical support, usabilidad, carga cognitiva o estado afectivo— puede atribuirse causalmente a la **presencia del embodiment multimodal del agente** (sprite Sonic Kaplay 2D, 8 estados reactivos, Piper TTS neuronal, Whisper STT, anillos s, zonas temáticas), no al contenido ni a la calidad de la tutoría. Esta comparación responde directamente a la brecha identificada en el Entregable 1: la literatura documenta que los agentes corporizados mejoran la experiencia del usuario, pero la evidencia en contextos de tutoría socrática de programación es escasa. El diseño A vs. B permite aportar evidencia empírica a esa brecha específica, cumpliendo además con la recomendación del profesor Barquero de incluir una condición "sin avatar" para validar el valor diferencial de la vía multimodal propuesta sobre un simple generador de texto.
 
 ---
 
@@ -53,7 +53,7 @@ La lógica experimental de esta comparación se fundamenta en el principio del *
 
 ### Preguntas de Investigación Actualizadas
 
-- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado gamificado (Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas temáticas) versus el mismo tutor en modo chat de texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
+- **RQ1:** ¿Cómo afecta la presencia de un agente corporizado  (Sonic Kaplay 2D + TTS Piper + STT Whisper + anillos + zonas temáticas) versus el mismo tutor en modo chat de texto plano sobre la percepción de **naturalidad**, **presencia social** y **perceived pedagogical support** de los participantes durante sesiones de tutoría socrática de programación?
 
 - **RQ2:** ¿En qué medida la modalidad corpórea del agente socrático influye en la **eficacia pedagógica autónoma** del participante —medida por porcentaje de resolución sin código directo, número de turnos conversacionales y tiempo por tarea— en tareas de depuración lógica de código?
 
@@ -110,13 +110,13 @@ El archivo HTML adaptado incluye:
 
 Justine Cassell y colegas (Cassell et al., 2000) constituyen la base canónica sobre los **Agentes Conversacionales Corporizados (ECAs)**. Su contribución central es demostrar que la comunicación humana es inherentemente **multimodal**: el 65% de la información social se transmite por canales no verbales —gestos, mirada, postura, expresiones faciales— que operan en sincronía con el discurso verbal para construir significado y presencia social. En consecuencia, un agente es verdaderamente "encarnado" no por el mero hecho de tener una representación visual, sino por la **integración funcional de sus comportamientos no verbales con el acto de habla**.
 
-En el diseño de Sonic, la teoría de Cassell se implementa a tres niveles adaptados al sistema gamificado Kaplay:
+En el diseño de Sonic, la teoría de Cassell se implementa a tres niveles adaptados al sistema  Kaplay:
 
 1. **Sincronía Paraverbal (Voice-Driven Empathy)**: Cuando Sonic pregunta "¿qué valor tiene esta variable en la línea 7?", la voz Piper (o Web Speech fallback) entrega el mensaje con calidad neuronal en español, creando una "corporeidad acústica" que refuerza el lazo social.
 
 2. **Beats Visuales y Respuestas 2D Reactivas (Kaplay)**: El sprite Sonic cambia entre 8 estados reactivos (`idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) según el contexto conversacional, generando señales de escucha activa (backchannel) y comprensión. Cassell documenta que la ausencia de estas señales genera percepción de indiferencia y eleva la ansiedad del interlocutor.
 
-3. **Fusión Multimodal y Expresiones Afectivas (Ring System)**: El sistema de anillos gamificado actúa como señal de retroalimentación no verbal: el estudiante recibe un anillo visual (ring burst animado en canvas Kaplay) cuando su respuesta se aproxima a la solución, y una señal de daño (hurt flash + parpadeo de Sonic) cuando el agente detecta frustración. Piper TTS vocaliza las respuestas con prosodia natural en español. Esta capa de feedback multimodal refuerza el andamiaje sin revelar la respuesta.
+3. **Fusión Multimodal y Expresiones Afectivas (Ring System)**: El sistema de anillos  actúa como señal de retroalimentación no verbal: el estudiante recibe un anillo visual (ring burst animado en canvas Kaplay) cuando su respuesta se aproxima a la solución, y una señal de daño (hurt flash + parpadeo de Sonic) cuando el agente detecta frustración. Piper TTS vocaliza las respuestas con prosodia natural en español. Esta capa de feedback multimodal refuerza el andamiaje sin revelar la respuesta.
 
 La hipótesis derivada de Cassell es que los participantes de la **Condición A** percibirán una mayor **naturalidad** e **inteligencia percibida** del agente que los de la Condición B, medibles en las subescalas de Godspeed.
 
