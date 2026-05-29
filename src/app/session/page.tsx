@@ -236,7 +236,9 @@ function SessionContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "close", sessionId }),
       }).catch((err) => console.error("[session] Failed to close session:", err));
-      router.push(`/session/complete?id=${sessionId}&condition=${condition}`);
+      // Post-task questionnaire battery BEFORE the results screen (so seeing the
+      // rank/score doesn't bias affect/motivation answers).
+      router.push(`/post?id=${sessionId}&condition=${condition}`);
     }
   };
 

@@ -143,3 +143,55 @@ test("Phase 1 — assign, persist, list, export CSV", async ({ request }) => {
   expect(csv).toContain("q_sus_x_total");
   console.log("CSV header:", csv.split("\n")[0]);
 });
+
+// Fills whatever required inputs an instrument shows, then submits. Generic so
+// it survives instrument changes.
+async function completeInstrument(page: import("@playwright/test").Page) {
+  const submit = page.getByTestId("questionnaire-submit");
+  await expect(submit).toBeVisible({ timeout: 10000 });
+  await page.waitForTimeout(350); // let the instrument remount settle
+
+  const names = new Set<string>();
+  for (const radio of await page.locator('input[type="radio"]').all()) {
+    const name = await radio.getAttribute("name");
+    if (name && !names.has(name)) {
+      names.add(name);
+      await radio.check();
+    }
+  }
+  for (const cb of await page.locator('input[type="checkbox"]').all()) await cb.check();
+  for (const num of await page.locator('input[type="number"]').all()) await num.fill("25");
+  for (const sel of await page.locator("select").all()) await sel.selectOption({ index: 1 });
+
+  await expect(submit).toBeEnabled({ timeout: 5000 });
+  await submit.click();
+}
+
+test("Phase 2 — intake flow reaches the session", async ({ page }) => {
+  const bag = attach(page);
+  await page.goto("/");
+  await page.getByTestId("start-condition-b").click();
+  await page.waitForURL(/\/intake/);
+  // INTAKE_FLOW = consent, demographics, panas-sf (3 steps)
+  await completeInstrument(page); // consent
+  await completeInstrument(page); // demographics
+  await completeInstrument(page); // panas pre
+  await page.waitForURL(/\/session\?/, { timeout: 15000 });
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  dump("INTAKE", bag);
+});
+
+test("Phase 2 — post flow persists all instruments", async ({ page, request }) => {
+  // Make a session directly, then drive /post.
+  const assign = await (await request.post("/api/session", { data: { action: "assign" } })).json();
+  const id = assign.sessionId as string;
+  await page.goto(`/post?id=${id}&condition=A`);
+  // POST_FLOW = godspeed, sus, nasa-tlx, sims, panas post, qualitative (6)
+  for (let i = 0; i < 6; i++) await completeInstrument(page);
+  await page.waitForURL(/\/session\/complete/, { timeout: 15000 });
+
+  // Verify the questionnaires were persisted (CSV has SUS + PANAS-post columns)
+  const csv = await (await request.get("/api/export?format=csv")).text();
+  expect(csv).toContain("q_sus_x_total");
+  expect(csv).toContain("q_panas-sf_post_positiveAffect");
+});
