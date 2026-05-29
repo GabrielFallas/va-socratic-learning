@@ -154,10 +154,10 @@ function DialogueBox({
           margin:     0,
           whiteSpace: "pre-wrap",
           wordBreak:  "break-word",
-          display:     "-webkit-box",
-          WebkitLineClamp: 5,
-          WebkitBoxOrient: "vertical",
-          overflow:    "hidden",
+          // Scroll long Socratic answers instead of truncating them (was a
+          // 5-line clamp that silently hid content).
+          maxHeight:  "120px",
+          overflowY:  "auto",
         } as React.CSSProperties}>
           {text}
           {/* Streaming cursor */}
@@ -233,10 +233,13 @@ export default function ChatInterface({
   const [sttAvailable,      setSttAvailable]      = useState(false);
   const [sttError,          setSttError]          = useState<string | null>(null);
   const [soundUnlocked,     setSoundUnlocked]     = useState(false);
+  const [showTranscript,    setShowTranscript]    = useState(false);
+  const [connError,         setConnError]         = useState(false);
 
   const messagesEndRef      = useRef<HTMLDivElement>(null);
   const inputRef            = useRef<HTMLTextAreaElement>(null);
   const inactivityRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastUserTextRef     = useRef("");
   const usedProactiveRef    = useRef<Set<string>>(new Set());
   const proactiveCountRef   = useRef(0);            // max 3 proactive messages
   const soundUnlockedRef    = useRef(false);         // always-current ref (avoids stale closure)
@@ -364,6 +367,9 @@ export default function ChatInterface({
     async (text: string) => {
       if (!text.trim() || isLoading) return;
 
+      lastUserTextRef.current = text.trim();
+      setConnError(false);
+
       // Reset inactivity timer on every send
       scheduleProactiveMessage();
 
@@ -486,13 +492,10 @@ export default function ChatInterface({
         } else if (isConditionA) {
           setAvatarState("listening");
         }
-      } catch (err) {
-        const errMsg = err instanceof Error ? err.message : "Error al conectar con Sonic";
+      } catch {
+        // Surface a friendly, retryable banner instead of a raw error bubble.
         if (isConditionA) playSFX("hurt", 0.5);
-        setMessages((prev) => [
-          ...prev,
-          { id: crypto.randomUUID(), role: "assistant", content: `Error: ${errMsg}`, timestamp: Date.now() },
-        ]);
+        setConnError(true);
         setStreamingText("");
         if (isConditionA) setAvatarState("idle");
       } finally {
@@ -598,6 +601,48 @@ export default function ChatInterface({
             </div>
           )}
 
+          {/* Transcript toggle (Condition A shows only the latest line) */}
+          <button
+            onClick={() => setShowTranscript((v) => !v)}
+            className="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg font-mono text-xs"
+            style={{ background: "rgba(0,10,30,0.8)", border: "1px solid #0066cc", color: "#88ccff" }}
+            data-testid="transcript-toggle"
+            title="Ver conversación completa"
+          >
+            📜 Historial
+          </button>
+
+          {/* Transcript overlay — full conversation history */}
+          {showTranscript && (
+            <div className="absolute inset-0 z-30 flex flex-col" style={{ background: "rgba(0,4,16,0.96)" }}>
+              <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "#0066cc" }}>
+                <span className="font-mono text-sm font-bold" style={{ color: "#ffcc00" }}>Conversación</span>
+                <button onClick={() => setShowTranscript(false)} className="font-mono text-xs px-2 py-1 rounded" style={{ background: "#0066cc", color: "#fff" }}>
+                  ✕ Cerrar
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-2" data-testid="transcript-list">
+                {messages.map((m) => (
+                  <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className="max-w-[85%] px-3 py-2 rounded-xl text-xs font-mono whitespace-pre-wrap"
+                      style={{
+                        background: m.role === "user" ? "rgba(26,0,102,0.8)" : "#13132a",
+                        border: m.role === "user" ? "1px solid #6633ff" : "1px solid #333355",
+                        color: "#fff",
+                      }}
+                    >
+                      <span style={{ color: m.role === "user" ? "#aa99ff" : "#88aacc" }}>
+                        {m.role === "user" ? "Tú" : "Sonic"}:{" "}
+                      </span>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Game dialogue box at bottom of canvas */}
           <div className="absolute bottom-0 left-0 right-0 z-10">
             <DialogueBox
@@ -663,6 +708,16 @@ export default function ChatInterface({
           {sttError && (
             <div className="text-xs text-red-300 px-3 py-1.5 rounded-lg font-mono" style={{ background: "#2a0000", border: "1px solid #ff4444" }}>
               ⚠ {sttError}
+            </div>
+          )}
+
+          {/* Connection error — friendly retry */}
+          {connError && (
+            <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg font-mono" style={{ background: "#2a1500", border: "1px solid #ffaa00", color: "#ffcc88" }} data-testid="conn-error">
+              <span>⚠ Sonic perdió la conexión.</span>
+              <button onClick={() => sendMessage(lastUserTextRef.current)} className="px-2 py-0.5 rounded font-bold" style={{ background: "#ffaa00", color: "#000" }}>
+                Reintentar
+              </button>
             </div>
           )}
 
@@ -815,6 +870,14 @@ export default function ChatInterface({
 
       {/* Input */}
       <div className="p-4 border-t" style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.4)" }}>
+        {connError && (
+          <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg font-mono mb-2" style={{ background: "#2a1500", border: "1px solid #ffaa00", color: "#ffcc88" }} data-testid="conn-error">
+            <span>⚠ Se perdió la conexión con el tutor.</span>
+            <button onClick={() => sendMessage(lastUserTextRef.current)} className="px-2 py-0.5 rounded font-bold" style={{ background: "#ffaa00", color: "#000" }}>
+              Reintentar
+            </button>
+          </div>
+        )}
         <div className="flex gap-2 items-end">
           <div className="flex-1">
             <textarea

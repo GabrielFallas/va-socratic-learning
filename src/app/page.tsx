@@ -81,7 +81,8 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "init", sessionId, condition }),
       });
-      router.push(`/intake?id=${sessionId}&condition=${condition}`);
+      // Pilot skips the questionnaire flow and goes straight to the tasks.
+      router.push(`/session?id=${sessionId}&condition=${condition}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);
     }

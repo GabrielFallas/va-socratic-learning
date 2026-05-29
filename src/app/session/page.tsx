@@ -350,6 +350,21 @@ function SessionContent() {
         <span className="text-white/20 text-xs font-mono hidden lg:block">
           {sessionId.slice(0, 8)}
         </span>
+
+        {/* Exit (facilitator/participant abandon) */}
+        <button
+          onClick={() => {
+            if (confirm("¿Salir de la sesión? El progreso de la tarea actual no se guardará.")) {
+              router.push("/");
+            }
+          }}
+          className="text-xs font-mono px-2 py-1 rounded transition-colors"
+          style={{ color: "#ff8888", border: "1px solid rgba(255,80,80,0.3)" }}
+          title="Salir de la sesión"
+          data-testid="exit-session"
+        >
+          ✕ Salir
+        </button>
       </nav>
 
       {/* ── Main split layout ─────────────────────────────────── */}
