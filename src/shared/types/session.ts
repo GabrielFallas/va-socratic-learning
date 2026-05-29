@@ -74,6 +74,19 @@ export interface TaskResult {
   codeEdited?: boolean;
 }
 
+/** A completed questionnaire instrument (PANAS-SF, SUS, NASA-TLX, …). */
+export interface QuestionnaireResponse {
+  /** Instrument id, e.g. "panas-sf", "sus", "nasa-tlx", "godspeed", "sims", "consent", "demographics", "qualitative". */
+  instrument: string;
+  /** Optional phase for instruments administered twice (PANAS pre/post). */
+  phase?: "pre" | "post";
+  /** Raw item responses keyed by item id. */
+  responses: Record<string, number | string | boolean>;
+  /** Optional derived score(s) for convenience in exports. */
+  scores?: Record<string, number>;
+  submittedAt: number;
+}
+
 export interface SessionLog {
   sessionId: string;
   condition: Condition;
@@ -81,9 +94,11 @@ export interface SessionLog {
   endTime?: number;
   messages: ChatMessage[];
   taskResults: TaskResult[];
-  /** Average latency in ms */
+  /** Questionnaire responses keyed by `${instrument}:${phase ?? "_"}`. */
+  questionnaires?: Record<string, QuestionnaireResponse>;
+  /** Average latency (TTFT) in ms */
   avgLatencyMs?: number;
-  /** Max latency in ms */
+  /** Max latency (TTFT) in ms */
   maxLatencyMs?: number;
 }
 

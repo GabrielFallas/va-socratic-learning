@@ -88,3 +88,58 @@ test("Pyodide runner — fixing Task 1 passes hidden tests", async ({ page }) =>
   await expect(page.getByText(/CORRER A LA ZONA 2/)).toBeVisible({ timeout: 5000 });
   dump("PYODIDE", bag);
 });
+
+test("Phase 1 — assign, persist, list, export CSV", async ({ request }) => {
+  // Server-assigned session
+  const assignRes = await request.post("/api/session", { data: { action: "assign" } });
+  const assign = await assignRes.json();
+  expect(assign.ok).toBeTruthy();
+  const sessionId = assign.sessionId as string;
+  expect(sessionId).toMatch(/^P-\d{3}$/);
+
+  // Log a task result
+  await request.post("/api/session", {
+    data: {
+      action: "log-task",
+      sessionId,
+      taskResult: {
+        taskId: "task-1-infinite-loop",
+        resolvedAutonomously: true,
+        turns: 3,
+        timeSpentSeconds: 120,
+        latencyReadings: [800, 1200],
+        resolution: "tests-passed",
+        codeRunAttempts: 2,
+        testsPassed: true,
+        codeEdited: true,
+      },
+    },
+  });
+
+  // Log a questionnaire
+  await request.post("/api/session", {
+    data: {
+      action: "log-questionnaire",
+      sessionId,
+      questionnaire: {
+        instrument: "sus",
+        responses: { q1: 4, q2: 2 },
+        scores: { total: 72.5 },
+      },
+    },
+  });
+
+  // Listing includes our session
+  const listRes = await request.get("/api/session?list=1");
+  const list = await listRes.json();
+  const found = list.sessions.find((s: { sessionId: string }) => s.sessionId === sessionId);
+  expect(found).toBeTruthy();
+  expect(found.tasksResolved).toBe(1);
+
+  // CSV export contains the session + questionnaire score column
+  const csvRes = await request.get("/api/export?format=csv");
+  const csv = await csvRes.text();
+  expect(csv).toContain(sessionId);
+  expect(csv).toContain("q_sus_x_total");
+  console.log("CSV header:", csv.split("\n")[0]);
+});

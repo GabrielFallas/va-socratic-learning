@@ -1,4 +1,5 @@
 import type { Condition } from "@/shared/types/session";
+import { loadAssignmentState, saveAssignmentState } from "@/server/telemetry/store";
 
 // ============================================================
 // Counterbalanced condition assignment
@@ -12,15 +13,20 @@ import type { Condition } from "@/shared/types/session";
 // so balance is guaranteed at every block boundary while order stays
 // unpredictable.
 //
-// NOTE (Phase 0): state is in-memory and resets on server restart. Phase 1
-// (persistence) will back this with the same store as telemetry so balance
-// survives restarts. The API surface is intentionally storage-agnostic.
+// State is persisted to disk (store.ts) so balance and participant numbering
+// survive server restarts mid-study.
 // ============================================================
 
 const BLOCK_SIZE = 4; // 2×A, 2×B per block
 
-let assignedCount = 0;
-let blockQueue: Condition[] = [];
+// Hydrate from disk on first use.
+const persisted = loadAssignmentState();
+let assignedCount = persisted?.assignedCount ?? 0;
+let blockQueue: Condition[] = persisted?.blockQueue ?? [];
+
+function persist(): void {
+  saveAssignmentState({ assignedCount, blockQueue });
+}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -60,6 +66,7 @@ export function assignNext(): Assignment {
   const condition = blockQueue.shift()!;
   const participantId = nextParticipantId();
   assignedCount += 1;
+  persist();
   return { participantId, condition, ordinal: assignedCount };
 }
 
