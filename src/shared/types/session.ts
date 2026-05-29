@@ -22,8 +22,10 @@ export interface ChatMessage {
   role: MessageRole;
   content: string;
   timestamp: number;
-  /** Time in ms between user send and first token received */
+  /** Time in ms between user send and first token received (perceived latency, RQ4) */
   latencyMs?: number;
+  /** Explicit time-to-first-token in ms (same value as latencyMs; named for clarity) */
+  ttftMs?: number;
   /** Time in ms for complete response */
   totalResponseMs?: number;
 }
@@ -40,18 +42,36 @@ export interface Task {
   errorDescription: string;
   /** Maximum time in seconds */
   maxTimeSeconds: number;
+  /**
+   * Hidden test harness (Python). Appended after the student's code and run in
+   * Pyodide. Must print a line `__TESTS__{"passed":bool,"detail":str}`.
+   * Drives the real `resolvedAutonomously` signal (replaces self-report).
+   */
+  tests: {
+    harness: string;
+    /** Per-task execution timeout in ms (worker is killed past this). */
+    timeoutMs?: number;
+  };
 }
 
 export interface TaskResult {
   taskId: string;
-  /** Did the student resolve without direct code? */
+  /** Did the student resolve autonomously? Now backed by passing hidden tests, not self-report. */
   resolvedAutonomously: boolean;
   /** Number of conversation turns */
   turns: number;
   /** Total time spent in seconds */
   timeSpentSeconds: number;
-  /** All latency readings in ms */
+  /** All latency readings in ms (time-to-first-token per turn) */
   latencyReadings: number[];
+  /** How was the task closed: tests passed, timed out, or gave up */
+  resolution?: "tests-passed" | "timeout" | "gave-up";
+  /** Number of times the student ran their code */
+  codeRunAttempts?: number;
+  /** Whether the hidden test suite passed on the final run */
+  testsPassed?: boolean;
+  /** Whether the student edited the starter code at all */
+  codeEdited?: boolean;
 }
 
 export interface SessionLog {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamChatResponse, extractAvatarState } from "@/services/llm/ollamaClient";
-import { buildTaskSystemPrompt, ADA_SYSTEM_PROMPT } from "@/prompts/sonic-system";
+import { buildTaskSystemPrompt, BASE_TUTOR_PROMPT } from "@/prompts/tutor-system";
 import { logMessage, getSession, initSession } from "@/server/telemetry/logger";
 import type { ApiChatRequest } from "@/shared/types/session";
 
@@ -23,19 +23,25 @@ export async function POST(req: NextRequest) {
       initSession(sessionId, condition);
     }
 
-    // Build system prompt — inject task context if present
+    // Build system prompt — identical tutor text for both conditions;
+    // Condition A additionally gets the avatar-control block (see tutor-system.ts).
     const systemPrompt = taskContext
-      ? buildTaskSystemPrompt(taskContext)
-      : ADA_SYSTEM_PROMPT;
+      ? buildTaskSystemPrompt({ condition, ...taskContext })
+      : BASE_TUTOR_PROMPT;
 
     // Stream the response
     const encoder = new TextEncoder();
     let fullText = "";
+    // ttftMs = time-to-first-token (perceived latency — the RQ4 metric).
+    // totalMs = full generation time. These are distinct and were previously
+    // conflated; RQ4's "<1.5s" target is about TTFT, not total generation.
+    let ttftMs = 0;
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
           for await (const chunk of streamChatResponse({ systemPrompt, messages })) {
+            if (ttftMs === 0 && chunk.length > 0) ttftMs = Date.now() - start;
             fullText += chunk;
             // Send chunk as SSE
             const data = `data: ${JSON.stringify({ chunk })}\n\n`;
@@ -44,7 +50,9 @@ export async function POST(req: NextRequest) {
 
           // Extract avatar state
           const { cleanText, avatarState } = extractAvatarState(fullText);
-          const latencyMs = Date.now() - start;
+          const totalMs = Date.now() - start;
+          // Back-compat: latencyMs now carries TTFT (the perceived-latency metric).
+          const latencyMs = ttftMs;
 
           // Log the assistant message
           const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
@@ -63,7 +71,8 @@ export async function POST(req: NextRequest) {
             content: cleanText,
             timestamp: Date.now(),
             latencyMs,
-            totalResponseMs: Date.now() - start,
+            ttftMs,
+            totalResponseMs: totalMs,
           });
 
           // Send final event with metadata
@@ -72,6 +81,8 @@ export async function POST(req: NextRequest) {
             fullText: cleanText,
             avatarState,
             latencyMs,
+            ttftMs,
+            totalMs,
           })}\n\n`;
           controller.enqueue(encoder.encode(finalData));
           controller.close();

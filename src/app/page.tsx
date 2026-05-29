@@ -52,9 +52,31 @@ export default function HomePage() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  const startSession = async (condition: Condition) => {
+  // Real experimental start: the SERVER counterbalances the condition and
+  // issues the participant id. The participant never sees or picks a
+  // condition (avoids selection bias; guarantees A/B balance per block).
+  const startExperiment = async () => {
     setIsStarting(true);
-    const sessionId = `P-${Date.now().toString(36).toUpperCase()}`;
+    try {
+      const res = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "assign" }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error("assign failed");
+      router.push(
+        `/session?id=${data.sessionId}&condition=${data.condition}&task=task-1-infinite-loop`
+      );
+    } catch {
+      setIsStarting(false);
+    }
+  };
+
+  // Pilot/testing only — forces a condition. NOT for real participants.
+  const startPilot = async (condition: Condition) => {
+    setIsStarting(true);
+    const sessionId = `P-PILOT-${Date.now().toString(36).toUpperCase()}`;
     try {
       await fetch("/api/session", {
         method: "POST",
@@ -65,11 +87,6 @@ export default function HomePage() {
     } catch {
       setIsStarting(false);
     }
-  };
-
-  const startRandom = () => {
-    const condition: Condition = Math.random() > 0.5 ? "A" : "B";
-    startSession(condition);
   };
 
   return (
@@ -274,7 +291,7 @@ export default function HomePage() {
         {/* Start buttons */}
         <div className="space-y-3 w-full max-w-md">
           <button
-            onClick={startRandom}
+            onClick={startExperiment}
             disabled={isStarting}
             className="w-full py-4 font-black text-xl text-black rounded-2xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
@@ -283,14 +300,15 @@ export default function HomePage() {
               fontFamily: "'Courier New', monospace",
               letterSpacing: "0.05em",
             }}
-            data-testid="start-random"
+            data-testid="start-experiment"
           >
-            {isStarting ? "⏳ INICIANDO..." : "🎲 PRESS START (Aleatorio)"}
+            {isStarting ? "⏳ INICIANDO..." : "▶ PRESS START"}
           </button>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Pilot/testing controls — NOT part of the experiment data */}
+          <div className="grid grid-cols-2 gap-3 opacity-60">
             <button
-              onClick={() => startSession("A")}
+              onClick={() => startPilot("A")}
               disabled={isStarting}
               className="py-3 font-bold text-sm text-white rounded-xl transition-all"
               style={{
@@ -301,10 +319,10 @@ export default function HomePage() {
               }}
               data-testid="start-condition-a"
             >
-              [A] Condición A
+              [A] Prueba A
             </button>
             <button
-              onClick={() => startSession("B")}
+              onClick={() => startPilot("B")}
               disabled={isStarting}
               className="py-3 font-bold text-sm text-white rounded-xl transition-all"
               style={{
@@ -315,9 +333,12 @@ export default function HomePage() {
               }}
               data-testid="start-condition-b"
             >
-              💬 Condición B
+              💬 Prueba B
             </button>
           </div>
+          <p className="text-center text-[10px] text-white/30 font-mono mt-1">
+            Los botones de prueba fuerzan la condición (no cuentan para el experimento).
+          </p>
         </div>
 
         <p className="text-center text-xs mt-6 font-mono">

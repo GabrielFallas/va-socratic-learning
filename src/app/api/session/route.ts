@@ -5,6 +5,7 @@ import {
   getSessionSummary,
   logTaskResult,
 } from "@/server/telemetry/logger";
+import { assignNext } from "@/server/experiment/assignment";
 import type { TaskResult } from "@/shared/types/session";
 
 export async function POST(req: NextRequest) {
@@ -12,6 +13,20 @@ export async function POST(req: NextRequest) {
   const { action, sessionId, condition, taskResult } = body;
 
   switch (action) {
+    // Counterbalanced allocation: server picks participantId + condition and
+    // inits the session atomically, so the participant never chooses (no bias)
+    // and balance is guaranteed per block.
+    case "assign": {
+      const assignment = assignNext();
+      const session = initSession(assignment.participantId, assignment.condition);
+      return NextResponse.json({
+        ok: true,
+        sessionId: session.sessionId,
+        condition: assignment.condition,
+        ordinal: assignment.ordinal,
+      });
+    }
+
     case "init": {
       const session = initSession(sessionId, condition);
       return NextResponse.json({ ok: true, sessionId: session.sessionId });

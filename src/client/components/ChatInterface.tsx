@@ -47,12 +47,14 @@ function formatTime(ts: number): string {
   });
 }
 
-// ── Welcome texts — distinct personalities per condition ──────────────────
-const WELCOME_A =
-  "Hola, soy Sonic, tu tutor socrático más veloz. Las respuestas directas son para los lentos — yo te lanzo preguntas que te hagan pensar. Tu código tiene un bug escondido... ¡Cuéntame qué está pasando!";
+// ── Welcome text — IDENTICAL tutor content across conditions ──────────────
+// Held constant so A vs B isolates embodiment, not the tutor's words.
+// In Condition A this same text is also delivered via neural voice (TTS).
+const WELCOME_TEXT =
+  "Hola. Vamos a resolver esto juntos sin que yo te dé la respuesta directamente. Mira el código: ¿qué observas en su comportamiento? Descríbelo con el mayor detalle que puedas.";
 
-const WELCOME_B =
-  "¿Qué observas en el comportamiento del código? Descríbelo con el mayor detalle que puedas.";
+const WELCOME_A = WELCOME_TEXT;
+const WELCOME_B = WELCOME_TEXT;
 
 // ── Proactive messages (fire after 60 s of inactivity) ───────────────────
 const PROACTIVE: Record<string, string[]> = {
