@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import type { Condition, ChatMessage, TaskResult } from "@/shared/types/session";
 import { TASKS } from "@/shared/config/tasks";
 import ChatInterface from "@/client/components/ChatInterface";
-import CodePanel from "@/client/components/CodePanel";
+import CodePanel, { type TaskCompleteMeta } from "@/client/components/CodePanel";
 
 // Dynamic imports — game components need browser APIs
 const ZoneTitleCard = dynamic(() => import("@/client/components/ZoneTitleCard"), { ssr: false });
@@ -74,9 +74,21 @@ function SessionContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  const sessionId = searchParams.get("id")        ?? `P-${Date.now().toString(36)}`;
-  const condition = (searchParams.get("condition") ?? "B") as Condition;
-  const taskId    = searchParams.get("task")       ?? "task-1-infinite-loop";
+  const rawId        = searchParams.get("id");
+  const rawCondition = searchParams.get("condition");
+  const taskId       = searchParams.get("task") ?? "task-1-infinite-loop";
+
+  // Validate params. A session MUST arrive with a real participant id and a
+  // valid condition (assigned on the landing page). Previously a missing id
+  // was silently replaced by a fabricated one, producing telemetry that no
+  // /api/session record existed for (orphaned data). Now we redirect home.
+  const paramsValid = !!rawId && /^P-/.test(rawId) && (rawCondition === "A" || rawCondition === "B");
+  const sessionId = rawId ?? "";
+  const condition = (rawCondition === "A" ? "A" : "B") as Condition;
+
+  useEffect(() => {
+    if (!paramsValid) router.replace("/");
+  }, [paramsValid, router]);
 
   const task = TASKS.find((t) => t.id === taskId) ?? TASKS[0];
   const zone = ZONE_NAMES[taskId] ?? { name: task.title.toUpperCase(), act: 1 };
@@ -167,7 +179,9 @@ function SessionContent() {
   }, []);
 
   // ── Task complete handler ────────────────────────────────────
-  const handleTaskComplete = useCallback(async (resolved: boolean) => {
+  // `meta` is supplied by CodePanel (test-driven). When absent (timer expiry),
+  // the task is recorded as a timeout.
+  const handleTaskComplete = useCallback(async (resolved: boolean, meta?: TaskCompleteMeta) => {
     if (taskCompleted) return;
     setTaskCompleted(true);
     setResolvedAutonomously(resolved);
@@ -190,6 +204,10 @@ function SessionContent() {
       turns: turnCountRef.current,
       timeSpentSeconds: timeSpent,
       latencyReadings,
+      resolution: meta?.resolution ?? (resolved ? "tests-passed" : "timeout"),
+      codeRunAttempts: meta?.runAttempts ?? 0,
+      testsPassed: meta?.testsPassed ?? resolved,
+      codeEdited: meta?.codeEdited ?? false,
     };
 
     try {
