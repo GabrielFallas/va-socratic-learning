@@ -4,13 +4,17 @@ import {
   closeSession,
   getSessionSummary,
   logTaskResult,
+  logQuestionnaire,
+  getAllSessions,
 } from "@/server/telemetry/logger";
 import { assignNext } from "@/server/experiment/assignment";
-import type { TaskResult } from "@/shared/types/session";
+import type { TaskResult, QuestionnaireResponse } from "@/shared/types/session";
+
+export const runtime = "nodejs"; // file-based store needs the Node fs API
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { action, sessionId, condition, taskResult } = body;
+  const { action, sessionId, condition, taskResult, questionnaire } = body;
 
   switch (action) {
     // Counterbalanced allocation: server picks participantId + condition and
@@ -42,6 +46,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    case "log-questionnaire": {
+      logQuestionnaire(sessionId, {
+        ...(questionnaire as QuestionnaireResponse),
+        submittedAt: Date.now(),
+      });
+      return NextResponse.json({ ok: true });
+    }
+
     case "summary": {
       const summary = getSessionSummary(sessionId);
       return NextResponse.json({ ok: true, summary });
@@ -53,6 +65,27 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Facilitator listing: GET /api/session?list=1 → all sessions (summary form).
+  if (req.nextUrl.searchParams.get("list")) {
+    const rows = getAllSessions().map((s) => {
+      const ttfts = s.messages
+        .filter((m) => m.role === "assistant" && m.latencyMs !== undefined)
+        .map((m) => m.latencyMs as number);
+      return {
+        sessionId: s.sessionId,
+        condition: s.condition,
+        startTime: s.startTime,
+        endTime: s.endTime ?? null,
+        turns: s.messages.filter((m) => m.role === "user").length,
+        tasksResolved: s.taskResults.filter((t) => t.resolvedAutonomously).length,
+        tasksTotal: s.taskResults.length,
+        avgTtftMs: ttfts.length ? Math.round(ttfts.reduce((a, b) => a + b, 0) / ttfts.length) : 0,
+        questionnaires: Object.keys(s.questionnaires ?? {}).length,
+      };
+    });
+    return NextResponse.json({ ok: true, sessions: rows });
+  }
+
   const sessionId = req.nextUrl.searchParams.get("sessionId");
   if (!sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });

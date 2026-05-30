@@ -56,31 +56,22 @@ const WELCOME_TEXT =
 const WELCOME_A = WELCOME_TEXT;
 const WELCOME_B = WELCOME_TEXT;
 
-// ── Proactive messages (fire after 60 s of inactivity) ───────────────────
-const PROACTIVE: Record<string, string[]> = {
-  "task-1-infinite-loop": [
-    "¡Ey! Sonic sigue corriendo... ¿y tú? Pista: ¿qué le pasa exactamente al valor de `counter` cada vez que el bucle repite?",
-    "El tiempo vuela como yo. Pregunta rápida: si `counter` arranca en 1 y la condición es `counter <= 5`, ¿cuándo se volvería `false` esa condición?",
-    "Truco Sonic: ejecuta el bucle mentalmente solo tres veces. ¿Qué valor tiene `counter` al inicio de la primera, segunda y tercera vuelta?",
-    "Oye, ¿ya miraste qué instrucciones están DENTRO del while y cuáles están FUERA? Eso puede ser la clave.",
-  ],
-  "task-2-algorithm-complexity": [
-    "Psst — ¿cuántos bucles anidados contaste en `find_duplicates`? Piénsalo: si la lista tiene N elementos, ¿cuántas comparaciones hace?",
-    "Imagina una lista de 10,000 números. Con el código actual, ¿cuántas veces se ejecuta la comparación `numbers[i] == numbers[j]`? (Pista: es un número enorme.)",
-    "Pregunta rápida: ¿qué estructura de datos de Python hace `x in coleccion` en O(1) en vez de O(n)?",
-    "El código funciona, pero *¿cuánto tiempo tarda* con listas grandes? Eso es exactamente lo que hace interesante este problema.",
-  ],
-  "default": [
-    "¡Ey! ¿Sigues ahí? Sin presión — tómate tu tiempo, pero si tienes alguna duda lánzamela y seguimos.",
-    "Sonic esperando... ¿En qué parte del código tienes más dudas ahora mismo?",
-    "Pausa activa: describe en una sola oración qué crees que hace el código. A veces verbalizar el problema revela la solución.",
-  ],
-};
+// ── Proactive nudges (fire after 60 s of inactivity, Condition A only) ────
+// IMPORTANT (experimental validity): these are deliberately CONTENT-NEUTRAL.
+// Proactive engagement is part of the embodiment manipulation, but the nudges
+// must NOT contain task-specific hints — otherwise Condition A would receive
+// extra pedagogical scaffolding that Condition B never gets, confounding RQ2.
+// They only prompt the participant to re-engage and articulate their thinking.
+const PROACTIVE: string[] = [
+  "¿Sigues ahí? Sin presión — tómate tu tiempo. Si quieres, cuéntame en qué estás pensando ahora.",
+  "Una técnica útil: describe en una sola oración qué crees que hace el código. Verbalizar el problema suele aclararlo.",
+  "¿En qué parte te sientes más atascado/a? Descríbelo con tus propias palabras y seguimos desde ahí.",
+  "Recuerda que puedes editar el código y pulsar Ejecutar para comprobar tus ideas cuando quieras.",
+];
 
-function getProactiveMessage(taskId?: string, used?: Set<string>): string {
-  const pool = PROACTIVE[taskId ?? "default"] ?? PROACTIVE["default"];
-  const available = pool.filter((m) => !used?.has(m));
-  const list = available.length > 0 ? available : pool;
+function getProactiveMessage(_taskId?: string, used?: Set<string>): string {
+  const available = PROACTIVE.filter((m) => !used?.has(m));
+  const list = available.length > 0 ? available : PROACTIVE;
   return list[Math.floor(Math.random() * list.length)];
 }
 
@@ -154,10 +145,10 @@ function DialogueBox({
           margin:     0,
           whiteSpace: "pre-wrap",
           wordBreak:  "break-word",
-          display:     "-webkit-box",
-          WebkitLineClamp: 5,
-          WebkitBoxOrient: "vertical",
-          overflow:    "hidden",
+          // Scroll long Socratic answers instead of truncating them (was a
+          // 5-line clamp that silently hid content).
+          maxHeight:  "120px",
+          overflowY:  "auto",
         } as React.CSSProperties}>
           {text}
           {/* Streaming cursor */}
@@ -233,10 +224,13 @@ export default function ChatInterface({
   const [sttAvailable,      setSttAvailable]      = useState(false);
   const [sttError,          setSttError]          = useState<string | null>(null);
   const [soundUnlocked,     setSoundUnlocked]     = useState(false);
+  const [showTranscript,    setShowTranscript]    = useState(false);
+  const [connError,         setConnError]         = useState(false);
 
   const messagesEndRef      = useRef<HTMLDivElement>(null);
   const inputRef            = useRef<HTMLTextAreaElement>(null);
   const inactivityRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastUserTextRef     = useRef("");
   const usedProactiveRef    = useRef<Set<string>>(new Set());
   const proactiveCountRef   = useRef(0);            // max 3 proactive messages
   const soundUnlockedRef    = useRef(false);         // always-current ref (avoids stale closure)
@@ -364,6 +358,9 @@ export default function ChatInterface({
     async (text: string) => {
       if (!text.trim() || isLoading) return;
 
+      lastUserTextRef.current = text.trim();
+      setConnError(false);
+
       // Reset inactivity timer on every send
       scheduleProactiveMessage();
 
@@ -486,13 +483,10 @@ export default function ChatInterface({
         } else if (isConditionA) {
           setAvatarState("listening");
         }
-      } catch (err) {
-        const errMsg = err instanceof Error ? err.message : "Error al conectar con Sonic";
+      } catch {
+        // Surface a friendly, retryable banner instead of a raw error bubble.
         if (isConditionA) playSFX("hurt", 0.5);
-        setMessages((prev) => [
-          ...prev,
-          { id: crypto.randomUUID(), role: "assistant", content: `Error: ${errMsg}`, timestamp: Date.now() },
-        ]);
+        setConnError(true);
         setStreamingText("");
         if (isConditionA) setAvatarState("idle");
       } finally {
@@ -598,6 +592,48 @@ export default function ChatInterface({
             </div>
           )}
 
+          {/* Transcript toggle (Condition A shows only the latest line) */}
+          <button
+            onClick={() => setShowTranscript((v) => !v)}
+            className="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg font-mono text-xs"
+            style={{ background: "rgba(0,10,30,0.8)", border: "1px solid #0066cc", color: "#88ccff" }}
+            data-testid="transcript-toggle"
+            title="Ver conversación completa"
+          >
+            📜 Historial
+          </button>
+
+          {/* Transcript overlay — full conversation history */}
+          {showTranscript && (
+            <div className="absolute inset-0 z-30 flex flex-col" style={{ background: "rgba(0,4,16,0.96)" }}>
+              <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "#0066cc" }}>
+                <span className="font-mono text-sm font-bold" style={{ color: "#ffcc00" }}>Conversación</span>
+                <button onClick={() => setShowTranscript(false)} className="font-mono text-xs px-2 py-1 rounded" style={{ background: "#0066cc", color: "#fff" }}>
+                  ✕ Cerrar
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-2" data-testid="transcript-list">
+                {messages.map((m) => (
+                  <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className="max-w-[85%] px-3 py-2 rounded-xl text-xs font-mono whitespace-pre-wrap"
+                      style={{
+                        background: m.role === "user" ? "rgba(26,0,102,0.8)" : "#13132a",
+                        border: m.role === "user" ? "1px solid #6633ff" : "1px solid #333355",
+                        color: "#fff",
+                      }}
+                    >
+                      <span style={{ color: m.role === "user" ? "#aa99ff" : "#88aacc" }}>
+                        {m.role === "user" ? "Tú" : "Sonic"}:{" "}
+                      </span>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Game dialogue box at bottom of canvas */}
           <div className="absolute bottom-0 left-0 right-0 z-10">
             <DialogueBox
@@ -663,6 +699,16 @@ export default function ChatInterface({
           {sttError && (
             <div className="text-xs text-red-300 px-3 py-1.5 rounded-lg font-mono" style={{ background: "#2a0000", border: "1px solid #ff4444" }}>
               ⚠ {sttError}
+            </div>
+          )}
+
+          {/* Connection error — friendly retry */}
+          {connError && (
+            <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg font-mono" style={{ background: "#2a1500", border: "1px solid #ffaa00", color: "#ffcc88" }} data-testid="conn-error">
+              <span>⚠ Sonic perdió la conexión.</span>
+              <button onClick={() => sendMessage(lastUserTextRef.current)} className="px-2 py-0.5 rounded font-bold" style={{ background: "#ffaa00", color: "#000" }}>
+                Reintentar
+              </button>
             </div>
           )}
 
@@ -815,6 +861,14 @@ export default function ChatInterface({
 
       {/* Input */}
       <div className="p-4 border-t" style={{ borderColor: "#1a2a3a", background: "rgba(0,0,0,0.4)" }}>
+        {connError && (
+          <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg font-mono mb-2" style={{ background: "#2a1500", border: "1px solid #ffaa00", color: "#ffcc88" }} data-testid="conn-error">
+            <span>⚠ Se perdió la conexión con el tutor.</span>
+            <button onClick={() => sendMessage(lastUserTextRef.current)} className="px-2 py-0.5 rounded font-bold" style={{ background: "#ffaa00", color: "#000" }}>
+              Reintentar
+            </button>
+          </div>
+        )}
         <div className="flex gap-2 items-end">
           <div className="flex-1">
             <textarea

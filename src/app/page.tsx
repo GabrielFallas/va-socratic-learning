@@ -65,9 +65,7 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error("assign failed");
-      router.push(
-        `/session?id=${data.sessionId}&condition=${data.condition}&task=task-1-infinite-loop`
-      );
+      router.push(`/intake?id=${data.sessionId}&condition=${data.condition}`);
     } catch {
       setIsStarting(false);
     }
@@ -83,6 +81,7 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "init", sessionId, condition }),
       });
+      // Pilot skips the questionnaire flow and goes straight to the tasks.
       router.push(`/session?id=${sessionId}&condition=${condition}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);

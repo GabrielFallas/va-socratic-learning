@@ -236,7 +236,9 @@ function SessionContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "close", sessionId }),
       }).catch((err) => console.error("[session] Failed to close session:", err));
-      router.push(`/session/complete?id=${sessionId}&condition=${condition}`);
+      // Post-task questionnaire battery BEFORE the results screen (so seeing the
+      // rank/score doesn't bias affect/motivation answers).
+      router.push(`/post?id=${sessionId}&condition=${condition}`);
     }
   };
 
@@ -348,6 +350,21 @@ function SessionContent() {
         <span className="text-white/20 text-xs font-mono hidden lg:block">
           {sessionId.slice(0, 8)}
         </span>
+
+        {/* Exit (facilitator/participant abandon) */}
+        <button
+          onClick={() => {
+            if (confirm("¿Salir de la sesión? El progreso de la tarea actual no se guardará.")) {
+              router.push("/");
+            }
+          }}
+          className="text-xs font-mono px-2 py-1 rounded transition-colors"
+          style={{ color: "#ff8888", border: "1px solid rgba(255,80,80,0.3)" }}
+          title="Salir de la sesión"
+          data-testid="exit-session"
+        >
+          ✕ Salir
+        </button>
       </nav>
 
       {/* ── Main split layout ─────────────────────────────────── */}
