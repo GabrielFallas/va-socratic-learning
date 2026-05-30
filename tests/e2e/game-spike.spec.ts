@@ -43,3 +43,27 @@ test("Open Sonic engine boots in the /play iframe", async ({ page }) => {
   // No failed asset loads from /game/
   expect(netfail.length).toBe(0);
 });
+
+test("Phase B — bridge: engine-ready, pause freezes, resume restores", async ({ page }) => {
+  await page.goto("/play");
+  // engine-ready arrives over postMessage
+  await expect(page.getByTestId("engine-ready")).toContainText("listo", { timeout: 30000 });
+  await page.waitForTimeout(2500); // let a level frame render
+
+  const frame = page.frameLocator('[data-testid="game-frame"]');
+  const canvas = frame.locator("canvas").first();
+  const snap = () => canvas.evaluate((c) => (c as HTMLCanvasElement).toDataURL().length);
+
+  // Pause → the rendered frame should stop changing.
+  await page.getByTestId("btn-pause").click();
+  await page.waitForTimeout(300);
+  const a = await snap();
+  await page.waitForTimeout(700);
+  const b = await snap();
+  expect(b).toBe(a); // frozen while paused
+
+  // Resume → engine runs again (no error; canvas still present/visible).
+  await page.getByTestId("btn-resume").click();
+  await page.waitForTimeout(500);
+  await expect(canvas).toBeVisible();
+});

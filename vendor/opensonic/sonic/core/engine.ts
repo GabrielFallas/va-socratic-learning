@@ -28,6 +28,7 @@ import { timer_init, timer_update } from "./timer"
 import { runAnimation } from "./util"
 import { video_init, video_render } from "./video"
 import { level_setfile } from "./../scenes/level"
+import { bridge_init, bridge_ready, bridge_is_paused } from "./bridge"
 import { player_set_lives, player_set_score, PLAYER_INITIAL_LIVES } from "./../entities/player"
 import { enemy_objects_init } from "./../entities/enemy"
 import { font_init } from "./../entities/font"
@@ -52,6 +53,7 @@ export const engine_init = async (options:engine_options_t) => {
   const cmd = commandline_parse(options);
   console.log('ENGINE OPTIONS', cmd)
   
+  bridge_init();
   init_basic_stuff();
   init_managers(cmd);
   await sprite_init()
@@ -59,6 +61,7 @@ export const engine_init = async (options:engine_options_t) => {
   await init_accessories(cmd);
   init_game_data();
   push_initial_scene(cmd);
+  bridge_ready({ level: cmd.level });
   engine_mainloop();
 };
 
@@ -68,7 +71,10 @@ export const engine_init = async (options:engine_options_t) => {
  */
 const engine_mainloop = () => {
   runAnimation(()=>{
+    // Keep the timer ticking while paused so dt stays small (avoids a physics
+    // jump on resume), but freeze input, scene update and rendering.
     timer_update();
+    if (bridge_is_paused()) return;
     input_update();
     //audio_update();
 
