@@ -7,6 +7,10 @@ import type { Condition, ChatMessage, TaskResult } from "@/shared/types/session"
 import { TASKS } from "@/shared/config/tasks";
 import ChatInterface from "@/client/components/ChatInterface";
 import CodePanel, { type TaskCompleteMeta } from "@/client/components/CodePanel";
+import { zoneForTask } from "@/shared/config/zones";
+
+// Condition A is now a playable Open Sonic level (needs browser APIs).
+const GameSession = dynamic(() => import("@/client/game/GameSession"), { ssr: false });
 
 // Dynamic imports — game components need browser APIs
 const ZoneTitleCard = dynamic(() => import("@/client/components/ZoneTitleCard"), { ssr: false });
@@ -226,9 +230,15 @@ function SessionContent() {
   // ── Navigation ────────────────────────────────────────────────
   const handleContinue = () => {
     if (taskId === "task-1-infinite-loop") {
-      // Show transition game instead of direct navigation
       setShowSummary(false);
-      setShowTransition(true);
+      if (condition === "A") {
+        // Game mode: skip the Kaplay mini-transition; the next zone loads in
+        // the engine itself.
+        setTaskCompleted(false);
+        router.push(`/session?id=${sessionId}&condition=${condition}&task=task-2-algorithm-complexity`);
+      } else {
+        setShowTransition(true);
+      }
     } else {
       // Close session before navigating to results — finalises endTime + latency stats
       fetch("/api/session", {
@@ -367,38 +377,48 @@ function SessionContent() {
         </button>
       </nav>
 
-      {/* ── Main split layout ─────────────────────────────────── */}
-      <div className="flex-1 flex min-h-0">
-        {/* Left: Code panel */}
-        <div className="w-[45%] border-r flex-shrink-0" style={{ borderColor: "#1a2a3a" }}>
-          <CodePanel
+      {/* ── Main area ─────────────────────────────────────────── */}
+      {condition === "A" ? (
+        /* Condition A: playable Open Sonic zone with the Debug Terminal overlay */
+        <div className="flex-1 min-h-0">
+          <GameSession
+            sessionId={sessionId}
             task={task}
-            timeRemainingSeconds={timeRemaining}
-            turnCount={turnCount}
+            level={zoneForTask(task.id).level}
             onTaskComplete={handleTaskComplete}
           />
         </div>
-
-        {/* Right: Chat interface */}
-        <div className="flex-1 min-w-0">
-          <ChatInterface
-            condition={condition}
-            sessionId={sessionId}
-            taskContext={{
-              taskId:           task.id,
-              buggyCode:        task.buggyCode,
-              errorDescription: task.errorDescription,
-            }}
-            onNewMessage={handleNewMessage}
-            onRingEarned={handleRingEarned}
-            onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
-            ringsCollected={ringsCollected}
-            timeRemainingSeconds={timeRemaining}
-            taskCompleted={taskCompleted}
-            ringMultiplier={ringMultiplier}
-          />
+      ) : (
+        /* Condition B: plain text tutor + editor (control) */
+        <div className="flex-1 flex min-h-0">
+          <div className="w-[45%] border-r flex-shrink-0" style={{ borderColor: "#1a2a3a" }}>
+            <CodePanel
+              task={task}
+              timeRemainingSeconds={timeRemaining}
+              turnCount={turnCount}
+              onTaskComplete={handleTaskComplete}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <ChatInterface
+              condition={condition}
+              sessionId={sessionId}
+              taskContext={{
+                taskId:           task.id,
+                buggyCode:        task.buggyCode,
+                errorDescription: task.errorDescription,
+              }}
+              onNewMessage={handleNewMessage}
+              onRingEarned={handleRingEarned}
+              onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
+              ringsCollected={ringsCollected}
+              timeRemainingSeconds={timeRemaining}
+              taskCompleted={taskCompleted}
+              ringMultiplier={ringMultiplier}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Task completion modal ─────────────────────────────── */}
       {showSummary && (

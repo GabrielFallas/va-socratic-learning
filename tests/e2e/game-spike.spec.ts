@@ -100,3 +100,32 @@ test("Phase C — terminal overlay → solve → gate opens", async ({ page }) =
   await expect(page.getByTestId("terminal-overlay")).toBeHidden();
   await page.screenshot({ path: "tests/e2e/shots/phase-c-gate.png", fullPage: true });
 });
+
+test("Phase D — Condition A session: zone → terminal → solve → next zone", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("start-condition-a").click(); // pilot → /session, condition A
+  await page.waitForURL(/\/session/);
+
+  // The playable zone (GameSession) renders for Condition A.
+  await expect(page.getByTestId("game-session")).toBeVisible({ timeout: 20000 });
+  await page.waitForTimeout(4500); // engine boot + zone card
+
+  // Force the Debug Terminal, solve the bug, gate opens.
+  const trigger = async () => page.evaluate(() => {
+    const f = document.querySelector('[data-testid="game-frame"]') as HTMLIFrameElement;
+    f?.contentWindow?.postMessage({ target: "sonic-engine", type: "trigger-terminal" }, "*");
+  });
+  await trigger();
+  await expect(page.getByTestId("terminal-overlay")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("code-editor").fill(FIX1);
+  await page.getByTestId("run-button").click();
+
+  // Completion modal appears (telemetry logged), then advance to zone 2.
+  await expect(page.getByText(/CORRER A LA ZONA 2/)).toBeVisible({ timeout: 60000 });
+  await page.screenshot({ path: "tests/e2e/shots/phase-d-condA.png", fullPage: true });
+  await page.getByText(/CORRER A LA ZONA 2/).click();
+
+  // Zone 2 loads its own playable level.
+  await page.waitForURL(/task-2/);
+  await expect(page.getByTestId("game-session")).toBeVisible({ timeout: 20000 });
+});
