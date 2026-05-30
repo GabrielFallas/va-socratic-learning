@@ -9,7 +9,8 @@ tests/e2e/shots
 tests/e2e/.last-run.json
 
 tsconfig.tsbuildinfo
-data
+# Root telemetry store only (NOT public/game/data engine assets)
+/data
 
 # Generated Open Sonic engine bundle (built from vendor/opensonic via build:game)
 public/game/js/opensonic.js
