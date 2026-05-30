@@ -63,7 +63,7 @@ export default function SonicGameCanvas({
       width:      480,
       height:     260,
       letterbox:  true,
-      background: [0, 10, 25],
+      background: [18, 4, 4],   // dark red base (Chemical Plant dramatic palette)
       global:     false,
       debug:      false,
     }).then((k) => {
@@ -101,14 +101,14 @@ export default function SonicGameCanvas({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2), k.z(0)]);
 
-        // Zone 2 warm colour overlay (Speed Highway sunset palette)
-        if (signals.current.zone === 2) {
-          k.add([
-            k.rect(480, 260), k.pos(0, 0),
-            k.color(k.Color.fromHex("#ff6600")),
-            k.opacity(0.18), k.z(1), k.fixed(),
-          ]);
-        }
+        // Zone colour overlay — zone 1: red Chemical Plant, zone 2: Speed Highway sunset
+        k.add([
+          k.rect(480, 260), k.pos(0, 0),
+          k.color(signals.current.zone === 2
+            ? k.Color.fromHex("#ff6600")
+            : k.Color.fromHex("#cc1100")),
+          k.opacity(signals.current.zone === 2 ? 0.18 : 0.22), k.z(1), k.fixed(),
+        ]);
 
         // Red tint overlay (critical timer)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,9 +118,9 @@ export default function SonicGameCanvas({
           k.opacity(0), k.z(15), k.fixed(),
         ]);
 
-        // Ground — colour varies by zone
-        const groundDark  = signals.current.zone === 2 ? "#3a1a1a" : "#1a3a1a";
-        const groundEdge  = signals.current.zone === 2 ? "#cc5500" : "#4caf50";
+        // Ground — colour varies by zone (zone 1 gets red-tinted ground to match)
+        const groundDark  = signals.current.zone === 2 ? "#3a1a1a" : "#2a0a0a";
+        const groundEdge  = signals.current.zone === 2 ? "#cc5500" : "#cc2200";
         k.add([k.rect(480, 50), k.pos(0, GROUND_Y), k.color(k.Color.fromHex(groundDark)), k.body({ isStatic: true }), k.area(), k.z(1)]);
         k.add([k.rect(480, 8),  k.pos(0, GROUND_Y), k.color(k.Color.fromHex(groundEdge)), k.z(2)]);
 
@@ -156,11 +156,10 @@ export default function SonicGameCanvas({
           "sonic",
         ]);
 
-        let isJumping    = false;
-        let hurtTimer    = 0;
-        let hurtBlink    = 0;
-        let victoryMode  = false;
-        let victoryTimer = 0;
+        let isJumping     = false;
+        let hurtTimer     = 0;
+        let hurtBlink     = 0;
+        let completedOnce = false;  // fires the stop sequence exactly once
 
         // ── Timer bar (HTML overlay handles ring count — only time bar here) ─
         k.add([k.rect(480, 6), k.pos(0, 254), k.color(k.Color.fromHex("#001a33")), k.z(12), k.fixed()]);
@@ -189,7 +188,7 @@ export default function SonicGameCanvas({
           });
         }
 
-        // Hurt flash (red overlay blink)
+        // Hurt flash (red overlay blink) + camera shake
         function spawnHurtFlash() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const flash: any = k.add([k.rect(480, 260), k.pos(0, 0), k.color(k.Color.fromHex("#ff0000")), k.opacity(0.35), k.z(14), k.fixed()]);
@@ -199,6 +198,32 @@ export default function SonicGameCanvas({
             ft += k.dt(); flash.opacity = Math.max(0, 0.35 - ft * 1.5);
             if (ft > 0.25) { k.destroy(flash); ctrl.cancel(); }
           });
+          // Camera shake — use k.setCamPos (k.camPos is deprecated in Kaplay 3001.x)
+          let shakeT = 0;
+          const shakeCtrl = k.onUpdate(() => {
+            shakeT += k.dt();
+            if (shakeT > 0.22) { k.setCamPos(240, 130); shakeCtrl.cancel(); return; }
+            const amp = 5 * (1 - shakeT / 0.22);
+            k.setCamPos(240 + (Math.random() - 0.5) * amp * 2, 130 + (Math.random() - 0.5) * amp * 2);
+          });
+        }
+
+        // Speed lines — thin rect objects at high speed (happy/encouraging states)
+        // Use k.rect (not custom draw() which can crash the render loop)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const speedLines: any[] = [];
+        for (let i = 0; i < 5; i++) {
+          const y = 35 + i * 44;
+          const lineW = 80 + (i % 3) * 30;  // vary lengths: 80, 110, 140
+          speedLines.push(k.add([
+            k.rect(lineW, 2),
+            k.pos(480 - lineW, y),
+            k.color(k.Color.fromHex("#ffffff")),
+            k.opacity(0),
+            k.z(6),
+            k.fixed(),
+            k.anchor("topleft"),
+          ]));
         }
 
         // Motobug
@@ -216,7 +241,7 @@ export default function SonicGameCanvas({
           if (!motobugObj?.exists()) { motoActive = false; return; }
           if (explode) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const ex: any = k.add([k.text("💥", { size: 28 }), k.pos(motobugObj.pos.clone()), k.anchor("center"), k.z(9)]);
+            const ex: any = k.add([k.text("*BOOM*", { size: 14, font: "monospace" }), k.pos(motobugObj.pos.clone()), k.anchor("center"), k.color(k.Color.fromHex("#ff4400")), k.z(9)]);
             setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 380);
           }
           k.destroy(motobugObj); motobugObj = null; motoActive = false; motoTimer = 0;
@@ -225,7 +250,7 @@ export default function SonicGameCanvas({
         // Victory stars
         function spawnVictoryStar(x: number, y: number) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const star: any = k.add([k.text("⭐", { size: 22 }), k.pos(x, y), k.anchor("center"), k.z(9), k.opacity(1)]);
+          const star: any = k.add([k.text("★", { size: 22, font: "monospace" }), k.pos(x, y), k.anchor("center"), k.color(k.Color.fromHex("#ffcc00")), k.z(9), k.opacity(1)]);
           let t = 0;
           const ctrl = k.onUpdate(() => {
             if (!star.exists()) { ctrl.cancel(); return; }
@@ -237,7 +262,7 @@ export default function SonicGameCanvas({
         sonic.onGround(() => {
           isJumping = false;
           const s = signals.current;
-          if (hurtTimer <= 0 && !victoryMode && s.state !== "thinking" && s.state !== "speaking") {
+          if (hurtTimer <= 0 && !s.completed && s.state !== "thinking" && s.state !== "speaking") {
             sonic.paused = false;
             if (sonic.curAnim() !== "run") sonic.play("run");
           }
@@ -262,11 +287,37 @@ export default function SonicGameCanvas({
           sonic.angle           = 0;
           sonic.angularVelocity = 0;
 
+          // ── STOP: celebrate dance when task completed ─────────────────────
+          if (sig.completed) {
+            if (!completedOnce) {
+              completedOnce = true;
+              destroyMotobug(false);
+              for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                  if (!mounted) return;
+                  spawnVictoryStar(sonic.pos.x + k.rand(-40, 80), sonic.pos.y - k.rand(20, 80));
+                }, i * 120);
+              }
+            }
+            // Celebration dance: alternate frame 0↔1 every 200ms
+            sonic.paused = false;
+            sonic.frame  = Math.floor(k.time() * 5) % 2;
+            sonic.angle           = 0;
+            sonic.angularVelocity = 0;
+            timerBar.width = 480 * Math.max(0, sig.timeLeft / 600);
+            label.text  = "¡ZONA COMPLETADA!";
+            label.color = k.Color.fromHex("#ffcc00");
+            redTint.opacity = 0;
+            thinkBubble.opacity = 0;
+            speedLines.forEach((sl) => { sl.opacity = 0; });
+            return;
+          }
+
           // ② Background + platform speed (more rings = faster, boosted on happy/encouraging)
           const isThinking  = sig.state === "thinking";
           const isSpeaking  = sig.state === "speaking";
           const pauseWalk   = isThinking || isSpeaking;  // slow/stop when Sonic talks or thinks
-          const boost       = (sig.state === "encouraging" || sig.state === "happy" || victoryMode) ? 2 : 1;
+          const boost       = (sig.state === "encouraging" || sig.state === "happy") ? 2 : 1;
           const bgSpeed     = pauseWalk
             ? 30  // slow crawl when thinking / speaking welcome
             : Math.min(220, 80 + Math.floor(sig.rings / 5) * 10) * boost;
@@ -294,7 +345,7 @@ export default function SonicGameCanvas({
             ? 0.07 * Math.abs(Math.sin(k.time() * 4)) : 0;
 
           // ⑤ Motobug timer
-          if (!sig.completed && !victoryMode) {
+          if (!sig.completed) {
             const motoInterval =
               sig.timeLeft < 30  ? 2.5 :
               sig.timeLeft < 60  ? 5.0 :
@@ -314,13 +365,22 @@ export default function SonicGameCanvas({
             }
             sig.prevRings = sig.rings;
           }
-          // ⑦ Hurt flash on ring loss (rings decreased)
+          // ⑦ Hurt flash on ring loss (rings decreased) + slow-mo
           if (sig.rings < sig.prevRings) {
             spawnHurtFlash();
             hurtTimer = 1.0;
             hurtBlink = 0;
             sig.prevRings = sig.rings;
+            // Slow motion: k.timeScale property (k.setTimeScale does not exist in Kaplay 3001.x)
+            k.timeScale = 0.3;
+            setTimeout(() => { if (mounted) k.timeScale = 1.0; }, 400);
           }
+
+          // ⑦b Speed lines — visible only at high speed (happy / encouraging)
+          const highSpeed = (sig.state === "happy" || sig.state === "encouraging") && bgSpeed > 140;
+          speedLines.forEach((sl, i) => {
+            sl.opacity = highSpeed ? 0.22 + Math.sin(k.time() * 8 + i) * 0.1 : Math.max(0, sl.opacity - k.dt() * 3);
+          });
 
           if (hurtTimer > 0) {
             hurtTimer -= k.dt();
@@ -338,32 +398,6 @@ export default function SonicGameCanvas({
             thinkBubble.pos.x   = sonic.pos.x + 22;
           } else {
             thinkBubble.opacity = 0;
-          }
-
-          // ⑨ Victory mode
-          if (sig.completed && !victoryMode) {
-            victoryMode = true;
-            destroyMotobug(false);
-            const iv = setInterval(() => {
-              if (!mounted) { clearInterval(iv); return; }
-              spawnVictoryStar(sonic.pos.x + k.rand(-40, 80), sonic.pos.y - k.rand(20, 80));
-            }, 220);
-            setTimeout(() => clearInterval(iv), 4000);
-          }
-          if (victoryMode) {
-            victoryTimer += k.dt();
-            if (sonic.isGrounded() && victoryTimer % 1.1 < k.dt() * 3) {
-              sonic.jump(650);         // halved from original 1100
-              sonic.play("jump");
-              sonic.angle           = 0;
-              sonic.angularVelocity = 0;
-            }
-            // Hard rotation lock in victory every frame
-            sonic.angle           = 0;
-            sonic.angularVelocity = 0;
-            label.text  = "¡ZONA COMPLETADA!";
-            label.color = k.Color.fromHex("#ffcc00");
-            return;
           }
 
           // ⑩ Avatar state → Sonic behaviour
@@ -446,7 +480,7 @@ export default function SonicGameCanvas({
           background:  "rgba(0,4,20,0.75)",
           border:      "1px solid rgba(255,204,0,0.4)",
           backdropFilter: "blur(2px)",
-          zIndex:      5,
+          zIndex:      25,
         }}
       >
         {/* 16-frame ring sprite via CSS spritesheet */}

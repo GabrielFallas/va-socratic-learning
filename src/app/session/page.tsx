@@ -351,6 +351,17 @@ function SessionContent() {
           {sessionId.slice(0, 8)}
         </span>
 
+        {/* Emergency reset — Murphy's Law contingency (reloads Kaplay canvas + chat without losing telemetry) */}
+        <button
+          onClick={() => { window.location.reload(); }}
+          className="text-xs font-mono px-2 py-1 rounded transition-colors"
+          style={{ color: "#aaaaaa", border: "1px solid rgba(180,180,180,0.2)", opacity: 0.45 }}
+          title="Reiniciar canvas (contingencia técnica)"
+          data-testid="reset-canvas"
+        >
+          ↺
+        </button>
+
         {/* Exit (facilitator/participant abandon) */}
         <button
           onClick={() => {

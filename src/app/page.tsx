@@ -81,8 +81,9 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "init", sessionId, condition }),
       });
-      // Pilot skips the questionnaire flow and goes straight to the tasks.
-      router.push(`/session?id=${sessionId}&condition=${condition}&task=task-1-infinite-loop`);
+      // Pilot now runs through the intake flow (consent + demographics + panas-pre)
+      // so the full experiment time is tracked from the first survey onward.
+      router.push(`/intake?id=${sessionId}&condition=${condition}`);
     } catch {
       setIsStarting(false);
     }
@@ -335,9 +336,6 @@ export default function HomePage() {
               💬 Prueba B
             </button>
           </div>
-          <p className="text-center text-[10px] text-white/30 font-mono mt-1">
-            Los botones de prueba fuerzan la condición (no cuentan para el experimento).
-          </p>
         </div>
 
         <p className="text-center text-xs mt-6 font-mono">

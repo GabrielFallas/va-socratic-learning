@@ -56,6 +56,27 @@ const WELCOME_TEXT =
 const WELCOME_A = WELCOME_TEXT;
 const WELCOME_B = WELCOME_TEXT;
 
+// ── Client-side sentiment — instant pre-response avatar reaction ──────────
+// Runs on user text before the LLM responds so Sonic reacts to the student's
+// emotion immediately, not just after the server round-trip.
+const FRUSTRATION_KEYWORDS = [
+  "no entiendo", "no sé", "me rindo", "no puedo", "no logro", "ayuda",
+  "no comprendo", "estoy perdido", "no funciona", "no lo veo", "no encuentro",
+  "qué hago", "no avanzo", "me perdí", "help",
+];
+const POSITIVE_KEYWORDS = [
+  "lo encontré", "ya vi", "creo que es", "entendí", "ya sé", "lo tengo",
+  "encontré el error", "ya entiendo", "creo que ya", "lo resolví", "ya lo veo",
+  "ahhh", "ohhh", "claro", "tiene sentido",
+];
+
+function detectUserSentiment(text: string): "frustrated" | "positive" | "neutral" {
+  const lower = text.toLowerCase();
+  if (FRUSTRATION_KEYWORDS.some((kw) => lower.includes(kw))) return "frustrated";
+  if (POSITIVE_KEYWORDS.some((kw) => lower.includes(kw))) return "positive";
+  return "neutral";
+}
+
 // ── Proactive nudges (fire after 60 s of inactivity, Condition A only) ────
 // IMPORTANT (experimental validity): these are deliberately CONTENT-NEUTRAL.
 // Proactive engagement is part of the embodiment manipulation, but the nudges
@@ -385,8 +406,18 @@ export default function ChatInterface({
       setStreamingText("");
 
       if (isConditionA) {
-        setAvatarState("thinking");
         stopSpeaking();
+        // Instant pre-response reaction based on student's own words
+        const sentiment = detectUserSentiment(text.trim());
+        if (sentiment === "frustrated") {
+          setAvatarState("empathetic");
+          setTimeout(() => setAvatarState("thinking"), 650);
+        } else if (sentiment === "positive") {
+          setAvatarState("happy");
+          setTimeout(() => setAvatarState("thinking"), 450);
+        } else {
+          setAvatarState("thinking");
+        }
       }
 
       const sendStart = Date.now();
@@ -577,10 +608,10 @@ export default function ChatInterface({
             className="w-full h-full"
           />
 
-          {/* Multiplier badge */}
+          {/* Multiplier badge — sits below transcript toggle so they don't clash */}
           {ringMultiplier > 1 && (
             <div
-              className="absolute top-2 left-2 z-10 px-2 py-1 rounded-lg font-mono font-black animate-pulse"
+              className="absolute top-10 left-2 z-10 px-2 py-1 rounded-lg font-mono font-black animate-pulse"
               style={{
                 background: ringMultiplier >= 3 ? "#ff4400" : "#ff8800",
                 color:      "#000",
@@ -592,15 +623,15 @@ export default function ChatInterface({
             </div>
           )}
 
-          {/* Transcript toggle (Condition A shows only the latest line) */}
+          {/* Transcript toggle — left side so it never covers the ring counter (top-right) */}
           <button
             onClick={() => setShowTranscript((v) => !v)}
-            className="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg font-mono text-xs"
+            className="absolute top-2 left-2 z-20 px-2 py-1 rounded-lg font-mono text-xs"
             style={{ background: "rgba(0,10,30,0.8)", border: "1px solid #0066cc", color: "#88ccff" }}
             data-testid="transcript-toggle"
             title="Ver conversación completa"
           >
-            📜 Historial
+            [=] Historial
           </button>
 
           {/* Transcript overlay — full conversation history */}
@@ -713,7 +744,7 @@ export default function ChatInterface({
           )}
 
           {/* Input row */}
-          <div className="flex gap-2 items-end mt-auto">
+          <div className="flex gap-2 items-center mt-auto">
             {/* Textarea */}
             <div className="flex-1 relative">
               <textarea

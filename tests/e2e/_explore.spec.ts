@@ -49,7 +49,12 @@ test("Condition B — full chat turn", async ({ page }) => {
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-b").click();
-  await page.waitForURL(/\/session/);
+  // Pilot buttons now go through the intake flow (3 instruments)
+  await page.waitForURL(/\/intake/, { timeout: 10000 });
+  await completeInstrument(page); // consent
+  await completeInstrument(page); // demographics
+  await completeInstrument(page); // panas pre
+  await page.waitForURL(/\/session\?/, { timeout: 15000 });
   await expect(page.getByTestId("chat-interface")).toHaveAttribute("data-condition", "B");
 
   await page.getByTestId("chat-input").fill("El bucle nunca termina, no sé por qué.");
@@ -70,7 +75,12 @@ test("Pyodide runner — fixing Task 1 passes hidden tests", async ({ page }) =>
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-b").click(); // deterministic condition
-  await page.waitForURL(/\/session/);
+  // Pilot buttons now go through the intake flow (3 instruments)
+  await page.waitForURL(/\/intake/, { timeout: 10000 });
+  await completeInstrument(page); // consent
+  await completeInstrument(page); // demographics
+  await completeInstrument(page); // panas pre
+  await page.waitForURL(/\/session\?/, { timeout: 15000 });
 
   const editor = page.getByTestId("code-editor");
   await expect(editor).toBeVisible();
@@ -204,7 +214,12 @@ test("Phase 3 — Condition A transcript toggle + exit button", async ({ page })
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-a").click();
-  await page.waitForURL(/\/session/);
+  // Pilot buttons now route through the intake flow (3 instruments)
+  await page.waitForURL(/\/intake/, { timeout: 10000 });
+  await completeInstrument(page); // consent
+  await completeInstrument(page); // demographics
+  await completeInstrument(page); // panas pre
+  await page.waitForURL(/\/session\?/, { timeout: 15000 });
   await page.waitForTimeout(3500); // canvas + zone card
 
   // Dismiss the PRESS START overlay (unlocks audio) so the HUD is interactive
