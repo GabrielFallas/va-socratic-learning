@@ -3,7 +3,7 @@
 // it in a playable zone.
 export const ZONE_FOR_TASK: Record<string, { level: string; name: string }> = {
   "task-1-infinite-loop": { level: "data/levels/blue_ocean_1.json", name: "BLUE OCEAN" },
-  "task-2-algorithm-complexity": { level: "data/levels/blue_ocean_3.json", name: "BLUE OCEAN" },
+  "task-2-algorithm-complexity": { level: "data/levels/desert1.json", name: "DESERT" },
 };
 
 export function zoneForTask(taskId: string) {

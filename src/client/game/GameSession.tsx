@@ -157,7 +157,8 @@ export default function GameSession({ sessionId, task, level, onTaskComplete }: 
             </div>
             <div className="w-1/2 min-w-0">
               <ChatInterface
-                condition="B"
+                condition="A"
+                voice
                 sessionId={sessionId}
                 taskContext={{
                   taskId: task.id,

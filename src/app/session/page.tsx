@@ -34,44 +34,11 @@ function RingSprite({ size = 22 }: { size?: number }) {
   );
 }
 
-// ── Ring HUD (top bar) ───────────────────────────────────────────
-function RingHUD({ rings, multiplier }: { rings: number; multiplier: number }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <RingSprite size={22} />
-      <span className="text-yellow-300 font-bold font-mono text-sm ring-glow">
-        {rings}
-      </span>
-      {multiplier > 1 && (
-        <span
-          className="font-mono font-black text-xs px-1.5 py-0.5 rounded animate-pulse"
-          style={{
-            background: multiplier >= 3 ? "#ff4400" : multiplier >= 2 ? "#ff8800" : "#ffcc00",
-            color: "#000",
-            fontSize: "10px",
-          }}
-        >
-          x{multiplier}
-        </span>
-      )}
-    </div>
-  );
-}
-
 // ── Zone name map ────────────────────────────────────────────────
 const ZONE_NAMES: Record<string, { name: string; act: number }> = {
   "task-1-infinite-loop":        { name: "BUCLE INFINITO",            act: 1 },
   "task-2-algorithm-complexity": { name: "OPTIMIZACIÓN ALGORÍTMICA",  act: 2 },
 };
-
-// ── Multiplier calc ──────────────────────────────────────────────
-function calcMultiplier(lastMsgTime: number, turnCount: number): number {
-  if (turnCount < 2) return 1;
-  const gap = (Date.now() - lastMsgTime) / 1000;
-  if (gap < 15) return 3;
-  if (gap < 30) return 2;
-  return 1;
-}
 
 // ─────────────────────────────────────────────────────────────────
 function SessionContent() {
@@ -106,8 +73,6 @@ function SessionContent() {
   const [taskStartTime]                               = useState(Date.now());
   const [resolvedAutonomously, setResolvedAutonomously] = useState(false);
   const [ringsCollected,      setRingsCollected]      = useState(0);
-  const [showRingAnimation,   setShowRingAnimation]   = useState(false);
-  const [ringDelta,           setRingDelta]           = useState(0);
 
   // ── Zone title ───────────────────────────────────────────────
   const [showZoneTitle,  setShowZoneTitle]  = useState(condition === "A");
@@ -115,12 +80,7 @@ function SessionContent() {
   // ── Transition game ──────────────────────────────────────────
   const [showTransition, setShowTransition] = useState(false);
 
-  // ── Ring multiplier ──────────────────────────────────────────
-  const [ringMultiplier, setRingMultiplier] = useState(1);
-  const lastMsgTimeRef    = useRef(Date.now());
-  const turnCountRef      = useRef(0);
-  const ringMultiplierRef = useRef(1);  // always-current ref for ring award callback
-
+  const turnCountRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Reset on task change
@@ -131,7 +91,6 @@ function SessionContent() {
     setTurnCount(0);
     setLatencyReadings([]);
     setResolvedAutonomously(false);
-    setRingMultiplier(1);
     if (condition === "A") setShowZoneTitle(true);
   }, [taskId, task.maxTimeSeconds, condition]);
 
@@ -152,34 +111,14 @@ function SessionContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskCompleted]);
 
-  // ── New message handler ──────────────────────────────────────
-  // Updates turn count, latency log, and ring multiplier.
-  // Ring award is intentionally NOT done here — it happens via onRingEarned
-  // which is only called when the LLM signals happy/encouraging (correct answer).
+  // ── New message handler — turn count + latency (TTFT) telemetry ──
   const handleNewMessage = useCallback((message: ChatMessage, latencyMs: number) => {
     if (message.role !== "assistant") return;
-
     setTurnCount((prev) => {
       turnCountRef.current = prev + 1;
       return prev + 1;
     });
     setLatencyReadings((prev) => [...prev, latencyMs]);
-
-    // Update multiplier; store in ref so onRingEarned can read it immediately
-    const mult = calcMultiplier(lastMsgTimeRef.current, turnCountRef.current);
-    lastMsgTimeRef.current  = Date.now();
-    ringMultiplierRef.current = mult;
-    setRingMultiplier(mult);
-    setTimeout(() => { ringMultiplierRef.current = 1; setRingMultiplier(1); }, 8000);
-  }, []);
-
-  // ── Ring earned handler (called only on correct/positive LLM responses) ─
-  const handleRingEarned = useCallback(() => {
-    const mult = ringMultiplierRef.current;
-    setRingsCollected((prev) => prev + mult);
-    setRingDelta(mult);
-    setShowRingAnimation(true);
-    setTimeout(() => setShowRingAnimation(false), 700);
   }, []);
 
   // ── Task complete handler ────────────────────────────────────
@@ -409,12 +348,6 @@ function SessionContent() {
                 errorDescription: task.errorDescription,
               }}
               onNewMessage={handleNewMessage}
-              onRingEarned={handleRingEarned}
-              onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
-              ringsCollected={ringsCollected}
-              timeRemainingSeconds={timeRemaining}
-              taskCompleted={taskCompleted}
-              ringMultiplier={ringMultiplier}
             />
           </div>
         </div>
