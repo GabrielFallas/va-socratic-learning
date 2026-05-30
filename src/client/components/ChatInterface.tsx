@@ -56,31 +56,22 @@ const WELCOME_TEXT =
 const WELCOME_A = WELCOME_TEXT;
 const WELCOME_B = WELCOME_TEXT;
 
-// ── Proactive messages (fire after 60 s of inactivity) ───────────────────
-const PROACTIVE: Record<string, string[]> = {
-  "task-1-infinite-loop": [
-    "¡Ey! Sonic sigue corriendo... ¿y tú? Pista: ¿qué le pasa exactamente al valor de `counter` cada vez que el bucle repite?",
-    "El tiempo vuela como yo. Pregunta rápida: si `counter` arranca en 1 y la condición es `counter <= 5`, ¿cuándo se volvería `false` esa condición?",
-    "Truco Sonic: ejecuta el bucle mentalmente solo tres veces. ¿Qué valor tiene `counter` al inicio de la primera, segunda y tercera vuelta?",
-    "Oye, ¿ya miraste qué instrucciones están DENTRO del while y cuáles están FUERA? Eso puede ser la clave.",
-  ],
-  "task-2-algorithm-complexity": [
-    "Psst — ¿cuántos bucles anidados contaste en `find_duplicates`? Piénsalo: si la lista tiene N elementos, ¿cuántas comparaciones hace?",
-    "Imagina una lista de 10,000 números. Con el código actual, ¿cuántas veces se ejecuta la comparación `numbers[i] == numbers[j]`? (Pista: es un número enorme.)",
-    "Pregunta rápida: ¿qué estructura de datos de Python hace `x in coleccion` en O(1) en vez de O(n)?",
-    "El código funciona, pero *¿cuánto tiempo tarda* con listas grandes? Eso es exactamente lo que hace interesante este problema.",
-  ],
-  "default": [
-    "¡Ey! ¿Sigues ahí? Sin presión — tómate tu tiempo, pero si tienes alguna duda lánzamela y seguimos.",
-    "Sonic esperando... ¿En qué parte del código tienes más dudas ahora mismo?",
-    "Pausa activa: describe en una sola oración qué crees que hace el código. A veces verbalizar el problema revela la solución.",
-  ],
-};
+// ── Proactive nudges (fire after 60 s of inactivity, Condition A only) ────
+// IMPORTANT (experimental validity): these are deliberately CONTENT-NEUTRAL.
+// Proactive engagement is part of the embodiment manipulation, but the nudges
+// must NOT contain task-specific hints — otherwise Condition A would receive
+// extra pedagogical scaffolding that Condition B never gets, confounding RQ2.
+// They only prompt the participant to re-engage and articulate their thinking.
+const PROACTIVE: string[] = [
+  "¿Sigues ahí? Sin presión — tómate tu tiempo. Si quieres, cuéntame en qué estás pensando ahora.",
+  "Una técnica útil: describe en una sola oración qué crees que hace el código. Verbalizar el problema suele aclararlo.",
+  "¿En qué parte te sientes más atascado/a? Descríbelo con tus propias palabras y seguimos desde ahí.",
+  "Recuerda que puedes editar el código y pulsar Ejecutar para comprobar tus ideas cuando quieras.",
+];
 
-function getProactiveMessage(taskId?: string, used?: Set<string>): string {
-  const pool = PROACTIVE[taskId ?? "default"] ?? PROACTIVE["default"];
-  const available = pool.filter((m) => !used?.has(m));
-  const list = available.length > 0 ? available : pool;
+function getProactiveMessage(_taskId?: string, used?: Set<string>): string {
+  const available = PROACTIVE.filter((m) => !used?.has(m));
+  const list = available.length > 0 ? available : PROACTIVE;
   return list[Math.floor(Math.random() * list.length)];
 }
 

@@ -46,7 +46,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 | **Reconocimiento de Voz (STT)** | Whisper STT (local via `/api/stt` Next.js) | Reconocimiento de voz local sin dependencias de nube, español, baja latencia, integrado en backend. |
 | **Gamificación** | Sistema de anillos + TaskTransitionGame (Kaplay mini-juego) | Anillos visuales (ring burst anim) ganados/perdidos según progreso socrático; mini-juego ~15 s entre tareas; SFX/BGM por zona temática. |
 | **Framework / Orquestación** | Next.js 14 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
-| **Telemetría** | Módulo logger.ts (en memoria, servidor) | Registra latencia extremo a extremo, turnos, tiempo por tarea, resolución autónoma, estado del avatar (RQ2–RQ4). |
+| **Telemetría** | `logger.ts` + `store.ts` (JSON persistente en `data/`) | Registra TTFT y latencia total, turnos, tiempo por tarea, resolución autónoma (pruebas ocultas), intentos de ejecución y respuestas de cuestionarios. Persistente entre reinicios; exportable a CSV/JSON; panel `/admin` (RQ1–RQ4). |
 
 ### Componentes Principales
 
@@ -58,8 +58,8 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 ### Flujo de Interacción
 
-1. El participante accede a `localhost:3000` y se asigna aleatoriamente a la Condición A (Sonic multimodal ) o B (chat de texto).
-2. El sistema inicializa la sesión con un ID único, carga el consentimiento informado, y presenta la Tarea 1 (depuración `print_numbers()` bucle infinito, Chemical Plant zone).
+1. El participante accede a `localhost:3000` y pulsa **PRESS START**. El servidor lo asigna a la Condición A o B mediante **contrabalanceo por bloques** (sin que el participante elija) y emite un ID secuencial (`P-001`, …).
+2. Flujo `/intake`: consentimiento informado → datos demográficos → PANAS-SF (pre). Luego se presenta la Tarea 1 (`print_numbers()`, Chemical Plant). El código es **editable**; al pulsar Ejecutar corre en Pyodide contra pruebas ocultas. Tras ambas tareas, el flujo `/post` administra Godspeed, SUS, NASA-TLX, SIMS, PANAS-SF (post) y preguntas cualitativas, antes de mostrar los resultados.
 3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
 4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
 5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A: Piper TTS vocaliza la respuesta, el canvas Kaplay anima el sprite Sonic al estado indicado, y el sistema de anillos se actualiza (ganado/perdido). En Condición B: solo texto.
@@ -122,11 +122,12 @@ OLLAMA_BASE_URL=http://localhost:11434
 # Modelo Ollama a utilizar
 OLLAMA_MODEL=gemma3:12b
 
-# URL del servidor Piper TTS (por defecto: http://localhost:8000)
-PIPER_TTS_URL=http://localhost:8000
+# Speech API (Piper TTS + Whisper STT) — FastAPI en speech-api/, puerto 5001.
+# Si no está disponible, el TTS usa Web Speech API automáticamente.
+SPEECH_API_URL=http://localhost:5001
 
-# Idioma/modelo Piper (ej. es_ES-josemi-medium.onnx)
-PIPER_VOICE=es_ES-josemi-medium
+# Carpeta de datos de telemetría (sesiones, eventos, asignación). Por defecto ./data
+# DATA_DIR=./data
 ```
 
 > **Nota de seguridad:** No se requieren API keys externas para la PoC. No subas credenciales al repositorio.
@@ -196,18 +197,38 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`src/services/tts/piperTTS.ts`](src/services/tts/piperTTS.ts) | Servicio TTS — Piper TTS neuronal (Docker local, español) con fallback Web Speech API. |
 | [`src/services/stt/whisperSTT.ts`](src/services/stt/whisperSTT.ts) | Servicio STT — Whisper local via `/api/stt` Next.js route, español. |
 | [`src/services/audio/sfx.ts`](src/services/audio/sfx.ts) | Gestor de efectos de sonido (ring, jump, hurt, victory) y música de fondo por zona. |
-| [`src/prompts/sonic-system.ts`](src/prompts/sonic-system.ts) | System prompt socrático de Sonic con personalidad energética, protocolo ZPD 3 niveles, detección de frustración, `[AVATAR_STATE]` control tags. |
-| [`src/prompts/ada-system.ts`](src/prompts/ada-system.ts) | System prompt de baseline (utilizado en Condición B: mismo tutor socrático, sin embodiment). |
-| [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Definición de las dos tareas experimentales de depuración. |
-| [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) | Módulo de telemetría — logs de latencia y métricas por sesión. |
+| [`src/prompts/tutor-system.ts`](src/prompts/tutor-system.ts) | System prompt socrático **neutral, idéntico para ambas condiciones**; la Condición A añade el bloque de control `[AVATAR_STATE]`. Aísla el embodiment manteniendo constante el texto del tutor. |
+| [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Tareas de depuración + arnés de pruebas ocultas (Pyodide) que determina la resolución autónoma. |
+| [`src/shared/config/questionnaires.ts`](src/shared/config/questionnaires.ts) | Instrumentos validados (consentimiento, demográficos, PANAS-SF, Godspeed, SUS, NASA-TLX, SIMS, cualitativo) con funciones de puntuación. |
+| [`src/client/code/pyodideRunner.ts`](src/client/code/pyodideRunner.ts) · [`public/pyodide.worker.js`](public/pyodide.worker.js) | Ejecución de Python en el navegador (Web Worker) con timeout que mata bucles infinitos. |
+| [`src/server/experiment/assignment.ts`](src/server/experiment/assignment.ts) | Asignación contrabalanceada (bloques permutados) persistida. |
+| [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) · [`store.ts`](src/server/telemetry/store.ts) · [`export.ts`](src/server/telemetry/export.ts) | Telemetría persistente, almacén JSON en `data/` y exportación CSV/JSON. |
+| [`src/app/intake/page.tsx`](src/app/intake/page.tsx) · [`src/app/post/page.tsx`](src/app/post/page.tsx) · [`src/app/admin/page.tsx`](src/app/admin/page.tsx) | Flujo pre-tarea, batería post-tarea y panel del facilitador. |
 
 ### Pruebas
 
 | Ruta | Descripción |
 |---|---|
-| [`tests/unit/`](tests/unit/) | Pruebas unitarias. |
-| [`tests/integration/`](tests/integration/) | Pruebas de integración. |
-| [`tests/e2e/`](tests/e2e/) | Pruebas end-to-end. |
+| [`tests/unit/`](tests/unit/) | Pruebas unitarias (Vitest): aislamiento del prompt por condición, extracción de `[AVATAR_STATE]`, puntuación de cuestionarios, exportación CSV, almacén/persistencia, balance de asignación. |
+| [`tests/e2e/`](tests/e2e/) | Pruebas end-to-end (Playwright): ambas condiciones, runner de Pyodide, persistencia/exportación y flujos de cuestionarios. |
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | CI: typecheck + unit + build, y un job de Playwright (sin Ollama, ejercita los caminos de degradación). |
+
+```bash
+npm test          # unitarias (Vitest)
+npm run test:e2e  # end-to-end (Playwright, levanta el servidor)
+npm run typecheck # verificación de tipos
+```
+
+### Recolección de Datos y Exportación
+
+Cada sesión se persiste en `data/sessions/<id>.json` (más un log `data/events.jsonl`),
+por lo que los datos sobreviven a reinicios del servidor. Para el análisis:
+
+- **Panel del facilitador:** [`/admin`](http://localhost:3000/admin) — tabla de sesiones, balance A/B y botones de exportación.
+- **CSV:** `GET /api/export?format=csv` — una fila por participante con métricas por tarea y puntajes de cuestionarios (`q_<instrumento>_<fase>_<score>`).
+- **JSON:** `GET /api/export?format=json` — sesión completa con fidelidad total.
+
+> Los datos quedan bajo un identificador anónimo (`P-001`, …). La carpeta `data/` está en `.gitignore`.
 
 ---
 
@@ -220,8 +241,8 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | **Reconocimiento de voz (STT)** | ✓ Whisper STT (backend `/api/stt`) | ✗ Deshabilitado (teclado solo) |
 | **Gamificación** | ✓ Sistema de anillos, TaskTransitionGame, SFX/BGM, zonas temáticas | ✗ Sin anillos, sin mini-juego |
 | **Modelo LLM** | ✓ Ollama + Gemma 3 12B (Q4_K_M) | ✓ Idéntico |
-| **System Prompt** | ✓ sonic-system.ts: Socrático ZPD 3 niveles, `[AVATAR_STATE]` tags | ✓ ada-system.ts: Idéntico ZPD, sin control de avatar |
-| **Tareas** | ✓ Tarea 1: print_numbers() (Chemical Plant) · Tarea 2: find_duplicates() (Speed Highway) | ✓ Idénticas |
+| **System Prompt** | ✓ `tutor-system.ts`: MISMO texto socrático neutral que B + bloque de control `[AVATAR_STATE]` | ✓ `tutor-system.ts`: texto idéntico, **sin** bloque de avatar (aísla el embodiment, no la persona) |
+| **Tareas** | ✓ Editor de código real + ejecución en Pyodide; resolución = pruebas ocultas pasan | ✓ Idénticas |
 | **Latencia objetivo** | ✓ < 1.5 s extremo a extremo (registro automático) | ✓ Idéntica |
 
 ---

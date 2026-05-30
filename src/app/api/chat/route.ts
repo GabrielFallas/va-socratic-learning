@@ -5,7 +5,9 @@ import { logMessage, getSession, initSession } from "@/server/telemetry/logger";
 import type { ApiChatRequest } from "@/shared/types/session";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+// Local Gemma 12B can be slow to first token on CPU; allow headroom so a slow
+// turn doesn't get cut off mid-stream.
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const start = Date.now();
