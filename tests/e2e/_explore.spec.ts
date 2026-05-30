@@ -200,26 +200,27 @@ test("Phase 2 — post flow persists all instruments", async ({ page, request })
   expect(csv).toContain("q_panas-sf_post_positiveAffect");
 });
 
-test("Phase 3 — Condition A transcript toggle + exit button", async ({ page }) => {
+// NOTE: the Kaplay Condition-A transcript/PRESS-START UI was superseded by the
+// playable Open Sonic zone (sonic-engine-reimagining). This now checks the
+// session-level features that survive: the exit control + graceful chat errors
+// in the Condition B control.
+test("Phase 3 — session exit control + graceful chat error (Condition B)", async ({ page }) => {
   const bag = attach(page);
   await page.goto("/");
-  await page.getByTestId("start-condition-a").click();
+  await page.getByTestId("start-condition-b").click();
   await page.waitForURL(/\/session/);
-  await page.waitForTimeout(3500); // canvas + zone card
 
-  // Dismiss the PRESS START overlay (unlocks audio) so the HUD is interactive
-  await page.getByText("▶ PRESS START").click();
-  await page.waitForTimeout(300);
-
-  // Transcript overlay opens and lists the welcome message
-  await page.getByTestId("transcript-toggle").click();
-  await expect(page.getByTestId("transcript-list")).toBeVisible();
-  await expect(page.getByTestId("transcript-list")).toContainText("Sonic");
-  await page.screenshot({ path: "tests/e2e/shots/condA-transcript.png", fullPage: true });
-  await page.getByText("✕ Cerrar").click();
-  await expect(page.getByTestId("transcript-list")).toBeHidden();
-
-  // Exit button present
+  // Exit control present in the session nav.
   await expect(page.getByTestId("exit-session")).toBeVisible();
+
+  // With Ollama down, a send surfaces the retry banner (not a raw error bubble).
+  await page.getByTestId("chat-input").fill("¿por qué no termina el bucle?");
+  await page.getByTestId("send-button").click();
+  const assistant = page.getByTestId("message-assistant");
+  await expect(async () => {
+    const replied = (await assistant.count()) >= 2;
+    const errored = await page.getByTestId("conn-error").isVisible().catch(() => false);
+    expect(replied || errored).toBeTruthy();
+  }).toPass({ timeout: 40000 });
   dump("PHASE 3", bag);
 });

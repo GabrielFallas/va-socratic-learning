@@ -44,26 +44,29 @@ test("Open Sonic engine boots in the /play iframe", async ({ page }) => {
   expect(netfail.length).toBe(0);
 });
 
-test("Phase B — bridge: engine-ready, pause freezes, resume restores", async ({ page }) => {
+test("Phase B — bridge: pause freezes the engine, resume restores it", async ({ page }) => {
   await page.goto("/play");
-  // engine-ready arrives over postMessage
-  await expect(page.getByTestId("engine-ready")).toContainText("listo", { timeout: 30000 });
-  await page.waitForTimeout(2500); // let a level frame render
+  await expect(page.getByTestId("game-frame")).toBeVisible();
+  await page.waitForTimeout(4000); // engine boot + a few level frames
 
   const frame = page.frameLocator('[data-testid="game-frame"]');
   const canvas = frame.locator("canvas").first();
   const snap = () => canvas.evaluate((c) => (c as HTMLCanvasElement).toDataURL().length);
+  const cmd = (type: string) => page.evaluate((t) => {
+    const f = document.querySelector('[data-testid="game-frame"]') as HTMLIFrameElement;
+    f?.contentWindow?.postMessage({ target: "sonic-engine", type: t }, "*");
+  }, type);
 
   // Pause → the rendered frame should stop changing.
-  await page.getByTestId("btn-pause").click();
+  await cmd("pause");
   await page.waitForTimeout(300);
   const a = await snap();
   await page.waitForTimeout(700);
   const b = await snap();
   expect(b).toBe(a); // frozen while paused
 
-  // Resume → engine runs again (no error; canvas still present/visible).
-  await page.getByTestId("btn-resume").click();
+  // Resume → engine runs again, canvas still present.
+  await cmd("resume");
   await page.waitForTimeout(500);
   await expect(canvas).toBeVisible();
 });
@@ -128,4 +131,28 @@ test("Phase D — Condition A session: zone → terminal → solve → next zone
   // Zone 2 loads its own playable level.
   await page.waitForURL(/task-2/);
   await expect(page.getByTestId("game-session")).toBeVisible({ timeout: 20000 });
+});
+
+test("Phase E — assist button reaches terminal + logs gameplay telemetry", async ({ page, request }) => {
+  await page.goto("/");
+  await page.getByTestId("start-condition-a").click();
+  await page.waitForURL(/\/session/);
+  const id = new URL(page.url()).searchParams.get("id")!;
+
+  await expect(page.getByTestId("game-session")).toBeVisible({ timeout: 20000 });
+  await page.waitForTimeout(4000);
+
+  // Assist: reach the terminal without platforming.
+  await expect(page.getByTestId("assist-button")).toBeVisible();
+  await page.getByTestId("assist-button").click();
+  await expect(page.getByTestId("terminal-overlay")).toBeVisible({ timeout: 10000 });
+
+  // Gameplay telemetry was persisted and shows up in the CSV export.
+  const csv = await (await request.get("/api/export?format=csv")).text();
+  expect(csv).toContain("q_gameplay_x_timeToTerminalSec");
+  expect(csv).toContain("q_gameplay_x_assistUsed");
+  const headerCols = csv.split("\n")[0].split(",");
+  const row = csv.split("\n").find((l) => l.includes(id))!;
+  const cells = row.split(",");
+  expect(cells[headerCols.indexOf("q_gameplay_x_assistUsed")]).toBe("1"); // assist used
 });

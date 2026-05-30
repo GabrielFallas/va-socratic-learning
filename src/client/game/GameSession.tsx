@@ -25,15 +25,47 @@ export default function GameSession({ sessionId, task, level, onTaskComplete }: 
   const { ready, on, pause, resume, send } = useSonicBridge(iframeRef);
   const [overlay, setOverlay] = useState(false);
   const [gateMsg, setGateMsg] = useState<string | null>(null);
+  const [rings, setRings] = useState(0);
 
-  // When the player reaches the Debug Terminal, freeze the world and open the
-  // Socratic overlay.
+  // Exploratory gameplay metrics (kept separate from the RQ measures): how long
+  // the platforming took and whether the participant used the assist shortcut.
+  const zoneStart = useRef(Date.now());
+  const assistUsed = useRef(false);
+  const ringsRef = useRef(0);
+
+  // Count rings collected in-world.
+  useEffect(() => on("ring-collected", (p) => {
+    const total = (p as { total?: number })?.total ?? ringsRef.current + 1;
+    ringsRef.current = total;
+    setRings(total);
+  }), [on]);
+
+  // When the player reaches the Debug Terminal, freeze the world, log the
+  // gameplay metrics, and open the Socratic overlay.
   useEffect(() => {
-    return on("reach-terminal", () => {
+    return on("reach-terminal", (p) => {
       pause();
       setOverlay(true);
+      const forced = !!(p as { forced?: boolean })?.forced;
+      fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "log-questionnaire",
+          sessionId,
+          questionnaire: {
+            instrument: "gameplay",
+            responses: { taskId: task.id, forced },
+            scores: {
+              timeToTerminalSec: Math.round((Date.now() - zoneStart.current) / 1000),
+              ringsInGame: ringsRef.current,
+              assistUsed: assistUsed.current ? 1 : 0,
+            },
+          },
+        }),
+      }).catch(() => {});
     });
-  }, [on, pause]);
+  }, [on, pause, sessionId, task.id]);
 
   const handleResolve = (resolved: boolean, meta?: TaskCompleteMeta) => {
     setOverlay(false);
@@ -59,13 +91,25 @@ export default function GameSession({ sessionId, task, level, onTaskComplete }: 
         allow="autoplay; gamepad"
       />
 
-      {/* Hint while running */}
+      {/* Hint + assist while running */}
       {ready && !overlay && (
-        <div
-          className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full font-mono text-xs pointer-events-none"
-          style={{ background: "rgba(0,10,30,0.7)", color: "#ffcc00", border: "1px solid #0066cc" }}
-        >
-          → Corre hasta la Terminal de Depuración (flechas / espacio)
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 pointer-events-none">
+          <div
+            className="px-3 py-1 rounded-full font-mono text-xs"
+            style={{ background: "rgba(0,10,30,0.7)", color: "#ffcc00", border: "1px solid #0066cc" }}
+          >
+            → Corre hasta la Terminal de Depuración (flechas / espacio) · 💍 {rings}
+          </div>
+          {/* Assist: reach the terminal without platforming skill (logged) */}
+          <button
+            onClick={() => { assistUsed.current = true; send("trigger-terminal"); }}
+            className="pointer-events-auto px-3 py-1 rounded-full font-mono text-xs font-bold"
+            style={{ background: "rgba(255,200,0,0.18)", color: "#ffcc00", border: "1px solid #ffcc00" }}
+            data-testid="assist-button"
+            title="Ir directamente a la Terminal"
+          >
+            Ir a la Terminal →
+          </button>
         </div>
       )}
 

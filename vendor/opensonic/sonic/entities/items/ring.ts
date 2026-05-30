@@ -11,6 +11,7 @@ import { input_create_computer, input_simulate_button_down, IB_FIRE1 } from "./.
 import { random } from "./../../core/util"
 import { v2d_t } from "./../../core/v2d"
 import { player_set_rings, player_get_rings } from "./../player"
+import { bridge_emit } from "./../../core/bridge"
 import { level_gravity } from "./../../scenes/level"
 
 export interface ring_t extends item_t {
@@ -78,6 +79,7 @@ const update = (item:item_t, team:player_t[], team_size:number, brick_list:brick
         actor_collision(act, player.actor)
       ) {
         player_set_rings(player_get_rings() + 1);
+        bridge_emit("ring-collected", { total: player_get_rings() });
         me.is_disappearing = true;
         sound_play( soundfactory_get("ring") );
         break;

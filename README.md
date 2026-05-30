@@ -232,11 +232,33 @@ por lo que los datos sobreviven a reinicios del servidor. Para el análisis:
 
 ---
 
+## Condición A reimaginada — "Debug Zones" (nivel jugable)
+
+La Condición A ya no es un avatar decorativo: es un **nivel jugable de Sonic**
+real, embebido con el motor open-source [`opensonic-js`](https://github.com/clarkeadg/opensonic-js)
+(MIT). El participante corre por la zona hasta una **Terminal de Depuración**;
+al alcanzarla, el motor se pausa y aparece el **mismo** tutor socrático + editor
+con ejecución en Pyodide (contenido idéntico a la Condición B). Al pasar las
+pruebas ocultas se **abre la puerta** y Sonic continúa hacia la siguiente zona.
+El embodiment es el mundo de juego, no el texto del tutor — así A vs B aísla el
+embodiment sin confundir la persona del tutor.
+
+| Aspecto | Detalle |
+|---|---|
+| **Motor** | `vendor/opensonic/` (TS, sin deps); empaquetado con esbuild (`build:game`) a `public/game/js/opensonic.js`. Assets MIT en `public/game/data`. |
+| **Integración** | iframe + puente `postMessage` (`core/bridge.ts` ↔ `src/client/game/useSonicBridge.ts`): el host pausa/reanuda y recibe eventos (`engine-ready`, `reach-terminal`, `ring-collected`). |
+| **Disparador** | `level_update` emite `reach-terminal` al cruzar el umbral; `open-gate` re-arma; `trigger-terminal` lo fuerza (modo asistencia / tests). |
+| **Modo asistencia** | Botón "Ir a la Terminal →" para quien no domina el plataformeo (se registra `assistUsed`), evitando que la habilidad motriz confunda los resultados. |
+| **Telemetría de juego** | Métricas exploratorias (`timeToTerminalSec`, `ringsInGame`, `assistUsed`) exportadas como columnas `q_gameplay_x_*`, separadas de las medidas de las RQ. |
+
+> El bundle del motor se genera con `npm run build:game` (corre automáticamente
+> en `predev`/`prebuild`); `public/game/js/opensonic.js` está en `.gitignore`.
+
 ## Condiciones Experimentales
 
 | | Condición A — Sonic Embodied | Condición B — chat de texto |
 |---|---|---|
-| **Avatar (Canvas)** | ✓ Kaplay 2D Sonic, 16 frames, 8 estados reactivos | ✗ Sin avatar |
+| **Mundo (Canvas)** | ✓ **Nivel jugable de Open Sonic** (motor `opensonic-js`, MIT) con Terminal de Depuración diegética | ✗ Sin mundo (solo texto) |
 | **Voz (TTS)** | ✓ Piper TTS neuronal (Docker, español) + fallback Web Speech | ✗ Deshabilitada |
 | **Reconocimiento de voz (STT)** | ✓ Whisper STT (backend `/api/stt`) | ✗ Deshabilitado (teclado solo) |
 | **Gamificación** | ✓ Sistema de anillos, TaskTransitionGame, SFX/BGM, zonas temáticas | ✗ Sin anillos, sin mini-juego |
