@@ -44,6 +44,7 @@ import {
   BRS_ACTIVE
 } from "./../entities/brick"
 import { camera_get_position, camera_set_position, camera_init, camera_update, camera_move_to, camera_release, camera_lock, camera_unlock } from "./../entities/camera"
+import { bridge_emit, bridge_on_command } from "./../core/bridge"
 import { enemy_list_t, enemy_create, enemy_destroy, enemy_update, enemy_render, ES_DEAD } from "./../entities/enemy"
 import { font_t, font_create, font_destroy, font_set_width, font_set_text, font_get_text, font_render } from "./../entities/font"
 import { flyingtext_set_text } from "./../entities/items/flyingtext"
@@ -390,6 +391,7 @@ export const level_init = async () => {
   spawn_players();
   player_id = 0;
   currentPlayer = team[player_id];
+  terminalArmed = true; // re-arm the tutoring trigger for a fresh level
   camera_init();
   camera_set_position(v2d_new(currentPlayer.actor.position.x,currentPlayer.actor.position.y));
   level_set_camera_focus(currentPlayer.actor);
@@ -448,9 +450,30 @@ export const level_init = async () => {
  * Updates the scene (this one runs
  * every cycle of the program)
  */
+// ── Tutoring trigger (Debug Zones reimagining) ───────────────────────────
+// When the player runs past TERMINAL_X, tell the host once; it pauses the
+// engine and opens the Socratic overlay. The host re-arms via "open-gate"
+// after the task is solved. "trigger-terminal" lets the host force it
+// (assist mode / tests) without the player having to reach the spot.
+const TERMINAL_X = 1400;
+let terminalArmed = true;
+
+const fireTerminal = (forced: boolean) => {
+  if (!terminalArmed) return;
+  terminalArmed = false;
+  bridge_emit("reach-terminal", { x: currentPlayer?.actor?.position?.x ?? 0, forced });
+};
+
+bridge_on_command("trigger-terminal", () => fireTerminal(true));
+bridge_on_command("open-gate", () => { terminalArmed = true; });
+
 export const level_update = () => {
 
   level_timer+= timer_get_delta();
+
+  if (terminalArmed && currentPlayer?.actor && currentPlayer.actor.position.x > TERMINAL_X) {
+    fireTerminal(false);
+  }
 
   let i, cbox;
   let got_dying_player = false;

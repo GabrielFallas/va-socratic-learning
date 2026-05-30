@@ -10,6 +10,12 @@
 let paused = false;
 let ready = false;
 let readyPayload: unknown = null;
+const cmdHandlers: Record<string, (payload?: unknown) => void> = {};
+
+/** Register a handler for a host→engine command (e.g. "open-gate"). */
+export const bridge_on_command = (type: string, fn: (payload?: unknown) => void): void => {
+  cmdHandlers[type] = fn;
+};
 
 export const bridge_is_paused = (): boolean => paused;
 export const bridge_set_paused = (v: boolean): void => { paused = v; };
@@ -42,6 +48,7 @@ export const bridge_init = (): void => {
       case "pause":  paused = true;  break;
       case "resume": paused = false; break;
       case "ping":   if (ready) bridge_emit("engine-ready", readyPayload); break;
+      default:       cmdHandlers[d.type]?.(d.payload); break;
     }
   });
 };

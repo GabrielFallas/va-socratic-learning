@@ -55,7 +55,7 @@ export function useSonicBridge(iframeRef: React.RefObject<HTMLIFrameElement | nu
   /** Subscribe to a specific engine event type; returns an unsubscribe fn. */
   const on = useCallback((type: string, fn: (payload?: unknown) => void) => {
     handlers.current.set(type, fn);
-    return () => handlers.current.delete(type);
+    return () => { handlers.current.delete(type); };
   }, []);
 
   const pause = useCallback(() => send("pause"), [send]);

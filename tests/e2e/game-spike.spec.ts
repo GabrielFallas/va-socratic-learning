@@ -67,3 +67,36 @@ test("Phase B — bridge: engine-ready, pause freezes, resume restores", async (
   await page.waitForTimeout(500);
   await expect(canvas).toBeVisible();
 });
+
+const FIX1 = `def print_numbers():
+    counter = 1
+    while counter <= 5:
+        print(f"Número: {counter}")
+        counter += 1
+
+print_numbers()`;
+
+test("Phase C — terminal overlay → solve → gate opens", async ({ page }) => {
+  await page.goto("/play");
+  // Wait for the engine to be ready (the running-hint shows once ready).
+  await expect(page.getByTestId("game-frame")).toBeVisible();
+  await page.waitForTimeout(4000);
+
+  // Force the Debug Terminal trigger (assist/test path) by messaging the iframe.
+  await page.evaluate(() => {
+    const f = document.querySelector('[data-testid="game-frame"]') as HTMLIFrameElement;
+    f.contentWindow?.postMessage({ target: "sonic-engine", type: "trigger-terminal" }, "*");
+  });
+
+  // Overlay opens with the editor.
+  await expect(page.getByTestId("terminal-overlay")).toBeVisible({ timeout: 10000 });
+  const editor = page.getByTestId("code-editor");
+  await expect(editor).toBeVisible();
+
+  // Fix the bug, run → hidden tests pass → gate opens, overlay closes.
+  await editor.fill(FIX1);
+  await page.getByTestId("run-button").click();
+  await expect(page.getByTestId("gate-flash")).toBeVisible({ timeout: 60000 });
+  await expect(page.getByTestId("terminal-overlay")).toBeHidden();
+  await page.screenshot({ path: "tests/e2e/shots/phase-c-gate.png", fullPage: true });
+});
