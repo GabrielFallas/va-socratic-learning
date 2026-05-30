@@ -8,11 +8,14 @@
     "test": "tests"
   },
   "scripts": {
+    "predev": "npm run build:game",
     "dev": "next dev --port 3000",
+    "prebuild": "npm run build:game",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "build:game": "esbuild vendor/opensonic/sonic/main.ts --bundle --format=iife --target=es2018 --loader:.js=js --outfile=public/game/js/opensonic.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -55,6 +58,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.2",
+    "esbuild": "^0.28.0",
     "jsdom": "^29.1.1",
     "vitest": "^4.1.7"
   }

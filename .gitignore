@@ -10,3 +10,6 @@ tests/e2e/.last-run.json
 
 tsconfig.tsbuildinfo
 data
+
+# Generated Open Sonic engine bundle (built from vendor/opensonic via build:game)
+public/game/js/opensonic.js
