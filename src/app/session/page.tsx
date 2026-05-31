@@ -219,7 +219,8 @@ function SessionContent() {
       console.error("Failed to log task result:", err);
     }
 
-    setShowSummary(true);
+    // Delay modal so the player sees Sonic's victory animation (orbiting stars) first
+    setTimeout(() => setShowSummary(true), 1800);
   }, [taskCompleted, taskStartTime, latencyReadings, task.id, sessionId]);
 
   // ── Navigation ────────────────────────────────────────────────
@@ -414,7 +415,7 @@ function SessionContent() {
       {showSummary && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          style={{ background: "rgba(0,0,0,0.88)" }}
+          style={{ background: "rgba(0,0,0,0.72)" }}
         >
           <div
             className="rounded-2xl p-6 max-w-md w-full animate-bounce-in"

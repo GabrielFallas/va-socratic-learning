@@ -8,7 +8,7 @@ Repositorio del proyecto de investigación sobre un agente virtual de tutoría s
 
 ## 🎥 Video de Demostración
 
-> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/DEMO_LINK_PLACEHOLDER)**  
+> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/6yjbrtIlXa4)**  
 > *(~3 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
 
 ---

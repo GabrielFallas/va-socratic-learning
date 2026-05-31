@@ -35,7 +35,8 @@ export default function SonicGameCanvas({
   zone                 = 1,
   className            = "",
 }: SonicGameCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef       = useRef<HTMLCanvasElement>(null);
+  const thinkBubbleRef  = useRef<HTMLDivElement>(null);
   const signals   = useRef<GameSignals>({
     state:     avatarState,
     speaking:  isSpeaking,
@@ -312,15 +313,8 @@ export default function SonicGameCanvas({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const timerBar: any = k.add([k.rect(480, 6), k.pos(0, 254), k.color(k.Color.fromHex("#0066cc")), k.z(13), k.fixed()]);
 
-        // ── "?" thinking bubble above Sonic ───────────────────────────────
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const thinkBubble: any = k.add([
-          k.text("?", { size: 22, font: "monospace" }),
-          k.pos(120, 130),
-          k.color(k.Color.fromHex("#ffcc00")),
-          k.opacity(0),
-          k.z(10),
-        ]);
+        // "?" thinking bubble is rendered as an HTML overlay (see JSX below)
+        // to avoid Kaplay's bitmap font missing the glyph and showing a black block.
 
         // Ring burst — compact upward flash on ring earn
         function spawnRingBurst(x: number, y: number) {
@@ -563,7 +557,7 @@ export default function SonicGameCanvas({
             playSFX("checkpoint", 0.5);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const burst: any = k.add([
-              k.text("★ CHECKPOINT ★", { size: 14, font: "monospace" }),
+              k.text("* CHECKPOINT *", { size: 14, font: "monospace" }),
               k.pos(checkpointObj.pos.x, checkpointObj.pos.y - 60),
               k.anchor("center"),
               k.color(k.Color.fromHex("#00ff66")),
@@ -610,7 +604,7 @@ export default function SonicGameCanvas({
         // Victory stars
         function spawnVictoryStar(x: number, y: number) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const star: any = k.add([k.text("★", { size: 22, font: "monospace" }), k.pos(x, y), k.anchor("center"), k.color(k.Color.fromHex("#ffcc00")), k.z(9), k.opacity(1)]);
+          const star: any = k.add([k.circle(6), k.pos(x, y), k.anchor("center"), k.color(k.Color.fromHex("#ffcc00")), k.z(9), k.opacity(1)]);
           let t = 0;
           const ctrl = k.onUpdate(() => {
             if (!star.exists()) { ctrl.cancel(); return; }
@@ -689,7 +683,7 @@ export default function SonicGameCanvas({
               for (let s = 0; s < STAR_COUNT; s++) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const orb: any = k.add([
-                  k.text("★", { size: 16, font: "monospace" }),
+                  k.circle(5),
                   k.pos(sonic.pos.x, sonic.pos.y - 40),
                   k.anchor("center"),
                   k.color(k.Color.fromHex("#ffdd00")),
@@ -713,7 +707,7 @@ export default function SonicGameCanvas({
             label.text  = "¡ZONA COMPLETADA!";
             label.color = k.Color.fromHex("#ffcc00");
             redTint.opacity = 0;
-            thinkBubble.opacity = 0;
+            if (thinkBubbleRef.current) thinkBubbleRef.current.style.opacity = "0";
             speedLines.forEach((sl) => { sl.opacity = 0; });
             return;
           }
@@ -846,13 +840,20 @@ export default function SonicGameCanvas({
             sonic.opacity = 1;
           }
 
-          // ⑧ Thinking bubble
-          if (isThinking) {
-            thinkBubble.opacity = 0.85 + Math.sin(k.time() * 5) * 0.15;
-            thinkBubble.pos.y   = sonic.pos.y - 85 + Math.sin(k.time() * 3) * 5;
-            thinkBubble.pos.x   = sonic.pos.x + 22;
-          } else {
-            thinkBubble.opacity = 0;
+          // ⑧ Thinking bubble — HTML overlay, converts Kaplay coords to CSS px
+          if (thinkBubbleRef.current && canvasRef.current) {
+            const el  = thinkBubbleRef.current;
+            const cvs = canvasRef.current;
+            if (isThinking) {
+              const opacity = 0.85 + Math.sin(k.time() * 5) * 0.15;
+              const gx = sonic.pos.x + 22;
+              const gy = sonic.pos.y - 85 + Math.sin(k.time() * 3) * 5;
+              el.style.left    = `${(gx / 480) * cvs.offsetWidth}px`;
+              el.style.top     = `${(gy / 260) * cvs.offsetHeight}px`;
+              el.style.opacity = String(opacity);
+            } else {
+              el.style.opacity = "0";
+            }
           }
 
           // ⑩ Avatar state → Sonic behaviour (OpenSonic animations)
@@ -958,6 +959,26 @@ export default function SonicGameCanvas({
         className="w-full h-full"
         style={{ display: "block", imageRendering: "pixelated" }}
       />
+
+      {/* Thinking bubble overlay — positioned by the Kaplay onUpdate via DOM ref */}
+      <div
+        ref={thinkBubbleRef}
+        style={{
+          position:      "absolute",
+          opacity:       0,
+          pointerEvents: "none",
+          zIndex:        20,
+          color:         "#ffcc00",
+          fontFamily:    "Arial, 'Helvetica Neue', sans-serif",
+          fontSize:      "26px",
+          fontWeight:    "900",
+          textShadow:    "0 0 10px rgba(255,204,0,0.9), 1px 1px 0 #000, -1px -1px 0 #000",
+          lineHeight:    1,
+          userSelect:    "none",
+        }}
+      >
+        ?
+      </div>
 
       {/* Ring counter overlay — top-right corner of the canvas area */}
       <div
