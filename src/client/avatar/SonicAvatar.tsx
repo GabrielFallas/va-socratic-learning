@@ -206,6 +206,13 @@ const KEYFRAMES = `
     0%   { transform: translateY(0); opacity: 0.9; }
     100% { transform: translateY(18px); opacity: 0; }
   }
+  @keyframes fingerWag {
+    0%,100% { transform: rotate(0deg); }
+    20%     { transform: rotate(18deg); }
+    40%     { transform: rotate(-14deg); }
+    60%     { transform: rotate(12deg); }
+    80%     { transform: rotate(-8deg); }
+  }
 `;
 
 // ── Per-state pupil offsets for gaze direction ────────────────────────────
@@ -338,7 +345,15 @@ function SonicFace({
 
       {/* ── Gloves (white circles at sides) ─── */}
       <circle cx="-34" cy="62" r="10" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1.5"/>
-      <circle cx=" 34" cy="62" r="10" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1.5"/>
+      <g style={state === "curious" ? { transformOrigin: "34px 62px", animation: "fingerWag 0.8s ease-in-out infinite" } : undefined}>
+        <circle cx="34" cy="62" r="10" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1.5"/>
+        {state === "curious" && (
+          <g>
+            <line x1="44" y1="56" x2="52" y2="48" stroke="#e0e0e0" strokeWidth="2.5" strokeLinecap="round"/>
+            <circle cx="53" cy="47" r="3" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1"/>
+          </g>
+        )}
+      </g>
 
       {/* ── Shoes (red with white stripe) ───── */}
       <ellipse cx="-16" cy="82" rx="14" ry="8" fill="#cc2200"/>

@@ -7,10 +7,17 @@ const BGM_PATHS: Record<ZoneBGM, string> = {
   "speed-highway":  "/sounds/city.mp3",
 };
 
+const ZONE_DETUNE: Record<ZoneBGM, number> = {
+  "chemical-plant": 0,
+  "speed-highway":  400,
+};
+
 let ctx: AudioContext | null = null;
 let gainNode: GainNode | null = null;
 let sourceNode: AudioBufferSourceNode | null = null;
 let currentTrack: ZoneBGM | null = null;
+let baseDetune = 0;
+let criticalActive = false;
 const buffers = new Map<ZoneBGM, AudioBuffer>();
 
 function getCtx(): AudioContext {
@@ -47,11 +54,13 @@ export async function playBGM(zone: ZoneBGM, volume = 0.15): Promise<void> {
     sourceNode = ac.createBufferSource();
     sourceNode.buffer = buf;
     sourceNode.loop = true;
+    baseDetune = ZONE_DETUNE[zone];
+    sourceNode.detune.value = baseDetune;
     sourceNode.connect(gainNode);
     sourceNode.start();
     currentTrack = zone;
+    criticalActive = false;
 
-    // Fade in
     gainNode.gain.linearRampToValueAtTime(volume, ac.currentTime + 1.5);
   } catch {
     // Audio not available
@@ -72,6 +81,7 @@ export function stopBGM(): void {
     sourceNode = null;
     gainNode = null;
     currentTrack = null;
+    criticalActive = false;
   }
 }
 
@@ -82,4 +92,12 @@ export function setBGMVolume(volume: number): void {
       ctx.currentTime + 0.2
     );
   }
+}
+
+export function setBGMCritical(critical: boolean): void {
+  if (!sourceNode) return;
+  if (critical === criticalActive) return;
+  criticalActive = critical;
+  sourceNode.playbackRate.value = critical ? 1.25 : 1.0;
+  sourceNode.detune.value = baseDetune + (critical ? 200 : 0);
 }

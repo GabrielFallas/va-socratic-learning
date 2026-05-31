@@ -130,6 +130,10 @@ export default function TaskTransitionGame({
       k.loadSprite("itembox", "/sprites/itembox.png", {
         sliceX: 6, sliceY: 1,
       });
+      k.loadSprite("spring-yellow", "/sprites/spring-yellow.png", {
+        sliceX: 2, sliceY: 1,
+        anims: { bounce: { from: 0, to: 1, loop: false, speed: 8 } },
+      });
 
       k.scene("transition", () => {
         k.setGravity(2400);
@@ -301,6 +305,33 @@ export default function TaskTransitionGame({
           }
         });
 
+        // ── Spring pads — placed along the run ───────────────
+        const springPositions = [
+          { x: 420, y: GROUND_Y },
+          { x: 680, y: GROUND_Y },
+        ];
+        for (const sp of springPositions) {
+          k.add([
+            k.sprite("spring-yellow", { frame: 0 }),
+            k.pos(sp.x, sp.y),
+            k.scale(2),
+            k.anchor("bot"),
+            k.area({ shape: new k.Rect(k.vec2(-14, -16), 28, 16) }),
+            k.z(3),
+            "spring-pad",
+          ]);
+        }
+
+        sonic.onCollide("spring-pad", (spring: ReturnType<typeof k.add>) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (spring as any).play("bounce");
+          sonic.jump(900);
+          sonic.play("spring");
+          sonic.angle = 0;
+          sonic.angularVelocity = 0;
+          playSFX("spring", 0.5);
+        });
+
         // ── Multi-hit Motobug boss (3 HP) ─────────────────────
         const BOSS_MAX_HP = 3;
         let bossHP = BOSS_MAX_HP;
@@ -392,6 +423,12 @@ export default function TaskTransitionGame({
           k.get("itembox").forEach((ib: ReturnType<typeof k.add>) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (ib as any).pos.x -= WORLD_SPD * k.dt();
+          });
+
+          // ③a2 Scroll spring pads
+          k.get("spring-pad").forEach((sp: ReturnType<typeof k.add>) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (sp as any).pos.x -= WORLD_SPD * k.dt();
           });
 
           // ③b Scroll platform tiles (same speed as world for a ground-level runner look)

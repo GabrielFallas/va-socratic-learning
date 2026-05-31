@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { AvatarState } from "@/shared/types/session";
 import { createKaplay, destroyKaplay } from "@/client/avatar/kaplayManager";
 import { playSFX } from "@/client/audio/sfx";
-import { playBGM, stopBGM, setBGMVolume } from "@/client/audio/bgm";
+import { playBGM, stopBGM, setBGMVolume, setBGMCritical } from "@/client/audio/bgm";
 
 interface SonicGameCanvasProps {
   avatarState:           AvatarState;
@@ -134,6 +134,21 @@ export default function SonicGameCanvas({
       });
       k.loadSprite("animal", "/sprites/animals.png", {
         sliceX: 7, sliceY: 1,
+      });
+
+      // ── Bumper sprite (OpenSonic, 3 frames) ─────────────────
+      k.loadSprite("bumper", "/sprites/bumper.png", {
+        sliceX: 3, sliceY: 1,
+        anims: { spin: { from: 0, to: 2, loop: true, speed: 8 } },
+      });
+
+      // ── Checkpoint post sprite (OpenSonic, 6 frames) ───────
+      k.loadSprite("checkpoint-sprite", "/sprites/checkpoint.png", {
+        sliceX: 6, sliceY: 1,
+        anims: {
+          inactive: { from: 0, to: 2, loop: true, speed: 4 },
+          active:   { from: 3, to: 5, loop: true, speed: 6 },
+        },
       });
 
       // ── Shield sprites (OpenSonic, 5 frames each, 46×42) ───
@@ -525,44 +540,31 @@ export default function SonicGameCanvas({
         let lastCheckpointRing = 0;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let checkpointObj: any = null;
+        let checkpointActivated = false;
 
         function spawnCheckpoint() {
           if (checkpointObj?.exists()) return;
-          const poleH = 55;
-          const poleW = 6;
-          const orbR  = 9;
-          // Container group: pole + orb
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const pole: any = k.add([
-            k.rect(poleW, poleH),
+          checkpointActivated = false;
+          checkpointObj = k.add([
+            k.sprite("checkpoint-sprite", { anim: "inactive" }),
             k.pos(510, GROUND_Y),
+            k.scale(2),
             k.anchor("bot"),
-            k.color(k.Color.fromHex("#888888")),
+            k.area({ shape: new k.Rect(k.vec2(-14, -50), 28, 50) }),
             k.z(3),
-            "checkpoint-pole",
+            "checkpoint-post",
           ]);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const orb: any = k.add([
-            k.circle(orbR),
-            k.pos(510 + poleW / 2, GROUND_Y - poleH - orbR),
-            k.anchor("center"),
-            k.color(k.Color.fromHex("#ff4444")),
-            k.z(4),
-            k.area({ shape: new k.Rect(k.vec2(-orbR, -orbR), orbR * 2, orbR * 2) }),
-            "checkpoint-orb",
-          ]);
-          checkpointObj = { pole, orb, activated: false };
         }
 
-        sonic.onCollide("checkpoint-orb", () => {
-          if (checkpointObj && !checkpointObj.activated) {
-            checkpointObj.activated = true;
-            checkpointObj.orb.color = k.Color.fromHex("#00ff66");
+        sonic.onCollide("checkpoint-post", () => {
+          if (checkpointObj?.exists() && !checkpointActivated) {
+            checkpointActivated = true;
+            checkpointObj.play("active");
             playSFX("checkpoint", 0.5);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const burst: any = k.add([
               k.text("★ CHECKPOINT ★", { size: 14, font: "monospace" }),
-              k.pos(checkpointObj.orb.pos.x, checkpointObj.orb.pos.y - 15),
+              k.pos(checkpointObj.pos.x, checkpointObj.pos.y - 60),
               k.anchor("center"),
               k.color(k.Color.fromHex("#00ff66")),
               k.z(12), k.opacity(1),
@@ -572,6 +574,36 @@ export default function SonicGameCanvas({
               bt += k.dt(); burst.pos.y -= 40 * k.dt(); burst.opacity = Math.max(0, 1 - bt * 1.3);
               if (bt > 0.8) { if (burst.exists()) k.destroy(burst); bctrl.cancel(); }
             });
+          }
+        });
+
+        // ── Bumpers — scroll in during empathetic/low-timer states ─
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let bumperObj: any = null;
+        let bumperTimer = 0;
+
+        function spawnBumper() {
+          if (bumperObj?.exists()) return;
+          bumperObj = k.add([
+            k.sprite("bumper", { anim: "spin" }),
+            k.pos(510, GROUND_Y - 30),
+            k.scale(1.8),
+            k.anchor("center"),
+            k.area({ shape: new k.Rect(k.vec2(-28, -16), 56, 32) }),
+            k.z(3),
+            "bumper",
+          ]);
+        }
+
+        sonic.onCollide("bumper", () => {
+          if (bumperObj?.exists()) {
+            sonic.jump(600);
+            sonic.pos.x = Math.max(40, sonic.pos.x - 60);
+            sonic.play("spring");
+            playSFX("spring", 0.6);
+            // Flash bumper
+            bumperObj.color = k.Color.fromHex("#ffffff");
+            setTimeout(() => { if (bumperObj?.exists()) bumperObj.color = k.Color.fromHex("#ffff00"); }, 150);
           }
         });
 
@@ -775,20 +807,23 @@ export default function SonicGameCanvas({
             lastCheckpointRing = Math.floor(sig.rings / 5) * 5;
             spawnCheckpoint();
           }
-          if (checkpointObj?.pole?.exists()) {
-            checkpointObj.pole.pos.x -= bgSpeed * k.dt();
-            checkpointObj.orb.pos.x  -= bgSpeed * k.dt();
-            // Orb glow pulse (red if not activated, green if activated)
-            if (!checkpointObj.activated) {
-              checkpointObj.orb.color = k.Color.fromHex(
-                Math.floor(k.time() * 3) % 2 === 0 ? "#ff4444" : "#ff8866"
-              );
-            }
-            if (checkpointObj.pole.pos.x < -30) {
-              if (checkpointObj.pole.exists()) k.destroy(checkpointObj.pole);
-              if (checkpointObj.orb.exists())  k.destroy(checkpointObj.orb);
+          if (checkpointObj?.exists()) {
+            checkpointObj.pos.x -= bgSpeed * k.dt();
+            if (checkpointObj.pos.x < -40) {
+              k.destroy(checkpointObj);
               checkpointObj = null;
             }
+          }
+
+          // ⑦c2 Bumpers — spawn during empathetic or low-timer states
+          const bumperState = sig.state === "empathetic" || (sig.timeLeft < 60 && sig.timeLeft >= 30);
+          if (bumperState && !sig.completed) {
+            bumperTimer += k.dt();
+            if (bumperTimer > 5) { spawnBumper(); bumperTimer = 0; }
+          }
+          if (bumperObj?.exists()) {
+            bumperObj.pos.x -= bgSpeed * k.dt();
+            if (bumperObj.pos.x < -50) { k.destroy(bumperObj); bumperObj = null; }
           }
 
           // ⑦d Springs — spawn during positive states, scroll left
@@ -889,6 +924,7 @@ export default function SonicGameCanvas({
             : (sig.state === "happy" || sig.state === "encouraging") ? 0.18
             : 0.12;
           setBGMVolume(bgmVol);
+          setBGMCritical(sig.timeLeft < 30 && !sig.completed);
 
           // Speaking bob — ONLY apply when grounded so jumps stay clean (no mid-air squish)
           sonic.scale.y = (sig.speaking && sonic.isGrounded()) ? 2 + Math.sin(k.time() * 18) * 0.09 : 2;
