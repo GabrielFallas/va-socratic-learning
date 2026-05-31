@@ -171,9 +171,8 @@ function SessionContent() {
 
   // ── Ring earned handler (called only on correct/positive LLM responses) ─
   const handleRingEarned = useCallback(() => {
-    const mult = ringMultiplierRef.current;
-    setRingsCollected((prev) => prev + mult);
-    setRingDelta(mult);
+    setRingsCollected((prev) => prev + 1);
+    setRingDelta(1);
     setShowRingAnimation(true);
     setTimeout(() => setShowRingAnimation(false), 700);
   }, []);
@@ -402,7 +401,7 @@ function SessionContent() {
             }}
             onNewMessage={handleNewMessage}
             onRingEarned={handleRingEarned}
-            onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 2))}
+            onRingLost={() => setRingsCollected((prev) => Math.max(0, prev - 1))}
             ringsCollected={ringsCollected}
             timeRemainingSeconds={timeRemaining}
             taskCompleted={taskCompleted}

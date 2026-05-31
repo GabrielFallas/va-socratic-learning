@@ -151,13 +151,13 @@ export default function HomePage() {
             bottom: 0,
             width: "96px",
             height: "96px",
-            backgroundImage: "url(/sprites/sonic.png)",
+            backgroundImage: "url(/sprites/sonic-opensonic.png)",
             backgroundRepeat: "no-repeat",
-            backgroundSize: "800% 200%",  // 8 cols, 2 rows
-            backgroundPositionY: "0%",    // row 0 = run
+            backgroundSize: "500% 1500%", // 5 cols × 15 rows
+            backgroundPositionY: `${(6 / 14) * 100}%`, // row 6 = walking frames 30-34
             imageRendering: "pixelated",
             animation:
-              "sonicRunSheet 0.53s steps(8) infinite, sonicSlide 10s linear infinite",
+              "sonicRunSheet 0.42s steps(5) infinite, sonicSlide 10s linear infinite",
           }}
         />
         <style>{`

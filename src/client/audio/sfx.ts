@@ -6,14 +6,27 @@
 // Sounds are pre-fetched and cached as AudioBuffers on first use.
 // ─────────────────────────────────────────────────────────────────
 
-type SFXName = "ring" | "jump" | "hyperRing" | "destroy" | "hurt";
+type SFXName =
+  | "ring" | "jump" | "hyperRing" | "destroy" | "hurt"
+  | "spindash" | "spring" | "shield" | "checkpoint" | "brake"
+  | "bosshit" | "thundershield" | "fireshield" | "watershield" | "spin";
 
 const SFX_PATHS: Record<SFXName, string> = {
-  ring:      "/sounds/Ring.wav",
-  jump:      "/sounds/Jump.wav",
-  hyperRing: "/sounds/HyperRing.wav",
-  destroy:   "/sounds/Destroy.wav",
-  hurt:      "/sounds/Hurt.wav",
+  ring:           "/sounds/Ring.wav",
+  jump:           "/sounds/Jump.wav",
+  hyperRing:      "/sounds/HyperRing.wav",
+  destroy:        "/sounds/Destroy.wav",
+  hurt:           "/sounds/Hurt.wav",
+  spindash:       "/sounds/spindash1.wav",
+  spring:         "/sounds/spring.wav",
+  shield:         "/sounds/shield.wav",
+  checkpoint:     "/sounds/checkpoint.wav",
+  brake:          "/sounds/brake.wav",
+  bosshit:        "/sounds/bosshit.wav",
+  thundershield:  "/sounds/thundershield.wav",
+  fireshield:     "/sounds/fireshield.wav",
+  watershield:    "/sounds/watershield.wav",
+  spin:           "/sounds/spin.wav",
 };
 
 let ctx: AudioContext | null = null;
@@ -61,24 +74,3 @@ export function playSFX(name: SFXName, volume = 1.0): void {
     .catch(() => {});
 }
 
-// ─── Background music ────────────────────────────────────────────
-let bgAudio: HTMLAudioElement | null = null;
-
-export function startBGMusic(volume = 0.12): void {
-  if (typeof window === "undefined" || bgAudio) return;
-  bgAudio = new Audio("/sounds/city.mp3");
-  bgAudio.loop = true;
-  bgAudio.volume = volume;
-  bgAudio.play().catch(() => {});
-}
-
-export function stopBGMusic(): void {
-  if (!bgAudio) return;
-  bgAudio.pause();
-  bgAudio.currentTime = 0;
-  bgAudio = null;
-}
-
-export function setBGMVolume(v: number): void {
-  if (bgAudio) bgAudio.volume = Math.max(0, Math.min(1, v));
-}

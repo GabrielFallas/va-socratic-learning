@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import type { ChatMessage, Condition, AvatarState } from "@/shared/types/session";
 import { speak, stopSpeaking, preloadCheck } from "@/services/tts/piperTTS";
 import { startListening, stopListening, isSTTAvailable } from "@/services/stt/whisperSTT";
-import { playSFX, preloadSFX, startBGMusic, stopBGMusic } from "@/client/audio/sfx";
+import { playSFX, preloadSFX } from "@/client/audio/sfx";
 
 // Dynamic import — Kaplay/Three.js must not run on SSR
 const SonicGameCanvas = dynamic(
@@ -301,10 +301,9 @@ export default function ChatInterface({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Stop music on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopBGMusic();
       if (inactivityRef.current) clearTimeout(inactivityRef.current);
     };
   }, []);
@@ -357,10 +356,9 @@ export default function ChatInterface({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConditionA, taskCompleted]);
 
-  // ── Unlock audio + start BGM + speak welcome ──────────────────────────
+  // ── Unlock audio + speak welcome ──────────────────────────────────────
   const handleUnlockSound = useCallback(() => {
     setSoundUnlocked(true);
-    startBGMusic(0.12);
     preloadSFX().catch(() => {});
     setAvatarState("speaking");
     setIsSpeakingTTS(true);
@@ -387,7 +385,6 @@ export default function ChatInterface({
 
       if (isConditionA && !soundUnlocked) {
         setSoundUnlocked(true);
-        startBGMusic(0.12);
       }
 
       if (isConditionA) playSFX("jump", 0.5);
@@ -537,8 +534,13 @@ export default function ChatInterface({
 
   const toggleSTT = () => {
     if (isListeningSTT) {
+      // Commit any interim text before stopping so nothing is lost
+      if (interimTranscript.trim()) {
+        setInputText((prev) => prev + interimTranscript.trim() + " ");
+      }
       stopListening();
       setIsListeningSTT(false);
+      setInterimTranscript("");
       setSttError(null);
       if (isConditionA) setAvatarState("thinking");
     } else {
@@ -546,31 +548,36 @@ export default function ChatInterface({
       setIsListeningSTT(true);
       if (isConditionA) setAvatarState("listening");
       startListening(
-        { lang: "es-ES" },
+        { lang: "es-ES", continuous: true },
         {
           onResult: (transcript, isFinal) => {
             if (isFinal) {
+              // Append each finalized utterance — don't stop the indicator;
+              // the user controls when to stop via the mic button.
               setInputText((prev) => prev + transcript + " ");
               setInterimTranscript("");
-              setIsListeningSTT(false);
-              if (isConditionA) setAvatarState("thinking");
             } else {
               setInterimTranscript(transcript);
             }
           },
           onError: (error) => {
             setIsListeningSTT(false);
+            setInterimTranscript("");
             if (isConditionA) setAvatarState("idle");
             setSttError(
-              error === "not-allowed"      ? "Permiso de micrófono denegado." :
-              error === "device-not-found" ? "Dispositivo no encontrado."     :
-              error.includes("network")    ? "Error de conexión STT."         :
+              error === "not-allowed"      ? "Permiso de micrófono denegado."       :
+              error === "device-not-found" ? "Micrófono no encontrado."             :
+              error === "no-speech"        ? "No se detectó voz. Intenta de nuevo." :
+              error === "not-supported"    ? "Voz no soportada en este navegador."  :
+              error.includes("network")    ? "Error de red. Intenta de nuevo."      :
               `Error: ${error}`
             );
           },
           onEnd: () => {
+            // Fires after stop() — clean up indicator and switch Sonic to thinking
             setIsListeningSTT(false);
             setInterimTranscript("");
+            if (isConditionA) setAvatarState("thinking");
           },
         }
       );
@@ -699,7 +706,7 @@ export default function ChatInterface({
                 >
                   ▶ PRESS START
                 </span>
-                <span className="text-white/40 text-xs font-mono">click para activar voz + música</span>
+                <span className="text-white/40 text-xs font-mono">click para activar voz</span>
               </button>
             </div>
           )}

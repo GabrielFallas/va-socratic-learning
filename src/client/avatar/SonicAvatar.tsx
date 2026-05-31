@@ -295,11 +295,15 @@ function SonicFace({
   const browColor = cfg.color;
 
   return (
-    <svg viewBox="-60 -82 120 156" width="100%" height="100%">
+    <svg viewBox="-70 -90 140 200" width="100%" height="100%">
       <defs>
         <radialGradient id="sonicHead" cx="38%" cy="32%" r="65%">
           <stop offset="0%"   stopColor="#1976d2"/>
           <stop offset="100%" stopColor="#0d47a1"/>
+        </radialGradient>
+        <radialGradient id="sonicBelly" cx="50%" cy="30%" r="60%">
+          <stop offset="0%"   stopColor="#f5e6c8"/>
+          <stop offset="100%" stopColor="#dcc8a0"/>
         </radialGradient>
         <radialGradient id="sonicEye" cx="28%" cy="28%" r="70%">
           <stop offset="0%"   stopColor="#1e2060"/>
@@ -310,26 +314,42 @@ function SonicFace({
         </filter>
       </defs>
 
-      {/* ── Back spikes ─────────────────────── */}
-      <polygon points=" 40,-46  50,-72  54,-42" fill="#0d47a1"/>
-      <polygon points=" 16,-54  13,-82  32,-51" fill="#0d47a1"/>
-      <polygon points="-12,-55 -22,-80   0,-52" fill="#0d47a1"/>
+      {/* ── Back quills (3 iconic Sonic spines) ── */}
+      <path d="M 30,-40 Q 52,-68 60,-85 Q 50,-60 42,-42 Z" fill="#0d47a1"/>
+      <path d="M 10,-52 Q 22,-78 18,-95 Q 14,-72 20,-50 Z" fill="#0d47a1"/>
+      <path d="M -8,-50 Q -18,-76 -25,-90 Q -16,-68 -4,-48 Z" fill="#0d47a1"/>
 
       {/* ── Ear flaps ───────────────────────── */}
-      <polygon points="-50,-25 -64,-54 -34,-30" fill="#0d47a1"/>
-      <polygon points=" 50,-25  64,-54  34,-30" fill="#0d47a1"/>
+      <polygon points="-48,-22 -62,-50 -34,-28" fill="#0d47a1"/>
+      <polygon points=" 48,-22  62,-50  34,-28" fill="#0d47a1"/>
 
       {/* ── Main head ───────────────────────── */}
       <circle
-        cx="0" cy="-5" r="54"
+        cx="0" cy="-5" r="52"
         fill="url(#sonicHead)"
         filter="url(#faceShadow)"
       />
 
-      {/* ── Muzzle (cream area) ─────────────── */}
+      {/* ── Body (blue torso) ───────────────── */}
+      <ellipse cx="0" cy="55" rx="28" ry="22" fill="#1565c0"/>
+
+      {/* ── Belly (cream patch) ─────────────── */}
+      <ellipse cx="0" cy="55" rx="20" ry="16" fill="url(#sonicBelly)"/>
+
+      {/* ── Gloves (white circles at sides) ─── */}
+      <circle cx="-34" cy="62" r="10" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1.5"/>
+      <circle cx=" 34" cy="62" r="10" fill="#ffffff" stroke="#e0e0e0" strokeWidth="1.5"/>
+
+      {/* ── Shoes (red with white stripe) ───── */}
+      <ellipse cx="-16" cy="82" rx="14" ry="8" fill="#cc2200"/>
+      <ellipse cx=" 16" cy="82" rx="14" ry="8" fill="#cc2200"/>
+      <rect x="-28" y="79" width="10" height="3" rx="1.5" fill="#ffffff"/>
+      <rect x=" 18" y="79" width="10" height="3" rx="1.5" fill="#ffffff"/>
+
+      {/* ── Muzzle (cream face area — connected) */}
       <ellipse cx="1" cy="14" rx="34" ry="24" fill="#f0dfc0"/>
 
-      {/* ── Eyebrows (state-driven, add expressiveness) ─────────────── */}
+      {/* ── Eyebrows ────────────────────────── */}
       {cfg.browLeft && (
         <path
           d={cfg.browLeft}
@@ -351,42 +371,41 @@ function SonicFace({
         />
       )}
 
-      {/* ── Left eye ────────────────────────── */}
-      <g>
-        <ellipse cx="-19" cy="-12" rx="13" ry={leftRy}
-          fill="white"
-          style={{ transition: "ry 0.18s ease" }}
-        />
-        {leftRy > 2 && (
+      {/* ── Connected eye whites (iconic Sonic shape) ── */}
+      <path
+        d={`M -32,-12 C -32,${-12 - Math.max(leftRy, 4)} -6,${-12 - Math.max(Math.min(leftRy, rightRy), 4)} 0,${-12 - Math.max(Math.min(leftRy, rightRy), 3)} C 6,${-12 - Math.max(Math.min(leftRy, rightRy), 4)} 32,${-12 - Math.max(rightRy, 4)} 32,-12 C 32,${-12 + Math.max(rightRy, 4)} 6,${-12 + Math.max(Math.min(leftRy, rightRy), 4)} 0,${-12 + Math.max(Math.min(leftRy, rightRy), 3)} C -6,${-12 + Math.max(Math.min(leftRy, rightRy), 4)} -32,${-12 + Math.max(leftRy, 4)} -32,-12 Z`}
+        fill="white"
+        style={{ transition: "d 0.18s ease" }}
+      />
+
+      {/* ── Left pupil ──────────────────────── */}
+      {leftRy > 2 && (
+        <>
           <circle cx={leftPupilX} cy={leftPupilY} r={leftPupilR}
             fill="url(#sonicEye)"
             style={{ transition: "cx 0.28s ease, cy 0.28s ease, r 0.18s ease" }}
           />
-        )}
-        {leftRy > 5 && (
-          <circle cx={leftPupilX + 5} cy={leftPupilY - 4} r="3" fill="white"/>
-        )}
-      </g>
+          {leftRy > 5 && (
+            <circle cx={leftPupilX + 4} cy={leftPupilY - 3} r="2.5" fill="white"/>
+          )}
+        </>
+      )}
 
-      {/* ── Right eye ───────────────────────── */}
-      <g>
-        <ellipse cx="19" cy="-12" rx="13" ry={rightRy}
-          fill="white"
-          style={{ transition: "ry 0.18s ease" }}
-        />
-        {rightRy > 2 && (
+      {/* ── Right pupil ─────────────────────── */}
+      {rightRy > 2 && (
+        <>
           <circle cx={rightPupilX} cy={rightPupilY} r={rightPupilR}
             fill="url(#sonicEye)"
             style={{ transition: "cx 0.28s ease, cy 0.28s ease, r 0.18s ease" }}
           />
-        )}
-        {rightRy > 5 && (
-          <circle cx={rightPupilX + 5} cy={rightPupilY - 4} r="3" fill="white"/>
-        )}
-      </g>
+          {rightRy > 5 && (
+            <circle cx={rightPupilX + 4} cy={rightPupilY - 3} r="2.5" fill="white"/>
+          )}
+        </>
+      )}
 
       {/* ── Nose ────────────────────────────── */}
-      <ellipse cx="1" cy="5" rx="5" ry="3.5" fill="#b06868"/>
+      <ellipse cx="1" cy="5" rx="5" ry="3.5" fill="#222222"/>
 
       {/* ── Mouth ───────────────────────────── */}
       <path

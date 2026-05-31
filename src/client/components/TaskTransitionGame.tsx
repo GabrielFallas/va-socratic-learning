@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { playSFX } from "@/client/audio/sfx";
+import { playBGM, stopBGM } from "@/client/audio/bgm";
 import { createKaplay, destroyKaplay } from "@/client/avatar/kaplayManager";
 
 interface TaskTransitionGameProps {
@@ -85,11 +86,26 @@ export default function TaskTransitionGame({
     }).then((k) => {
       if (!k || !mounted) return;
 
-      k.loadSprite("sonic", "/sprites/sonic.png", {
-        sliceX: 8, sliceY: 2,
+      k.loadSprite("sonic", "/sprites/sonic-opensonic.png", {
+        sliceX: 5, sliceY: 15,
         anims: {
-          run:  { from: 0, to: 7,  loop: true,  speed: 18 },
-          jump: { from: 8, to: 15, loop: false, speed: 14 },
+          stopped:   { from: 0,  to: 0,  loop: false, speed: 8  },
+          waiting:   { from: 1,  to: 2,  loop: true,  speed: 6  },
+          lookUp:    { from: 3,  to: 4,  loop: false, speed: 12 },
+          crouchDown:{ from: 5,  to: 6,  loop: false, speed: 12 },
+          braking:   { from: 7,  to: 9,  loop: false, speed: 8  },
+          ringless:  { from: 10, to: 11, loop: false, speed: 8  },
+          spring:    { from: 12, to: 12, loop: true,  speed: 8  },
+          dead:      { from: 13, to: 13, loop: false, speed: 8  },
+          drowned:   { from: 14, to: 14, loop: false, speed: 8  },
+          jumping:   { from: 15, to: 19, loop: true,  speed: 16 },
+          spinDash:  { from: 20, to: 24, loop: true,  speed: 16 },
+          running:   { from: 26, to: 29, loop: true,  speed: 10 },
+          walking:   { from: 30, to: 37, loop: true,  speed: 12 },
+          breathing: { from: 38, to: 38, loop: false, speed: 8  },
+          ledge:     { from: 39, to: 41, loop: true,  speed: 6  },
+          pushing:   { from: 42, to: 45, loop: true,  speed: 8  },
+          victory:   { from: 47, to: 49, loop: true,  speed: 8  },
         },
       });
       k.loadSprite("ring-sprite", "/sprites/ring.png", {
@@ -103,6 +119,16 @@ export default function TaskTransitionGame({
       k.loadSprite("bg", "/sprites/chemical-bg.png");
       k.loadSprite("platforms", "/sprites/platforms.png", {
         sliceX: 8, sliceY: 1,
+      });
+      k.loadSprite("explosion", "/sprites/explosion.png", {
+        sliceX: 7, sliceY: 1,
+        anims: { boom: { from: 0, to: 6, loop: false, speed: 14 } },
+      });
+      k.loadSprite("animal", "/sprites/animals.png", {
+        sliceX: 7, sliceY: 1,
+      });
+      k.loadSprite("itembox", "/sprites/itembox.png", {
+        sliceX: 6, sliceY: 1,
       });
 
       k.scene("transition", () => {
@@ -151,7 +177,7 @@ export default function TaskTransitionGame({
         // ── Sonic (player) ────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sonic: any = k.add([
-          k.sprite("sonic", { anim: "run" }),
+          k.sprite("sonic", { anim: "running" }),
           k.pos(130, GROUND_Y),
           k.scale(2),
           k.anchor("bot"),
@@ -165,7 +191,7 @@ export default function TaskTransitionGame({
         function tryJump() {
           if (sonic.isGrounded()) {
             sonic.jump(820);
-            sonic.play("jump");
+            sonic.play("jumping");
             // Reset rotation immediately after jump impulse
             sonic.angle           = 0;
             sonic.angularVelocity = 0;
@@ -180,7 +206,7 @@ export default function TaskTransitionGame({
         sonic.onGround(() => {
           sonic.angle           = 0;
           sonic.angularVelocity = 0;
-          if (sonic.curAnim() !== "run") sonic.play("run");
+          if (sonic.curAnim() !== "running") sonic.play("running");
         });
 
         // Hint
@@ -195,12 +221,10 @@ export default function TaskTransitionGame({
         ]);
 
         // ── Rings placed ahead in world-space ─────────────────
-        // Rings start to the right of Sonic and scroll toward him at WORLD_SPD.
-        // Layout: every 3rd ring is elevated so players must jump for it.
         for (let i = 0; i < ringCount; i++) {
           const elevated = i % 3 === 2;
           const y = elevated ? GROUND_Y - 115 : GROUND_Y - 48;
-          const x = 350 + i * 65;          // first ring at x=350, spreads rightward
+          const x = 350 + i * 65;
           k.add([
             k.sprite("ring-sprite", { anim: "spin" }),
             k.pos(x, y),
@@ -211,6 +235,44 @@ export default function TaskTransitionGame({
             "ring",
           ]);
         }
+
+        // ── Item boxes — placed between ring clusters ─────────
+        const itemBoxPositions = [
+          { x: 500, y: GROUND_Y - 55 },
+          { x: 750, y: GROUND_Y - 90 },
+        ];
+        for (const ibp of itemBoxPositions) {
+          const frame = Math.floor(Math.random() * 6);
+          k.add([
+            k.sprite("itembox", { frame }),
+            k.pos(ibp.x, ibp.y),
+            k.scale(2),
+            k.anchor("center"),
+            k.area({ shape: new k.Rect(k.vec2(-15, -16), 30, 32) }),
+            k.z(4),
+            "itembox",
+          ]);
+        }
+
+        sonic.onCollide("itembox", (box: ReturnType<typeof k.add>) => {
+          k.destroy(box);
+          playSFX("destroy", 0.5);
+          localRings += 2;
+          setCollectedHere(localRings);
+          onRingCollected?.();
+          onRingCollected?.();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const popup: any = k.add([
+            k.text("+2 RINGS!", { size: 16, font: "monospace" }),
+            k.pos((box as any).pos.clone()), k.anchor("center"),
+            k.color(k.Color.fromHex("#ffcc00")), k.z(12), k.opacity(1),
+          ]);
+          let pt = 0;
+          const pctrl = k.onUpdate(() => { pt += k.dt(); popup.pos.y -= 50 * k.dt(); popup.opacity = Math.max(0, 1 - pt * 1.5); if (pt > 0.7) { if (popup.exists()) k.destroy(popup); pctrl.cancel(); } });
+          if (localRings >= ringCount && bossDefeatedRef.current) {
+            setTimeout(() => { if (mounted) startOutro(); }, 600);
+          }
+        });
 
         // Collect rings
         sonic.onCollide("ring", (ring: ReturnType<typeof k.add>) => {
@@ -239,9 +301,11 @@ export default function TaskTransitionGame({
           }
         });
 
-        // ── Motobug boss ──────────────────────────────────────
-        // Spawns far to the right; the world scroll plus its own chase speed
-        // bring it to Sonic at roughly the same time as the last ring.
+        // ── Multi-hit Motobug boss (3 HP) ─────────────────────
+        const BOSS_MAX_HP = 3;
+        let bossHP = BOSS_MAX_HP;
+        let bossHitCooldown = 0;
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const moto: any = k.add([
           k.sprite("motobug", { anim: "run" }),
@@ -253,22 +317,55 @@ export default function TaskTransitionGame({
           "motobug",
         ]);
 
-        // Defeat motobug by stomping (falling vel must be positive = downward)
-        sonic.onCollide("motobug", (bug: ReturnType<typeof k.add>) => {
-          if (!bossDefeatedRef.current && sonic.vel.y > 30) {
-            bossDefeatedRef.current = true;
-            if (mounted) setBossDefeated(true); // triggers React progress bar update
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const ex: any = k.add([k.text("💥", { size: 40 }), k.pos((bug as any).pos.clone()), k.anchor("center"), k.z(9)]);
-            setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 600);
-            k.destroy(bug);
-            playSFX("destroy", 0.75);
-            sonic.jump(750); // bounce — halved to stay on screen
+        // Boss HP bar background
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const hpBarBg: any = k.add([
+          k.rect(60, 6), k.pos(0, 0), k.anchor("center"),
+          k.color(k.Color.fromHex("#330000")), k.z(10), k.opacity(0),
+        ]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const hpBarFg: any = k.add([
+          k.rect(60, 6), k.pos(0, 0), k.anchor("left"),
+          k.color(k.Color.fromHex("#ff2222")), k.z(11), k.opacity(0),
+        ]);
+
+        sonic.onCollide("motobug", () => {
+          if (bossDefeatedRef.current || bossHitCooldown > 0) return;
+          if (sonic.vel.y > 30) {
+            bossHP--;
+            bossHitCooldown = 0.6;
+            playSFX("bosshit", 0.65);
+            sonic.jump(750);
+            sonic.play("spring");
             sonic.angle           = 0;
             sonic.angularVelocity = 0;
 
-            if (localRings >= ringCount) {
-              setTimeout(() => { if (mounted) startOutro(); }, 600);
+            // Flash boss red on hit
+            moto.color = k.Color.fromHex("#ff0000");
+            setTimeout(() => { if (moto.exists()) moto.color = k.Color.fromHex("#ffffff"); }, 200);
+
+            if (bossHP <= 0) {
+              bossDefeatedRef.current = true;
+              if (mounted) setBossDefeated(true);
+              const bugPos = moto.pos.clone();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const ex: any = k.add([k.sprite("explosion", { anim: "boom" }), k.pos(bugPos), k.scale(2.5), k.anchor("center"), k.z(9)]);
+              ex.onAnimEnd(() => { if (ex.exists()) k.destroy(ex); });
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const critter: any = k.add([k.sprite("animal", { frame: Math.floor(Math.random() * 7) }), k.pos(bugPos.x, bugPos.y), k.scale(2.5), k.anchor("center"), k.z(8), k.opacity(1)]);
+              let avy = -200; let avx = (Math.random() - 0.5) * 100; let at = 0;
+              const actrl = k.onUpdate(() => { if (!critter.exists()) { actrl.cancel(); return; } at += k.dt(); avy += 550 * k.dt(); critter.pos.x += avx * k.dt(); critter.pos.y += avy * k.dt(); if (critter.pos.y > GROUND_Y) { critter.pos.y = GROUND_Y; avy *= -0.3; } if (at > 2) { k.destroy(critter); actrl.cancel(); } });
+              k.destroy(moto);
+              hpBarBg.opacity = 0;
+              hpBarFg.opacity = 0;
+              playSFX("destroy", 0.75);
+
+              if (localRings >= ringCount) {
+                setTimeout(() => { if (mounted) startOutro(); }, 600);
+              }
+            } else {
+              // Knockback boss to the right on non-fatal hit
+              moto.pos.x += 80;
             }
           }
         });
@@ -291,6 +388,12 @@ export default function TaskTransitionGame({
             (ring as any).pos.x -= WORLD_SPD * k.dt();
           });
 
+          // ③a Scroll item boxes
+          k.get("itembox").forEach((ib: ReturnType<typeof k.add>) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (ib as any).pos.x -= WORLD_SPD * k.dt();
+          });
+
           // ③b Scroll platform tiles (same speed as world for a ground-level runner look)
           const TILE_FULL = TILE_W * TILE_COUNT * 2;
           platTiles.forEach((t) => {
@@ -298,20 +401,34 @@ export default function TaskTransitionGame({
             if (t.pos.x < -TILE_W) t.pos.x += TILE_FULL;
           });
 
-          // ④ Motobug: world scroll + chase speed; flip to face left
+          // ④ Motobug boss: world scroll + chase speed; flip to face left; HP bar
+          if (bossHitCooldown > 0) bossHitCooldown -= k.dt();
           if (moto.exists()) {
             moto.pos.x -= (WORLD_SPD + 60) * k.dt();
             moto.scale.x = -2.5;
-            if (moto.pos.x < -60) k.destroy(moto);
+            // HP bar follows boss
+            hpBarBg.pos.x = moto.pos.x;
+            hpBarBg.pos.y = moto.pos.y - 60;
+            hpBarBg.opacity = 1;
+            hpBarFg.pos.x = moto.pos.x - 30;
+            hpBarFg.pos.y = moto.pos.y - 60;
+            hpBarFg.width = 60 * (bossHP / BOSS_MAX_HP);
+            hpBarFg.opacity = 1;
+            hpBarFg.color = bossHP > 1
+              ? k.Color.fromHex("#ff2222")
+              : k.Color.fromHex("#ff8800");
+            if (moto.pos.x < -60) { k.destroy(moto); hpBarBg.opacity = 0; hpBarFg.opacity = 0; }
           }
         });
       });
 
       k.go("transition");
+      playBGM("speed-highway", 0.15);
     });
 
     return () => {
       mounted = false;
+      stopBGM();
       destroyKaplay();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import type { AvatarState } from "@/shared/types/session";
 import { createKaplay, destroyKaplay } from "@/client/avatar/kaplayManager";
+import { playSFX } from "@/client/audio/sfx";
+import { playBGM, stopBGM, setBGMVolume } from "@/client/audio/bgm";
 
 interface SonicGameCanvasProps {
   avatarState:           AvatarState;
@@ -70,11 +72,28 @@ export default function SonicGameCanvas({
       if (!k || !mounted) return;
 
       // ── Sprites ────────────────────────────────────────────
-      k.loadSprite("sonic", "/sprites/sonic.png", {
-        sliceX: 8, sliceY: 2,
+      // OpenSonic player.png: Sonic region = 5 cols × 15 rows = 75 frames
+      // Frame map (row-major): row0=[0‥4], row1=[5‥9], … row14=[70‥74]
+      k.loadSprite("sonic", "/sprites/sonic-opensonic.png", {
+        sliceX: 5, sliceY: 15,
         anims: {
-          run:  { from: 0, to: 7,  loop: true,  speed: 18 },
-          jump: { from: 8, to: 15, loop: false, speed: 14 },
+          stopped:   { from: 0,  to: 0,  loop: false, speed: 8  },
+          waiting:   { from: 1,  to: 2,  loop: true,  speed: 6  },
+          lookUp:    { from: 3,  to: 4,  loop: false, speed: 12 },
+          crouchDown:{ from: 5,  to: 6,  loop: false, speed: 12 },
+          braking:   { from: 7,  to: 9,  loop: false, speed: 8  },
+          ringless:  { from: 10, to: 11, loop: false, speed: 8  },
+          spring:    { from: 12, to: 12, loop: true,  speed: 8  },
+          dead:      { from: 13, to: 13, loop: false, speed: 8  },
+          drowned:   { from: 14, to: 14, loop: false, speed: 8  },
+          jumping:   { from: 15, to: 19, loop: true,  speed: 16 },
+          spinDash:  { from: 20, to: 24, loop: true,  speed: 16 },
+          running:   { from: 26, to: 29, loop: true,  speed: 10 },
+          walking:   { from: 30, to: 37, loop: true,  speed: 12 },
+          breathing: { from: 38, to: 38, loop: false, speed: 8  },
+          ledge:     { from: 39, to: 41, loop: true,  speed: 6  },
+          pushing:   { from: 42, to: 45, loop: true,  speed: 8  },
+          victory:   { from: 47, to: 49, loop: true,  speed: 8  },
         },
       });
       k.loadSprite("ring-sprite", "/sprites/ring.png", {
@@ -86,16 +105,75 @@ export default function SonicGameCanvas({
         anims: { run: { from: 0, to: 4, loop: true, speed: 8 } },
       });
       k.loadSprite("bg", "/sprites/chemical-bg.png");
+      k.loadSprite("bg-sky", "/sprites/bg-sky.png");
+      k.loadSprite("bg-far", "/sprites/bg-far.png");
       k.loadSprite("platforms", "/sprites/platforms.png", {
         sliceX: 8, sliceY: 1,
+      });
+
+      // ── Extra enemies (OpenSonic baddies) ───────────────────
+      k.loadSprite("enemy-fly", "/sprites/enemy-fly.png", {
+        sliceX: 4, sliceY: 1,
+        anims: { fly: { from: 0, to: 3, loop: true, speed: 8 } },
+      });
+      k.loadSprite("enemy-buzzer", "/sprites/enemy-buzzer.png", {
+        sliceX: 4, sliceY: 1,
+        anims: { walk: { from: 0, to: 3, loop: true, speed: 6 } },
+      });
+
+      // ── Spring pads (OpenSonic, 2 frames: compressed + extended) ─
+      k.loadSprite("spring-yellow", "/sprites/spring-yellow.png", {
+        sliceX: 2, sliceY: 1,
+        anims: { bounce: { from: 0, to: 1, loop: false, speed: 8 } },
+      });
+
+      // ── Explosion & animal sprites (OpenSonic) ─────────────
+      k.loadSprite("explosion", "/sprites/explosion.png", {
+        sliceX: 7, sliceY: 1,
+        anims: { boom: { from: 0, to: 6, loop: false, speed: 14 } },
+      });
+      k.loadSprite("animal", "/sprites/animals.png", {
+        sliceX: 7, sliceY: 1,
+      });
+
+      // ── Shield sprites (OpenSonic, 5 frames each, 46×42) ───
+      k.loadSprite("shield-regular", "/sprites/shield-regular.png", {
+        sliceX: 5, sliceY: 1,
+        anims: { pulse: { from: 0, to: 4, loop: true, speed: 24 } },
+      });
+      k.loadSprite("shield-fire", "/sprites/shield-fire.png", {
+        sliceX: 5, sliceY: 1,
+        anims: { pulse: { from: 0, to: 4, loop: true, speed: 24 } },
+      });
+      k.loadSprite("shield-thunder", "/sprites/shield-thunder.png", {
+        sliceX: 5, sliceY: 1,
+        anims: { pulse: { from: 0, to: 4, loop: true, speed: 24 } },
+      });
+      k.loadSprite("shield-water", "/sprites/shield-water.png", {
+        sliceX: 5, sliceY: 1,
+        anims: { pulse: { from: 0, to: 4, loop: true, speed: 24 } },
       });
 
       k.scene("main", () => {
         k.setGravity(2200);
         const GROUND_Y = 215;
         const BG_W     = 960;
+        const SKY_W    = 925;
 
-        // Scrolling BG (zone 2 gets a warm tint via a color overlay added later)
+        // ── 3-layer parallax background ───────────────────────
+        // Layer 0 (farthest): sky/clouds — slowest scroll
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sky1: any = k.add([k.sprite("bg-sky"), k.pos(0, 0), k.scale(480 / 925, 260 / 150), k.z(-2)]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sky2: any = k.add([k.sprite("bg-sky"), k.pos(SKY_W * (480 / 925), 0), k.scale(480 / 925, 260 / 150), k.z(-2)]);
+
+        // Layer 1 (mid): island/far scenery — medium scroll
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const far1: any = k.add([k.sprite("bg-far"), k.pos(0, 10), k.scale(480 / 888, 220 / 550), k.opacity(0.45), k.z(-1)]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const far2: any = k.add([k.sprite("bg-far"), k.pos(480, 10), k.scale(480 / 888, 220 / 550), k.opacity(0.45), k.z(-1)]);
+
+        // Layer 2 (nearest): chemical plant — fastest scroll
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),    k.scale(2), k.z(0)]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -146,7 +224,7 @@ export default function SonicGameCanvas({
         // Sonic — anchor bot so pos.y = ground top
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sonic: any = k.add([
-          k.sprite("sonic", { anim: "run" }),
+          k.sprite("sonic", { anim: "walking" }),
           k.pos(90, GROUND_Y),
           k.scale(2),
           k.anchor("bot"),
@@ -160,6 +238,59 @@ export default function SonicGameCanvas({
         let hurtTimer     = 0;
         let hurtBlink     = 0;
         let completedOnce = false;  // fires the stop sequence exactly once
+        let prevAvatarState: AvatarState = signals.current.state;
+        let spinDashCharging = false;
+
+        function sonicAnimForState(state: AvatarState): string {
+          switch (state) {
+            case "happy":
+            case "encouraging": return "running";
+            case "thinking":    return "waiting";
+            case "speaking":    return "stopped";
+            case "listening":   return "lookUp";
+            case "curious":     return "ledge";
+            case "empathetic":  return "pushing";
+            default:            return "walking";
+          }
+        }
+
+        // ── Shield system — state-driven elemental shields ─────────────
+        const SHIELD_MAP: Partial<Record<AvatarState, string>> = {
+          listening:   "shield-regular",
+          encouraging: "shield-fire",
+          happy:       "shield-thunder",
+          empathetic:  "shield-water",
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let activeShield: any = null;
+        let activeShieldType: string | null = null;
+
+        function updateShield(state: AvatarState) {
+          const needed = SHIELD_MAP[state] ?? null;
+          if (needed === activeShieldType) return;
+
+          if (activeShield?.exists()) {
+            k.destroy(activeShield);
+            activeShield = null;
+          }
+          activeShieldType = needed;
+
+          if (needed) {
+            activeShield = k.add([
+              k.sprite(needed, { anim: "pulse" }),
+              k.pos(sonic.pos.x, sonic.pos.y - 22),
+              k.scale(2.2),
+              k.anchor("center"),
+              k.opacity(0.75),
+              k.z(6),
+            ]);
+            const sfxMap: Record<string, Parameters<typeof playSFX>[0]> = {
+              "shield-regular": "shield", "shield-fire": "fireshield",
+              "shield-thunder": "thundershield", "shield-water": "watershield",
+            };
+            if (sfxMap[needed]) playSFX(sfxMap[needed], 0.4);
+          }
+        }
 
         // ── Timer bar (HTML overlay handles ring count — only time bar here) ─
         k.add([k.rect(480, 6), k.pos(0, 254), k.color(k.Color.fromHex("#001a33")), k.z(12), k.fixed()]);
@@ -176,7 +307,7 @@ export default function SonicGameCanvas({
           k.z(10),
         ]);
 
-        // Ring burst
+        // Ring burst — compact upward flash on ring earn
         function spawnRingBurst(x: number, y: number) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const r: any = k.add([k.sprite("ring-sprite", { anim: "spin" }), k.pos(x, y), k.scale(2.5), k.anchor("center"), k.z(8), k.opacity(1)]);
@@ -185,6 +316,92 @@ export default function SonicGameCanvas({
             if (!r.exists()) { ctrl.cancel(); return; }
             t += k.dt(); r.pos.y -= 60 * k.dt(); r.opacity = Math.max(0, 1 - t * 2.2);
             if (t > 0.5) { k.destroy(r); ctrl.cancel(); }
+          });
+        }
+
+        // "+1 RING" popup — prominent golden text + ring sprite that floats up
+        function spawnRingEarnedPopup(x: number, y: number) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const txt: any = k.add([
+            k.text("+1 RING", { size: 18, font: "monospace" }),
+            k.pos(x - 18, y - 30),
+            k.anchor("center"),
+            k.color(k.Color.fromHex("#ffcc00")),
+            k.z(12), k.opacity(1),
+          ]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sprite: any = k.add([
+            k.sprite("ring-sprite", { anim: "spin" }),
+            k.pos(x + 32, y - 30),
+            k.scale(2.2),
+            k.anchor("center"),
+            k.z(12), k.opacity(1),
+          ]);
+          let t = 0;
+          const ctrl = k.onUpdate(() => {
+            t += k.dt();
+            txt.pos.y    -= 50 * k.dt();
+            sprite.pos.y -= 50 * k.dt();
+            sprite.pos.x  = x + 32 + Math.sin(t * 12) * 3;
+            const alpha   = Math.max(0, 1 - t * 1.1);
+            txt.opacity = sprite.opacity = alpha;
+            if (t > 0.95) {
+              if (txt.exists())    k.destroy(txt);
+              if (sprite.exists()) k.destroy(sprite);
+              ctrl.cancel();
+            }
+          });
+        }
+
+        // Ring scatter (opensonic-style) — rings fly outward, bounce with gravity, flash before vanish
+        function spawnRingScatter(x: number, y: number) {
+          const COUNT = 8;
+          for (let i = 0; i < COUNT; i++) {
+            const angle  = (i / COUNT) * Math.PI * 2 + k.rand(-0.4, 0.4);
+            const speed  = k.rand(70, 140);
+            let vx       = Math.cos(angle) * speed;
+            let vy       = Math.sin(angle) * speed - 110;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const r: any = k.add([
+              k.sprite("ring-sprite", { anim: "spin" }),
+              k.pos(x, y),
+              k.scale(1.8),
+              k.anchor("center"),
+              k.z(8), k.opacity(1),
+            ]);
+            let t = 0;
+            const ctrl = k.onUpdate(() => {
+              if (!r.exists()) { ctrl.cancel(); return; }
+              t   += k.dt();
+              vy  += 380 * k.dt();
+              r.pos.x += vx * k.dt();
+              r.pos.y += vy * k.dt();
+              if (r.pos.y > GROUND_Y) { r.pos.y = GROUND_Y; vy *= -0.4; vx *= 0.7; }
+              // flash near the end (opensonic-js pattern)
+              r.opacity = t > 1.1
+                ? (Math.floor(t * 8) % 2 === 0 ? 0.85 : 0.1)
+                : 1;
+              if (t > 1.8) { if (r.exists()) k.destroy(r); ctrl.cancel(); }
+            });
+          }
+        }
+
+        // "-1" red text popup
+        function spawnRingLostPopup(x: number, y: number) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const txt: any = k.add([
+            k.text("-1 RING", { size: 18, font: "monospace" }),
+            k.pos(x, y - 40),
+            k.anchor("center"),
+            k.color(k.Color.fromHex("#ff4444")),
+            k.z(12), k.opacity(1),
+          ]);
+          let t = 0;
+          const ctrl = k.onUpdate(() => {
+            t += k.dt();
+            txt.pos.y  -= 30 * k.dt();
+            txt.opacity = Math.max(0, 1 - t * 1.6);
+            if (t > 0.65) { if (txt.exists()) k.destroy(txt); ctrl.cancel(); }
           });
         }
 
@@ -235,17 +452,128 @@ export default function SonicGameCanvas({
         function spawnMotobug() {
           if (motoActive) return;
           motoActive = true;
-          motobugObj = k.add([k.sprite("motobug", { anim: "run" }), k.pos(510, GROUND_Y), k.scale(2), k.anchor("bot"), k.z(4), "motobug"]);
+          const tl = signals.current.timeLeft;
+          if (tl < 30) {
+            // Critical: flying enemy swoops from above
+            motobugObj = k.add([k.sprite("enemy-fly", { anim: "fly" }), k.pos(510, GROUND_Y - 70), k.scale(2), k.anchor("bot"), k.z(4), "motobug"]);
+          } else if (tl < 60) {
+            // Urgent: buzzer enemy
+            motobugObj = k.add([k.sprite("enemy-buzzer", { anim: "walk" }), k.pos(510, GROUND_Y), k.scale(2), k.anchor("bot"), k.z(4), "motobug"]);
+          } else {
+            // Normal: classic motobug
+            motobugObj = k.add([k.sprite("motobug", { anim: "run" }), k.pos(510, GROUND_Y), k.scale(2), k.anchor("bot"), k.z(4), "motobug"]);
+          }
         }
         function destroyMotobug(explode = true) {
           if (!motobugObj?.exists()) { motoActive = false; return; }
+          const motoPos = motobugObj.pos.clone();
           if (explode) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const ex: any = k.add([k.text("*BOOM*", { size: 14, font: "monospace" }), k.pos(motobugObj.pos.clone()), k.anchor("center"), k.color(k.Color.fromHex("#ff4400")), k.z(9)]);
-            setTimeout(() => { if (ex.exists()) k.destroy(ex); }, 380);
+            const ex: any = k.add([k.sprite("explosion", { anim: "boom" }), k.pos(motoPos), k.scale(2), k.anchor("center"), k.z(9)]);
+            ex.onAnimEnd(() => { if (ex.exists()) k.destroy(ex); });
+            spawnRescuedAnimal(motoPos.x, motoPos.y);
           }
           k.destroy(motobugObj); motobugObj = null; motoActive = false; motoTimer = 0;
         }
+
+        function spawnRescuedAnimal(x: number, y: number) {
+          const animalFrame = Math.floor(Math.random() * 7);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const critter: any = k.add([
+            k.sprite("animal", { frame: animalFrame }),
+            k.pos(x, y), k.scale(2), k.anchor("center"), k.z(8), k.opacity(1),
+          ]);
+          let vy = -180;
+          let vx = (Math.random() - 0.5) * 80;
+          let t = 0;
+          const ctrl = k.onUpdate(() => {
+            if (!critter.exists()) { ctrl.cancel(); return; }
+            t += k.dt();
+            vy += 500 * k.dt();
+            critter.pos.x += vx * k.dt();
+            critter.pos.y += vy * k.dt();
+            if (critter.pos.y > GROUND_Y) { critter.pos.y = GROUND_Y; vy *= -0.35; vx *= 0.6; }
+            if (t > 2.0) { critter.opacity = Math.max(0, critter.opacity - k.dt() * 3); }
+            if (t > 2.5) { k.destroy(critter); ctrl.cancel(); }
+          });
+        }
+
+        // ── Spring pads — scroll in during positive states ─────
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let springObj: any = null;
+        let springTimer = 0;
+
+        function spawnSpring() {
+          if (springObj?.exists()) return;
+          springObj = k.add([
+            k.sprite("spring-yellow", { frame: 0 }),
+            k.pos(510, GROUND_Y), k.scale(2), k.anchor("bot"),
+            k.area(), k.z(3), "spring-pad",
+          ]);
+        }
+
+        sonic.onCollide("spring-pad", () => {
+          if (springObj?.exists()) {
+            springObj.play("bounce");
+            sonic.jump(900);
+            sonic.play("spring");
+            playSFX("spring", 0.5);
+          }
+        });
+
+        // ── Checkpoint posts — spawn every 5 rings earned ──────────
+        let lastCheckpointRing = 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let checkpointObj: any = null;
+
+        function spawnCheckpoint() {
+          if (checkpointObj?.exists()) return;
+          const poleH = 55;
+          const poleW = 6;
+          const orbR  = 9;
+          // Container group: pole + orb
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pole: any = k.add([
+            k.rect(poleW, poleH),
+            k.pos(510, GROUND_Y),
+            k.anchor("bot"),
+            k.color(k.Color.fromHex("#888888")),
+            k.z(3),
+            "checkpoint-pole",
+          ]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orb: any = k.add([
+            k.circle(orbR),
+            k.pos(510 + poleW / 2, GROUND_Y - poleH - orbR),
+            k.anchor("center"),
+            k.color(k.Color.fromHex("#ff4444")),
+            k.z(4),
+            k.area({ shape: new k.Rect(k.vec2(-orbR, -orbR), orbR * 2, orbR * 2) }),
+            "checkpoint-orb",
+          ]);
+          checkpointObj = { pole, orb, activated: false };
+        }
+
+        sonic.onCollide("checkpoint-orb", () => {
+          if (checkpointObj && !checkpointObj.activated) {
+            checkpointObj.activated = true;
+            checkpointObj.orb.color = k.Color.fromHex("#00ff66");
+            playSFX("checkpoint", 0.5);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const burst: any = k.add([
+              k.text("★ CHECKPOINT ★", { size: 14, font: "monospace" }),
+              k.pos(checkpointObj.orb.pos.x, checkpointObj.orb.pos.y - 15),
+              k.anchor("center"),
+              k.color(k.Color.fromHex("#00ff66")),
+              k.z(12), k.opacity(1),
+            ]);
+            let bt = 0;
+            const bctrl = k.onUpdate(() => {
+              bt += k.dt(); burst.pos.y -= 40 * k.dt(); burst.opacity = Math.max(0, 1 - bt * 1.3);
+              if (bt > 0.8) { if (burst.exists()) k.destroy(burst); bctrl.cancel(); }
+            });
+          }
+        });
 
         // Victory stars
         function spawnVictoryStar(x: number, y: number) {
@@ -264,7 +592,8 @@ export default function SonicGameCanvas({
           const s = signals.current;
           if (hurtTimer <= 0 && !s.completed && s.state !== "thinking" && s.state !== "speaking") {
             sonic.paused = false;
-            if (sonic.curAnim() !== "run") sonic.play("run");
+            const anim = sonicAnimForState(s.state);
+            if (sonic.curAnim() !== anim) sonic.play(anim);
           }
         });
 
@@ -283,6 +612,30 @@ export default function SonicGameCanvas({
         k.onUpdate(() => {
           const sig = signals.current;
 
+          // ── State change: golden flash for positive, blue for empathetic ──
+          if (sig.state !== prevAvatarState) {
+            if (sig.state === "happy" || sig.state === "encouraging") {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const glow: any = k.add([k.rect(480, 260), k.pos(0, 0), k.color(k.Color.fromHex("#ffcc00")), k.opacity(0.18), k.z(14), k.fixed()]);
+              let gt = 0;
+              const gctrl = k.onUpdate(() => { gt += k.dt(); glow.opacity = Math.max(0, 0.18 - gt * 1.8); if (gt > 0.12) { if (glow.exists()) k.destroy(glow); gctrl.cancel(); } });
+            } else if (sig.state === "empathetic") {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const blueGlow: any = k.add([k.rect(480, 260), k.pos(0, 0), k.color(k.Color.fromHex("#4488ff")), k.opacity(0.12), k.z(14), k.fixed()]);
+              let bt = 0;
+              const bctrl = k.onUpdate(() => { bt += k.dt(); blueGlow.opacity = Math.max(0, 0.12 - bt * 1.2); if (bt > 0.12) { if (blueGlow.exists()) k.destroy(blueGlow); bctrl.cancel(); } });
+            }
+            prevAvatarState = sig.state;
+            updateShield(sig.state);
+            if (sig.state === "thinking") playSFX("brake", 0.3);
+          }
+
+          // Shield follows Sonic
+          if (activeShield?.exists()) {
+            activeShield.pos.x = sonic.pos.x;
+            activeShield.pos.y = sonic.pos.y - 22;
+          }
+
           // ① Rotation lock — must run every frame
           sonic.angle           = 0;
           sonic.angularVelocity = 0;
@@ -292,18 +645,38 @@ export default function SonicGameCanvas({
             if (!completedOnce) {
               completedOnce = true;
               destroyMotobug(false);
+              playSFX("checkpoint", 0.6);
               for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
                   if (!mounted) return;
                   spawnVictoryStar(sonic.pos.x + k.rand(-40, 80), sonic.pos.y - k.rand(20, 80));
                 }, i * 120);
               }
+              // Orbiting invincibility stars (OpenSonic-style)
+              const STAR_COUNT = 5;
+              for (let s = 0; s < STAR_COUNT; s++) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const orb: any = k.add([
+                  k.text("★", { size: 16, font: "monospace" }),
+                  k.pos(sonic.pos.x, sonic.pos.y - 40),
+                  k.anchor("center"),
+                  k.color(k.Color.fromHex("#ffdd00")),
+                  k.z(11), k.opacity(0.9),
+                ]);
+                const angleOff = (s / STAR_COUNT) * Math.PI * 2;
+                const ctrl = k.onUpdate(() => {
+                  if (!orb.exists()) { ctrl.cancel(); return; }
+                  const t = k.time() * 4;
+                  orb.pos.x = sonic.pos.x + Math.cos(t + angleOff) * 50;
+                  orb.pos.y = (sonic.pos.y - 40) + Math.sin(t + angleOff) * 18;
+                });
+              }
             }
-            // Celebration dance: alternate frame 0↔1 every 200ms
             sonic.paused = false;
-            sonic.frame  = Math.floor(k.time() * 5) % 2;
+            if (sonic.curAnim() !== "victory") sonic.play("victory");
             sonic.angle           = 0;
             sonic.angularVelocity = 0;
+            if (activeShield?.exists()) { k.destroy(activeShield); activeShield = null; activeShieldType = null; }
             timerBar.width = 480 * Math.max(0, sig.timeLeft / 600);
             label.text  = "¡ZONA COMPLETADA!";
             label.color = k.Color.fromHex("#ffcc00");
@@ -321,6 +694,17 @@ export default function SonicGameCanvas({
           const bgSpeed     = pauseWalk
             ? 30  // slow crawl when thinking / speaking welcome
             : Math.min(220, 80 + Math.floor(sig.rings / 5) * 10) * boost;
+          // Parallax: sky (0.15x), far (0.35x), main (1x)
+          const skyScroll = bgSpeed * 0.15;
+          const farScroll = bgSpeed * 0.35;
+          [sky1, sky2].forEach((s) => {
+            s.pos.x -= skyScroll * k.dt();
+            if (s.pos.x <= -480) s.pos.x = 480;
+          });
+          [far1, far2].forEach((f) => {
+            f.pos.x -= farScroll * k.dt();
+            if (f.pos.x <= -480) f.pos.x = 480;
+          });
           [bg1, bg2].forEach((bg) => {
             bg.pos.x -= bgSpeed * k.dt();
             if (bg.pos.x <= -BG_W) bg.pos.x = BG_W;
@@ -358,20 +742,24 @@ export default function SonicGameCanvas({
             if (motobugObj.pos.x < -50) destroyMotobug(false);
           }
 
-          // ⑥ Ring burst on collect (rings increased)
+          // ⑥ Ring earned: burst + golden popup
           if (sig.rings > sig.prevRings) {
-            for (let i = 0; i < sig.rings - sig.prevRings; i++) {
-              spawnRingBurst(95 + k.rand(-18, 18), GROUND_Y - 50 + k.rand(-15, 0));
-            }
+            const sonicX = sonic.pos.x;
+            const sonicY = sonic.pos.y;
+            spawnRingBurst(sonicX + k.rand(-14, 14), sonicY - 50 + k.rand(-10, 0));
+            spawnRingEarnedPopup(sonicX, sonicY - 55);
             sig.prevRings = sig.rings;
           }
-          // ⑦ Hurt flash on ring loss (rings decreased) + slow-mo
+          // ⑦ Ring lost: scatter + red popup + hurt flash + slow-mo
           if (sig.rings < sig.prevRings) {
+            const sonicX = sonic.pos.x;
+            const sonicY = sonic.pos.y;
             spawnHurtFlash();
+            spawnRingScatter(sonicX, sonicY - 20);
+            spawnRingLostPopup(sonicX, sonicY);
             hurtTimer = 1.0;
             hurtBlink = 0;
             sig.prevRings = sig.rings;
-            // Slow motion: k.timeScale property (k.setTimeScale does not exist in Kaplay 3001.x)
             k.timeScale = 0.3;
             setTimeout(() => { if (mounted) k.timeScale = 1.0; }, 400);
           }
@@ -381,6 +769,38 @@ export default function SonicGameCanvas({
           speedLines.forEach((sl, i) => {
             sl.opacity = highSpeed ? 0.22 + Math.sin(k.time() * 8 + i) * 0.1 : Math.max(0, sl.opacity - k.dt() * 3);
           });
+
+          // ⑦c Checkpoint posts — spawn every 5 rings
+          if (sig.rings >= lastCheckpointRing + 5 && !sig.completed) {
+            lastCheckpointRing = Math.floor(sig.rings / 5) * 5;
+            spawnCheckpoint();
+          }
+          if (checkpointObj?.pole?.exists()) {
+            checkpointObj.pole.pos.x -= bgSpeed * k.dt();
+            checkpointObj.orb.pos.x  -= bgSpeed * k.dt();
+            // Orb glow pulse (red if not activated, green if activated)
+            if (!checkpointObj.activated) {
+              checkpointObj.orb.color = k.Color.fromHex(
+                Math.floor(k.time() * 3) % 2 === 0 ? "#ff4444" : "#ff8866"
+              );
+            }
+            if (checkpointObj.pole.pos.x < -30) {
+              if (checkpointObj.pole.exists()) k.destroy(checkpointObj.pole);
+              if (checkpointObj.orb.exists())  k.destroy(checkpointObj.orb);
+              checkpointObj = null;
+            }
+          }
+
+          // ⑦d Springs — spawn during positive states, scroll left
+          const positiveState = sig.state === "happy" || sig.state === "encouraging";
+          if (positiveState && !sig.completed) {
+            springTimer += k.dt();
+            if (springTimer > 4) { spawnSpring(); springTimer = 0; }
+          }
+          if (springObj?.exists()) {
+            springObj.pos.x -= bgSpeed * k.dt();
+            if (springObj.pos.x < -40) { k.destroy(springObj); springObj = null; }
+          }
 
           if (hurtTimer > 0) {
             hurtTimer -= k.dt();
@@ -400,49 +820,75 @@ export default function SonicGameCanvas({
             thinkBubble.opacity = 0;
           }
 
-          // ⑩ Avatar state → Sonic behaviour
+          // ⑩ Avatar state → Sonic behaviour (OpenSonic animations)
           if (hurtTimer <= 0) {
             switch (sig.state) {
               case "happy": case "encouraging":
                 sonic.paused = false;
                 if (!isJumping && sonic.isGrounded()) {
-                  isJumping = true;
-                  sonic.jump(680);  // halved from 1350
-                  sonic.play("jump");
-                  destroyMotobug();
+                  if (!spinDashCharging) {
+                    spinDashCharging = true;
+                    sonic.play("spinDash");
+                    playSFX("spindash", 0.5);
+                    setTimeout(() => {
+                      if (!mounted) return;
+                      spinDashCharging = false;
+                      isJumping = true;
+                      sonic.jump(680);
+                      sonic.play("jumping");
+                      destroyMotobug();
+                    }, 350);
+                  }
+                } else if (isJumping) {
+                  if (sonic.curAnim() !== "jumping") sonic.play("jumping");
+                } else {
+                  if (sonic.curAnim() !== "running") sonic.play("running");
                 }
                 break;
               case "thinking":
-                // Freeze Sonic in place while he "thinks" — pause anim on frame 0
-                // Only apply scale bob and pause when grounded; in-air = no squish
                 if (sonic.isGrounded()) {
-                  sonic.scale.x = 2 + Math.sin(k.time() * 4) * 0.05; // subtle bob
-                  sonic.paused  = true;
-                  sonic.frame   = 0;  // first frame = standing pose
+                  sonic.scale.x = 2 + Math.sin(k.time() * 4) * 0.05;
+                  sonic.paused  = false;
+                  if (sonic.curAnim() !== "waiting") sonic.play("waiting");
                 }
                 break;
               case "speaking":
-                // Sonic pauses (stands) when delivering the welcome/proactive message
                 sonic.scale.x = 2;
                 if (sonic.isGrounded()) {
-                  sonic.paused = true;
-                  sonic.frame  = 0;
+                  sonic.paused = false;
+                  if (sonic.curAnim() !== "stopped") sonic.play("stopped");
                 }
+                break;
+              case "listening":
+                sonic.scale.x = 2;
+                sonic.paused  = false;
+                if (sonic.isGrounded() && sonic.curAnim() !== "lookUp") sonic.play("lookUp");
+                break;
+              case "curious":
+                sonic.scale.x = 2;
+                sonic.paused  = false;
+                if (sonic.isGrounded() && sonic.curAnim() !== "ledge") sonic.play("ledge");
                 break;
               case "empathetic":
                 sonic.scale.x = 2;
                 sonic.paused  = false;
-                if (sonic.isGrounded() && sonic.curAnim() !== "run") sonic.play("run");
+                if (sonic.isGrounded() && sonic.curAnim() !== "pushing") sonic.play("pushing");
                 break;
               default:
-                // Reset scale.x to neutral when transitioning from thinking/other states
                 sonic.scale.x = 2;
                 sonic.paused  = false;
+                spinDashCharging = false;
                 if (motoActive) destroyMotobug();
-                if (sonic.isGrounded() && sonic.curAnim() !== "run") sonic.play("run");
+                if (sonic.isGrounded() && sonic.curAnim() !== "walking") sonic.play("walking");
                 break;
             }
           }
+
+          // ⑪ Dynamic BGM volume — quieter during thinking/speaking
+          const bgmVol = isThinking || isSpeaking ? 0.04
+            : (sig.state === "happy" || sig.state === "encouraging") ? 0.18
+            : 0.12;
+          setBGMVolume(bgmVol);
 
           // Speaking bob — ONLY apply when grounded so jumps stay clean (no mid-air squish)
           sonic.scale.y = (sig.speaking && sonic.isGrounded()) ? 2 + Math.sin(k.time() * 18) * 0.09 : 2;
@@ -454,10 +900,14 @@ export default function SonicGameCanvas({
       });
 
       k.go("main");
+
+      const bgmZone = zone === 2 ? "speed-highway" : "chemical-plant";
+      playBGM(bgmZone, 0.12);
     });
 
     return () => {
       mounted = false;
+      stopBGM();
       destroyKaplay();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
