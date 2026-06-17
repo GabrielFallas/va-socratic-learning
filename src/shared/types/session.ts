@@ -28,6 +28,8 @@ export interface ChatMessage {
   ttftMs?: number;
   /** Time in ms for complete response */
   totalResponseMs?: number;
+  /** How the user composed this message (Condition A multimodal usage). Only set on user messages. */
+  inputMode?: "voice" | "text";
 }
 
 export interface Task {
@@ -72,6 +74,8 @@ export interface TaskResult {
   testsPassed?: boolean;
   /** Whether the student edited the starter code at all */
   codeEdited?: boolean;
+  /** Rings collected during this task (engagement proxy, Condition A). */
+  ringsCollected?: number;
 }
 
 /** A completed questionnaire instrument (PANAS-SF, SUS, NASA-TLX, …). */
@@ -111,6 +115,8 @@ export interface ApiChatRequest {
     buggyCode: string;
     errorDescription: string;
   };
+  /** How the latest user message was composed (Condition A multimodal usage). */
+  inputMode?: "voice" | "text";
 }
 
 export interface ApiChatResponse {

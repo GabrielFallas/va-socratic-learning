@@ -59,16 +59,6 @@ const LIKERT5_AGREE = [
 
 const PANAS_OPTIONS = ["Nada o muy poco", "Un poco", "Moderadamente", "Bastante", "Extremadamente"];
 
-const SIMS_OPTIONS = [
-  "No corresponde en absoluto",
-  "2",
-  "3",
-  "Corresponde moderadamente",
-  "5",
-  "6",
-  "Corresponde exactamente",
-];
-
 const num = (r: Record<string, number | string | boolean>, id: string) => Number(r[id] ?? 0);
 const mean = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 100) / 100 : 0);
 
@@ -83,7 +73,7 @@ const PANAS_NEG = [1, 3, 5, 7, 9];
 export const PANAS_SF: Instrument = {
   id: "panas-sf",
   title: "I-PANAS-SF",
-  subtitle: "Indique en qué medida se siente de esta manera EN ESTE MOMENTO.",
+  subtitle: "Indique en qué medida se ha sentido de esta manera DURANTE la sesión que acaba de realizar.",
   fields: PANAS_ITEMS.map((label, i) => ({
     id: `q${i}`,
     type: "likert" as const,
@@ -193,61 +183,6 @@ export const NASA_TLX: Instrument = {
   }),
 };
 
-// ── SIMS (16 items, 7-point) ──────────────────────────────────────────────
-const SIMS_ITEMS = [
-  "Porque creo que esta actividad es interesante.",
-  "Porque lo hago por mi propio bien.",
-  "Porque se supone que debo hacerlo.",
-  "Porque no tengo otra opción.",
-  "Porque esta actividad es divertida.",
-  "Porque creo que esta actividad es buena para mí.",
-  "Porque es algo que tengo que hacer.",
-  "Porque me siento obligado/a a hacerlo.",
-  "Porque me gusta esta actividad.",
-  "Por elección personal.",
-  "Porque me lo exigen.",
-  "Porque no tengo alternativa.",
-  "Porque me siento bien haciendo esta actividad.",
-  "Porque creo que es importante hacerla.",
-  "Porque me siento presionado/a a hacerla.",
-  "Porque me obligan a hacerla.",
-];
-
-export const SIMS: Instrument = {
-  id: "sims",
-  title: "SIMS — Motivación Situacional",
-  subtitle: "¿Por qué está realizando actualmente esta actividad?",
-  fields: SIMS_ITEMS.map((label, i) => ({
-    id: `q${i}`,
-    type: "likert" as const,
-    label,
-    options: SIMS_OPTIONS,
-  })),
-  score: (r) => ({
-    intrinsic: mean([0, 4, 8, 12].map((i) => num(r, `q${i}`))),
-    identified: mean([1, 5, 9, 13].map((i) => num(r, `q${i}`))),
-    external: mean([2, 6, 10, 14].map((i) => num(r, `q${i}`))),
-    amotivation: mean([3, 7, 11, 15].map((i) => num(r, `q${i}`))),
-  }),
-};
-
-// ── Consent ───────────────────────────────────────────────────────────────
-export const CONSENT: Instrument = {
-  id: "consent",
-  title: "Consentimiento Informado",
-  subtitle: "Por favor lea y confirme antes de continuar.",
-  fields: [
-    {
-      id: "info",
-      type: "info",
-      text:
-        "Participa en un estudio de la Universidad de Costa Rica (PF-3311) sobre tutoría socrática con agentes virtuales. La sesión dura ~30 minutos e incluye dos tareas de programación y varios cuestionarios. Sus datos se registran bajo un identificador anónimo (sin nombre ni correo), se tratan con confidencialidad según los lineamientos del Comité Ético Científico (CEC) y se usan solo con fines de investigación. La participación es voluntaria y puede retirarse en cualquier momento.",
-    },
-    { id: "agree_participate", type: "check", label: "Acepto participar voluntariamente en este estudio." },
-    { id: "agree_data", type: "check", label: "Entiendo cómo se usarán mis datos anónimos y lo autorizo." },
-  ],
-};
-
 // ── Demographics ──────────────────────────────────────────────────────────
 export const DEMOGRAPHICS: Instrument = {
   id: "demographics",
@@ -284,22 +219,20 @@ export const QUALITATIVE: Instrument = {
 };
 
 // ── Flow definitions (instrument + phase) ─────────────────────────────────
+// All instruments are administered ONCE, at the END of the session, so the
+// participant starts the experience with zero forms (no intake). PANAS is a
+// single post-session affect measure (no pre/post split); informed consent is
+// no longer collected as an in-app instrument.
 export interface FlowStep {
   instrument: Instrument;
   phase?: "pre" | "post";
 }
 
-export const INTAKE_FLOW: FlowStep[] = [
-  { instrument: CONSENT },
-  { instrument: DEMOGRAPHICS },
-  { instrument: PANAS_SF, phase: "pre" },
-];
-
 export const POST_FLOW: FlowStep[] = [
+  { instrument: DEMOGRAPHICS },
   { instrument: GODSPEED },
   { instrument: SUS },
   { instrument: NASA_TLX },
-  { instrument: SIMS },
   { instrument: PANAS_SF, phase: "post" },
   { instrument: QUALITATIVE },
 ];

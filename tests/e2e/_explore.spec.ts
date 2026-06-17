@@ -49,11 +49,7 @@ test("Condition B — full chat turn", async ({ page }) => {
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-b").click();
-  // Pilot buttons now go through the intake flow (3 instruments)
-  await page.waitForURL(/\/intake/, { timeout: 10000 });
-  await completeInstrument(page); // consent
-  await completeInstrument(page); // demographics
-  await completeInstrument(page); // panas pre
+  // No intake: pilot buttons go straight into the session (forms are all at the end).
   await page.waitForURL(/\/session\?/, { timeout: 15000 });
   await expect(page.getByTestId("chat-interface")).toHaveAttribute("data-condition", "B");
 
@@ -75,11 +71,7 @@ test("Pyodide runner — fixing Task 1 passes hidden tests", async ({ page }) =>
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-b").click(); // deterministic condition
-  // Pilot buttons now go through the intake flow (3 instruments)
-  await page.waitForURL(/\/intake/, { timeout: 10000 });
-  await completeInstrument(page); // consent
-  await completeInstrument(page); // demographics
-  await completeInstrument(page); // panas pre
+  // No intake: straight into the session.
   await page.waitForURL(/\/session\?/, { timeout: 15000 });
 
   const editor = page.getByTestId("code-editor");
@@ -181,18 +173,13 @@ async function completeInstrument(page: import("@playwright/test").Page) {
   await submit.click();
 }
 
-test("Phase 2 — intake flow reaches the session", async ({ page }) => {
+test("Phase 2 — real flow reaches the session with no intake forms", async ({ page }) => {
   const bag = attach(page);
   await page.goto("/");
-  await page.getByTestId("start-experiment").click(); // real flow → /intake
-  await page.waitForURL(/\/intake/);
-  // INTAKE_FLOW = consent, demographics, panas-sf (3 steps)
-  await completeInstrument(page); // consent
-  await completeInstrument(page); // demographics
-  await completeInstrument(page); // panas pre
+  await page.getByTestId("start-experiment").click(); // real flow → straight to /session
   await page.waitForURL(/\/session\?/, { timeout: 15000 });
   await expect(page.getByTestId("code-editor")).toBeVisible();
-  dump("INTAKE", bag);
+  dump("NO-INTAKE", bag);
 });
 
 test("Phase 2 — post flow persists all instruments", async ({ page, request }) => {
@@ -200,7 +187,7 @@ test("Phase 2 — post flow persists all instruments", async ({ page, request })
   const assign = await (await request.post("/api/session", { data: { action: "assign" } })).json();
   const id = assign.sessionId as string;
   await page.goto(`/post?id=${id}&condition=A`);
-  // POST_FLOW = godspeed, sus, nasa-tlx, sims, panas post, qualitative (6)
+  // POST_FLOW = demographics, godspeed, sus, nasa-tlx, panas post, qualitative (6)
   for (let i = 0; i < 6; i++) await completeInstrument(page);
   await page.waitForURL(/\/session\/complete/, { timeout: 15000 });
 
@@ -214,11 +201,7 @@ test("Phase 3 — Condition A transcript toggle + exit button", async ({ page })
   const bag = attach(page);
   await page.goto("/");
   await page.getByTestId("start-condition-a").click();
-  // Pilot buttons now route through the intake flow (3 instruments)
-  await page.waitForURL(/\/intake/, { timeout: 10000 });
-  await completeInstrument(page); // consent
-  await completeInstrument(page); // demographics
-  await completeInstrument(page); // panas pre
+  // No intake: straight into the session.
   await page.waitForURL(/\/session\?/, { timeout: 15000 });
   await page.waitForTimeout(3500); // canvas + zone card
 

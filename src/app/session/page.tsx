@@ -104,6 +104,8 @@ function SessionContent() {
   const [ringsCollected,      setRingsCollected]      = useState(0);
   const [showRingAnimation,   setShowRingAnimation]   = useState(false);
   const [ringDelta,           setRingDelta]           = useState(0);
+  const ringsCollectedRef                             = useRef(0); // current value for the task-complete log (avoids stale closure)
+  useEffect(() => { ringsCollectedRef.current = ringsCollected; }, [ringsCollected]);
 
   // ── Zone title ───────────────────────────────────────────────
   const [showZoneTitle,  setShowZoneTitle]  = useState(condition === "A");
@@ -207,6 +209,7 @@ function SessionContent() {
       codeRunAttempts: meta?.runAttempts ?? 0,
       testsPassed: meta?.testsPassed ?? resolved,
       codeEdited: meta?.codeEdited ?? false,
+      ringsCollected: ringsCollectedRef.current + (resolved ? 10 : 0),
     };
 
     try {

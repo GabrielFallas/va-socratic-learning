@@ -127,6 +127,42 @@ export async function checkOllamaHealth(): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Warm-up — preload the model into VRAM so the participant's FIRST turn is
+// not penalised by a multi-second cold start. The model load can take tens of
+// seconds on first use; warming it during the landing-page preflight means the
+// weights are resident by the time the first message is sent. `keep_alive`
+// keeps it resident across participants so only the very first session pays.
+// ─────────────────────────────────────────────────────────────
+
+let warmed = false;
+
+export async function warmUpModel(): Promise<boolean> {
+  if (warmed) return true;
+  try {
+    const res = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        prompt: "ok",
+        stream: false,
+        keep_alive: "30m",
+        options: { num_predict: 1 },
+      }),
+      signal: AbortSignal.timeout(120_000), // cold load on CPU can be slow
+    });
+    if (res.ok) {
+      warmed = true;
+      console.info(`[ollamaClient] Model ${OLLAMA_MODEL} warmed up (resident in memory).`);
+      return true;
+    }
+  } catch (err) {
+    console.warn("[ollamaClient] Warm-up failed (will retry on next preflight):", err instanceof Error ? err.message : err);
+  }
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────
 // Streaming inference
 // ─────────────────────────────────────────────────────────────
 

@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * Runs a sequence of questionnaire instruments, persisting each to the session
- * before advancing. Used by /intake (pre) and /post (post battery).
+ * before advancing. Used by /post — the single questionnaire battery at the end.
  */
 export default function QuestionnaireFlow({ flow, sessionId, nextHref }: Props) {
   const router = useRouter();

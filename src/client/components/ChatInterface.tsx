@@ -252,6 +252,7 @@ export default function ChatInterface({
   const inputRef            = useRef<HTMLTextAreaElement>(null);
   const inactivityRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUserTextRef     = useRef("");
+  const composedWithVoiceRef = useRef(false);        // did STT contribute to the pending message?
   const usedProactiveRef    = useRef<Set<string>>(new Set());
   const proactiveCountRef   = useRef(0);            // max 3 proactive messages
   const soundUnlockedRef    = useRef(false);         // always-current ref (avoids stale closure)
@@ -425,10 +426,13 @@ export default function ChatInterface({
           { role: userMessage.role, content: userMessage.content },
         ].filter((m) => m.role !== "system");
 
+        const inputMode = composedWithVoiceRef.current ? "voice" : "text";
+        composedWithVoiceRef.current = false; // reset for the next message
+
         const response = await fetch("/api/chat", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ sessionId, condition, messages: apiMessages, taskContext }),
+          body:    JSON.stringify({ sessionId, condition, messages: apiMessages, taskContext, inputMode }),
         });
 
         if (!response.ok || !response.body) {
@@ -556,6 +560,7 @@ export default function ChatInterface({
               // the user controls when to stop via the mic button.
               setInputText((prev) => prev + transcript + " ");
               setInterimTranscript("");
+              composedWithVoiceRef.current = true; // mark this message as voice-composed
             } else {
               setInterimTranscript(transcript);
             }

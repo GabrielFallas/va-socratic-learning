@@ -14,10 +14,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as ApiChatRequest;
-    const { sessionId, condition, messages, taskContext } = body;
+    const { sessionId, condition, messages, taskContext, inputMode } = body;
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: "No messages provided" }, { status: 400 });
+    }
+    // Defensive validation: a chat turn must carry a real participant id and a
+    // valid condition so telemetry is never orphaned or mislabelled.
+    if (!sessionId || !/^P-/.test(sessionId) || (condition !== "A" && condition !== "B")) {
+      return NextResponse.json({ error: "Invalid sessionId or condition" }, { status: 400 });
     }
 
     // Init session if first message
@@ -64,6 +69,7 @@ export async function POST(req: NextRequest) {
               role: "user",
               content: lastUserMsg.content,
               timestamp: start,
+              inputMode: inputMode === "voice" ? "voice" : "text",
             });
           }
 

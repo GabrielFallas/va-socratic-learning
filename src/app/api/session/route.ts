@@ -8,6 +8,7 @@ import {
   getAllSessions,
 } from "@/server/telemetry/logger";
 import { assignNext } from "@/server/experiment/assignment";
+import { statsByCondition, isPilot } from "@/server/telemetry/export";
 import type { TaskResult, QuestionnaireResponse } from "@/shared/types/session";
 
 export const runtime = "nodejs"; // file-based store needs the Node fs API
@@ -32,6 +33,9 @@ export async function POST(req: NextRequest) {
     }
 
     case "init": {
+      if (!sessionId || !/^P-/.test(sessionId) || (condition !== "A" && condition !== "B")) {
+        return NextResponse.json({ error: "Invalid sessionId or condition" }, { status: 400 });
+      }
       const session = initSession(sessionId, condition);
       return NextResponse.json({ ok: true, sessionId: session.sessionId });
     }
@@ -65,6 +69,11 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Descriptive stats by condition: GET /api/session?stats=1 → A vs B means/SD/n.
+  if (req.nextUrl.searchParams.get("stats")) {
+    return NextResponse.json({ ok: true, stats: statsByCondition(getAllSessions()) });
+  }
+
   // Facilitator listing: GET /api/session?list=1 → all sessions (summary form).
   if (req.nextUrl.searchParams.get("list")) {
     const rows = getAllSessions().map((s) => {
@@ -74,6 +83,7 @@ export async function GET(req: NextRequest) {
       return {
         sessionId: s.sessionId,
         condition: s.condition,
+        isPilot: isPilot(s.sessionId),
         startTime: s.startTime,
         endTime: s.endTime ?? null,
         turns: s.messages.filter((m) => m.role === "user").length,

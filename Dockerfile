@@ -2,7 +2,9 @@
 # Stage 1: Install dependencies
 # ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# libc6-compat for prebuilt binaries; python3/make/g++ let better-sqlite3
+# compile its native addon from source on Alpine (musl has no prebuild).
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -26,6 +28,9 @@ RUN npm run build
 # ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 WORKDIR /app
+
+# Runtime shared lib the compiled better-sqlite3 addon links against.
+RUN apk add --no-cache libstdc++
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

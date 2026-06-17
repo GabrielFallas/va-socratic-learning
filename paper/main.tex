@@ -1,0 +1,320 @@
+%==============================================================
+% PF-3311 — Agentes Virtuales Inteligentes · Entregable 3
+% Artículo académico (plantilla IEEE conference). Español.
+% Compilar:  latexmk -pdf main.tex   (o subir a Overleaf)
+%==============================================================
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noquoting]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+% Marcador visible para los datos empíricos que el estudio aún debe completar.
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[PENDIENTE: #1]}}}
+
+\begin{document}
+
+\title{Sonic: un tutor socr\'atico multimodal corporizado para el desarrollo de l\'ogica de programaci\'on en entornos STEM}
+
+\author{\IEEEauthorblockN{Gabriel Isa\'ias Fallas L\'opez}
+\IEEEauthorblockA{Escuela de Ciencias de la Computaci\'on e Inform\'atica\\
+Universidad de Costa Rica\\
+San Jos\'e, Costa Rica\\
+gabrielfallas0803@gmail.com}}
+
+\maketitle
+
+\begin{abstract}
+La integraci\'on masiva de modelos de lenguaje (LLMs) en la educaci\'on en computaci\'on
+ha generado una paradoja pedag\'ogica: el acceso inmediato a soluciones de c\'odigo erosiona
+el desarrollo del razonamiento l\'ogico y la descomposici\'on de problemas. Este art\'iculo
+presenta \emph{Sonic}, un tutor socr\'atico que gu\'ia al estudiante mediante preguntas
+reflexivas y andamiaje graduado (Zona de Desarrollo Pr\'oximo) sin entregar c\'odigo directo.
+El sistema se implementa sobre un LLM local (Ollama + Gemma~3 12B) y se eval\'ua mediante un
+dise\~no experimental intra-sujetos de dos condiciones: una condici\'on corporizada (A) con
+avatar 2D reactivo (Kaplay.js), s\'intesis de voz neuronal (Piper~TTS), reconocimiento de voz
+local (Whisper~STT) y gamificaci\'on por anillos; y una condici\'on de control (B) de chat de
+texto plano con \emph{id\'entico} tutor socr\'atico. Mediante dos tareas de depuraci\'on en
+Python verificadas por pruebas ocultas, se miden la eficacia aut\'onoma, la carga cognitiva
+(NASA-TLX), la percepci\'on del agente (Godspeed), la usabilidad (SUS), el afecto
+post-sesi\'on (PANAS-SF) y un conjunto de m\'etricas conductuales autom\'aticas (latencia,
+turnos, tiempo de reflexi\'on, uso de voz). \todo{resumen cuantitativo de resultados
+principales (tama\~nos de efecto y direcci\'on)}. Los hallazgos contribuyen a comprender el rol
+del \emph{embodiment} en tutores socr\'aticos para programaci\'on y su efecto sobre la
+autonom\'ia del aprendiz.
+\end{abstract}
+
+\begin{IEEEkeywords}
+tutor\'ia socr\'atica, agentes virtuales corporizados, modelos de lenguaje, andamiaje
+cognitivo, educaci\'on en programaci\'on, gamificaci\'on.
+\end{IEEEkeywords}
+
+%--------------------------------------------------------------
+\section{Introducci\'on}
+La educaci\'on en ciencias, tecnolog\'ia, ingenier\'ia y matem\'aticas (STEM) atraviesa una
+transformaci\'on impulsada por la IA generativa. En computaci\'on, la disponibilidad inmediata
+de soluciones de c\'odigo produce una \emph{descarga cognitiva}: el estudiante delega la
+resoluci\'on de errores l\'ogicos a un sistema que devuelve el c\'odigo corregido, eliminando el
+proceso de prueba y error esencial para formar modelos mentales robustos~\cite{phung2023generative,raihan2025llms}.
+El m\'etodo socr\'atico ---no proporcionar la respuesta, sino guiar mediante preguntas que
+revelan contradicciones y lagunas--- es un ant\'idoto reconocido, pero su escalabilidad es nula
+en cursos con cientos de estudiantes.
+
+Este trabajo investiga si un tutor socr\'atico basado en LLM, dotado de \emph{corporizaci\'on}
+multimodal (avatar reactivo, voz neuronal, reconocimiento de voz y gamificaci\'on), mejora la
+percepci\'on del agente y la eficacia pedag\'ogica aut\'onoma frente al mismo tutor en modo de
+texto plano. La contribuci\'on es triple: (i) un sistema reproducible, completamente local y
+sin dependencias de nube; (ii) un dise\~no experimental que a\'isla el \emph{embodiment}
+manteniendo constante el texto del tutor; y (iii) una bater\'ia de m\'etricas conductuales
+autom\'aticas que reduce la dependencia del auto-reporte.
+
+El resto del art\'iculo se organiza as\'i: la Secci\'on~\ref{sec:related} revisa los trabajos
+relacionados; la Secci\'on~\ref{sec:agent} describe el desarrollo del agente; la
+Secci\'on~\ref{sec:method} detalla la metodolog\'ia; las Secciones~\ref{sec:results}
+y~\ref{sec:discussion} presentan y discuten los resultados; y la Secci\'on~\ref{sec:conclusion}
+concluye.
+
+%--------------------------------------------------------------
+\section{Trabajos Relacionados}
+\label{sec:related}
+
+\subsection{Tutor\'ia socr\'atica con modelos de lenguaje}
+Diversos trabajos exploran el uso de LLMs como tutores socr\'aticos que evitan entregar la
+respuesta. \emph{SocraticLM}~\cite{liu2024socraticlm} y \emph{SocraticAI}~\cite{sunil2025socraticai}
+estructuran la interacci\'on en niveles de andamiaje; \emph{MathDial}~\cite{macina2023mathdial}
+aporta un corpus de di\'alogos tutoriales con propiedades pedag\'ogicas ricas; y Jurenka et
+al.~\cite{jurenka2024problem} alinean el LLM con objetivos pedag\'ogicos mediante aprendizaje por
+refuerzo. Tack y Piech~\cite{tack2022clean} sientan bases para evaluar la calidad tutorial.
+Estudios recientes reportan ganancias de aprendizaje y compromiso metacognitivo en cursos STEM
+introductorios~\cite{ali2026tool,xi2026investigating,essel2024aimediated,kao2025socratic}.
+
+\subsection{Agentes conversacionales corporizados en educaci\'on}
+La revisi\'on de Sonlu et al.~\cite{sonlu2024scoping} sintetiza una d\'ecada de agentes
+conversacionales corporizados, evidenciando efectos positivos de la presencia social pero
+resultados heterog\'eneos seg\'un la tarea. Trabajos en realidad virtual e interacci\'on
+multimodal~\cite{elhajji2025architecture,yang2025embodied} sugieren que la corporizaci\'on
+puede mejorar el aprendizaje de programaci\'on, aunque advierten sobre la carga cognitiva
+adicional y el riesgo del Valle Inquietante~\cite{mori1970uncanny}.
+
+\subsection{Brecha y posicionamiento}
+La literatura aborda por separado (a) la calidad socr\'atica del di\'alogo y (b) el efecto de la
+corporizaci\'on, frecuentemente con tutores cuyo \emph{contenido} difiere entre condiciones, lo
+que confunde el efecto del \emph{embodiment} con el de la persona. Adem\'as, la planificaci\'on
+adaptativa del di\'alogo a\'un es incipiente~\cite{dong2026learning}. Este trabajo se posiciona en
+esa brecha: compara dos condiciones con \emph{texto de tutor id\'entico}, aislando el
+\emph{embodiment} (avatar + voz + gamificaci\'on), y mide la autonom\'ia con verificaci\'on
+objetiva (pruebas ocultas) en lugar de auto-reporte.
+
+%--------------------------------------------------------------
+\section{Desarrollo del Agente}
+\label{sec:agent}
+
+\subsection{Arquitectura del sistema}
+El sistema es una aplicaci\'on web Next.js (App Router) con servicios de IA completamente
+locales, sin claves de API ni dependencias de nube. Los componentes principales son:
+\begin{itemize}
+  \item \textbf{Motor de razonamiento.} Ollama con Gemma~3 12B (cuantizaci\'on Q4\_K\_M,
+        inferencia GPU local). El \emph{system prompt} socr\'atico proh\'ibe entregar c\'odigo,
+        define tres niveles de andamiaje (ZPD)~\cite{vygotsky1978mind} y detecta frustraci\'on.
+  \item \textbf{Avatar 2D (Condici\'on A).} Canvas Kaplay.js con sprite reactivo de 8 estados
+        expresivos, controlado por una etiqueta \texttt{[AVATAR\_STATE]} que el LLM emite al
+        final de cada respuesta y el cliente elimina antes de mostrar el texto.
+  \item \textbf{Voz (Condici\'on A).} S\'intesis neuronal Piper~TTS (espa\~nol) con respaldo a la
+        Web Speech API; reconocimiento de voz local Whisper~STT v\'ia \texttt{/api/stt}.
+  \item \textbf{Gamificaci\'on (Condici\'on A).} Sistema de anillos, mini-juego de transici\'on
+        entre tareas y efectos de sonido/m\'usica por zona tem\'atica.
+  \item \textbf{Ejecuci\'on de c\'odigo.} Editor real con ejecuci\'on de Python en el navegador
+        (Pyodide, Web Worker con \emph{timeout}) contra un arn\'es de pruebas ocultas que
+        determina la resoluci\'on aut\'onoma.
+  \item \textbf{Telemetr\'ia.} Registro persistente en disco (JSON) de mensajes, latencias,
+        resultados de tareas y cuestionarios; exportaci\'on a CSV/JSON y panel del facilitador.
+\end{itemize}
+La comunicaci\'on usa \emph{streaming} de tokens v\'ia Server-Sent Events para minimizar la
+latencia percibida (objetivo $<1.5$~s de \emph{time-to-first-token}).
+
+\subsection{Decisi\'on de dise\~no clave: aislar el \emph{embodiment}}
+Ambas condiciones comparten el \emph{mismo} texto de tutor; la \'unica diferencia a nivel de
+\emph{prompt} es el bloque de control del avatar a\~nadido en la Condici\'on~A. As\'i, la
+comparaci\'on A vs.\ B mide el efecto de la corporizaci\'on (sprite + voz + gamificaci\'on) y no
+una persona distinta.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/condA-initial.png}
+  \caption{Condici\'on A (corporizada): avatar Sonic en canvas Kaplay.js, HUD de anillos y panel
+  de c\'odigo con ejecuci\'on en Pyodide.}
+  \label{fig:condA}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/condB-initial.png}
+  \caption{Condici\'on B (control): chat de texto plano con el mismo tutor socr\'atico, sin
+  avatar, voz ni gamificaci\'on.}
+  \label{fig:condB}
+\end{figure}
+
+\subsection{Implementaci\'on}
+Las tareas de depuraci\'on (Fig.~\ref{fig:pyodide}) son: (T1) un bucle \texttt{while} infinito
+por un contador que no se incrementa; y (T2) un algoritmo \texttt{find\_duplicates} $O(n^3)$ que
+debe optimizarse a $O(n)$ con un conjunto. La resoluci\'on no se auto-reporta: el arn\'es oculto
+ejecuta el c\'odigo del estudiante y, en T2, impone una compuerta de rendimiento sobre 40\,000
+elementos.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/pyodide-fixed.png}
+  \caption{Verificaci\'on objetiva de la resoluci\'on: el arn\'es de pruebas ocultas confirma que
+  la correcci\'on del estudiante pasa.}
+  \label{fig:pyodide}
+\end{figure}
+
+%--------------------------------------------------------------
+\section{Metodolog\'ia}
+\label{sec:method}
+
+\subsection{Preguntas de investigaci\'on}
+\begin{itemize}
+  \item \textbf{RQ1.} ¿C\'omo afecta la corporizaci\'on a la percepci\'on de naturalidad,
+        presencia social y apoyo pedag\'ogico percibido?
+  \item \textbf{RQ2.} ¿En qu\'e medida la modalidad influye en la eficacia pedag\'ogica
+        aut\'onoma (resoluci\'on sin c\'odigo directo, turnos, tiempo)?
+  \item \textbf{RQ3.} ¿Qu\'e relaci\'on existe entre la modalidad y la carga cognitiva (NASA-TLX)
+        y el afecto post-sesi\'on (PANAS-SF)?
+  \item \textbf{RQ4.} ¿Se mantiene la latencia multimodal por debajo de 1.5~s de forma
+        consistente?
+\end{itemize}
+
+\subsection{Dise\~no del estudio}
+Dise\~no de evaluaci\'on con dos condiciones (A corporizada, B texto) y asignaci\'on
+\emph{contrabalanceada por bloques permutados} ejecutada en el servidor, de modo que el
+participante nunca elige su condici\'on y el balance A/B se garantiza por bloque. Se adopta un
+dise\~no \emph{post-only}: \textbf{no se administran formularios al inicio}; el participante entra
+directo a la experiencia y toda la bater\'ia se aplica una sola vez al final. Esto reduce la
+fricci\'on inicial y evita el \emph{priming} de medidas previas.
+
+\subsection{Participantes}
+Estudiantes universitarios de ingenier\'ia o computaci\'on de cursos introductorios, con
+experiencia heterog\'enea en programaci\'on. \todo{n total, distribuci\'on por condici\'on,
+edad (media/DE), g\'enero y experiencia previa}.
+
+\subsection{Instrumentos y m\'etricas}
+La Tabla~\ref{tab:instruments} resume la bater\'ia. Las medidas de auto-reporte (todas
+administradas una sola vez al final) se complementan con m\'etricas conductuales capturadas
+autom\'aticamente del flujo de mensajes, sin interrumpir al participante: latencia
+(\emph{time-to-first-token} medio y percentil 95), turnos, tiempo por tarea, \emph{think-time}
+entre turnos, verbosidad (caracteres/palabras), uso de voz vs.\ teclado y anillos.
+
+\begin{table}[t]
+  \caption{Bater\'ia de instrumentos (dise\~no \emph{post-only}).}
+  \label{tab:instruments}
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Instrumento} & \textbf{Constructo} & \textbf{RQ} \\
+    \midrule
+    Demogr\'aficos & Perfil de la muestra & --- \\
+    Godspeed~\cite{bartneck2009godspeed} & Antropomorfismo, agrado & RQ1 \\
+    SUS~\cite{brooke1996sus} & Usabilidad & RQ1 \\
+    NASA-TLX~\cite{hart1988nasatlx} & Carga cognitiva (RTLX) & RQ3 \\
+    PANAS-SF~\cite{thompson2007ipanas} & Afecto post-sesi\'on & RQ3 \\
+    Preguntas abiertas & Apreciaci\'on cualitativa & --- \\
+    Telemetr\'ia autom\'atica & Eficacia, latencia & RQ2, RQ4 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Protocolo de interacci\'on}
+(1) El participante pulsa \emph{PRESS START} y el servidor asigna condici\'on e identificador
+an\'onimo. (2) Resuelve la Tarea~1 (10~min) interactuando por texto (ambas condiciones) o voz
+(Condici\'on~A). (3) Mini-juego de transici\'on (Condici\'on~A). (4) Resuelve la Tarea~2
+(10~min). (5) Completa la bater\'ia \'unica final. El tutor aplica andamiaje de tres niveles y
+env\'ia mensajes proactivos tras 60~s de inactividad, sin entregar c\'odigo.
+
+\subsection{Recolecci\'on de datos}
+Cada sesi\'on se persiste bajo un identificador an\'onimo (\texttt{P-001}, \dots), sin nombre ni
+correo. El sistema exporta un CSV con una fila por participante (ver el diccionario de datos del
+repositorio) y un JSON de fidelidad completa. El an\'alisis descriptivo por condici\'on est\'a
+disponible en vivo en el panel del facilitador.
+
+%--------------------------------------------------------------
+\section{Resultados}
+\label{sec:results}
+Se reportan estad\'isticas descriptivas por condici\'on (media, desviaci\'on est\'andar y $n$).
+La Tabla~\ref{tab:results} resume las m\'etricas principales.
+
+\begin{table}[t]
+  \caption{Resultados descriptivos por condici\'on (media (DE), $n$).}
+  \label{tab:results}
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    \textbf{M\'etrica} & \textbf{Condici\'on A} & \textbf{Condici\'on B} \\
+    \midrule
+    Tasa de resoluci\'on aut\'onoma & \todo{} & \todo{} \\
+    Turnos conversacionales & \todo{} & \todo{} \\
+    Tiempo por tarea (s) & \todo{} & \todo{} \\
+    TTFT medio (ms) & \todo{} & \todo{} \\
+    \% latencia $<1.5$\,s & \todo{} & \todo{} \\
+    \emph{Think-time} (ms) & \todo{} & \todo{} \\
+    SUS (0--100) & \todo{} & \todo{} \\
+    NASA-TLX (RTLX) & \todo{} & \todo{} \\
+    Godspeed (global) & \todo{} & \todo{} \\
+    PANAS afecto $+$ & \todo{} & \todo{} \\
+    PANAS afecto $-$ & \todo{} & \todo{} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Para los datos cualitativos (preguntas abiertas) se realiza un an\'alisis tem\'atico que
+identifica categor\'ias emergentes. \todo{categor\'ias y patrones observados; citas
+representativas de los participantes}.
+
+%--------------------------------------------------------------
+\section{An\'alisis y Discusi\'on}
+\label{sec:discussion}
+\todo{interpretaci\'on de los resultados en relaci\'on con cada RQ}. En particular, se discute si
+la corporizaci\'on mejora la percepci\'on del agente (RQ1) sin incrementar la carga cognitiva de
+forma perjudicial (RQ3), y si ello se traduce ---o no--- en mayor eficacia aut\'onoma (RQ2). Los
+hallazgos se contrastan con la literatura revisada: la heterogeneidad reportada por
+Sonlu et al.~\cite{sonlu2024scoping} y los efectos de presencia social~\cite{elhajji2025architecture}.
+La latencia (RQ4) se eval\'ua contra el objetivo de 1.5~s usando el percentil 95.
+
+\paragraph{Limitaciones}
+Tama\~no muestral y reclutamiento por conveniencia; medici\'on de afecto \emph{post-only} (sin
+l\'inea base, por lo que no se estima cambio intra-sujeto); posible efecto de novedad del avatar;
+dependencia del hardware local para la latencia. \todo{ampliar seg\'un los datos obtenidos}.
+
+%--------------------------------------------------------------
+\section{Conclusiones y Trabajo Futuro}
+\label{sec:conclusion}
+Se present\'o \emph{Sonic}, un tutor socr\'atico multimodal corporizado, completamente local y
+reproducible, y un dise\~no experimental que a\'isla el \emph{embodiment} con verificaci\'on
+objetiva de la autonom\'ia. \todo{conclusiones principales derivadas de la evidencia}. El trabajo
+futuro incluye planificaci\'on adaptativa del di\'alogo~\cite{dong2026learning}, m\'as tareas y
+dominios, y un estudio con mayor poder estad\'istico.
+
+\paragraph{Proyecci\'on de publicaci\'on}
+\todo{declarar expl\'icitamente si se proyecta continuar con la ejecuci\'on del estudio y la
+recolecci\'on formal de datos ---mediante el sometimiento correspondiente al Comit\'e \'Etico
+Cient\'ifico (CEC)--- con miras a una publicaci\'on acad\'emica. Indicar que NO se proyecta es
+completamente v\'alido y no penaliza}.
+
+%--------------------------------------------------------------
+\section*{Disponibilidad}
+El c\'odigo fuente, las instrucciones de reproducci\'on y el video de demostraci\'on est\'an
+disponibles en el repositorio del proyecto.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

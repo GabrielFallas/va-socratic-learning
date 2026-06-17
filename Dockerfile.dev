@@ -1,7 +1,9 @@
 # Development image — hot reload via `next dev`
 # Source code is bind-mounted at runtime; only deps are baked in.
 FROM node:20-alpine
-RUN apk add --no-cache libc6-compat
+# python3/make/g++ compile better-sqlite3's native addon on Alpine; libstdc++
+# is the runtime lib it links against.
+RUN apk add --no-cache libc6-compat python3 make g++ libstdc++
 WORKDIR /app
 
 # Install deps once; node_modules stays inside the container

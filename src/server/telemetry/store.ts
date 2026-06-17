@@ -1,113 +1,141 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { SessionLog } from "@/shared/types/session";
+import { db } from "@/server/telemetry/db";
 
 // ============================================================
-// Durable session store (file-based JSON)
+// Durable session store — backed by SQLite (see db.ts).
 //
-// Replaces the previous in-memory-only Map, which lost ALL research data on
-// every server restart and could not be exported. We keep an in-memory cache
-// for speed but persist each session to disk on every mutation, plus an
-// append-only event log for an audit trail.
-//
-// File-based JSON (not SQLite) is deliberate: zero native dependencies, works
-// the same on the Windows lab machine and in CI, and the per-session files are
-// trivially inspectable and exportable.
+// Keeps the same API the rest of the server depends on (persistSession,
+// loadSession, listSessions, appendEvent, assignment state), so logger.ts and
+// assignment.ts are unchanged. Each session is stored as one row with the full
+// SessionLog JSON plus extracted columns (condition/startTime/endTime/isPilot)
+// for indexed querying and the facilitator dashboards.
 // ============================================================
 
-const DATA_DIR = process.env.DATA_DIR ?? path.join(process.cwd(), "data");
-const SESSIONS_DIR = path.join(DATA_DIR, "sessions");
-const EVENTS_LOG = path.join(DATA_DIR, "events.jsonl");
-
-function ensureDirs(): void {
-  fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+function isPilotId(sessionId: string): boolean {
+  return /^P-PILOT/i.test(sessionId);
 }
 
-function sessionPath(sessionId: string): string {
-  // Guard against path traversal from a crafted sessionId.
-  const safe = sessionId.replace(/[^A-Za-z0-9_-]/g, "_");
-  return path.join(SESSIONS_DIR, `${safe}.json`);
-}
-
-/** Atomic write (tmp + rename) so a crash can't leave a half-written file. */
-function writeJsonAtomic(file: string, data: unknown): void {
-  const tmp = `${file}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf8");
-  fs.renameSync(tmp, file);
-}
+const upsertStmt = db.prepare(`
+  INSERT INTO sessions (sessionId, condition, startTime, endTime, isPilot, data, updatedAt)
+  VALUES (@sessionId, @condition, @startTime, @endTime, @isPilot, @data, @updatedAt)
+  ON CONFLICT(sessionId) DO UPDATE SET
+    condition = excluded.condition,
+    startTime = excluded.startTime,
+    endTime   = excluded.endTime,
+    isPilot   = excluded.isPilot,
+    data      = excluded.data,
+    updatedAt = excluded.updatedAt
+`);
 
 export function persistSession(session: SessionLog): void {
   try {
-    ensureDirs();
-    writeJsonAtomic(sessionPath(session.sessionId), session);
+    upsertStmt.run({
+      sessionId: session.sessionId,
+      condition: session.condition,
+      startTime: session.startTime,
+      endTime: session.endTime ?? null,
+      isPilot: isPilotId(session.sessionId) ? 1 : 0,
+      data: JSON.stringify(session),
+      updatedAt: Date.now(),
+    });
   } catch (err) {
     console.error("[store] Failed to persist session:", err);
   }
 }
 
+const loadStmt = db.prepare("SELECT data FROM sessions WHERE sessionId = ?");
+
 export function loadSession(sessionId: string): SessionLog | undefined {
   try {
-    const file = sessionPath(sessionId);
-    if (!fs.existsSync(file)) return undefined;
-    return JSON.parse(fs.readFileSync(file, "utf8")) as SessionLog;
+    const row = loadStmt.get(sessionId) as { data: string } | undefined;
+    return row ? (JSON.parse(row.data) as SessionLog) : undefined;
   } catch (err) {
     console.error("[store] Failed to load session:", err);
     return undefined;
   }
 }
 
+const listStmt = db.prepare("SELECT data FROM sessions ORDER BY startTime ASC");
+
 export function listSessions(): SessionLog[] {
   try {
-    ensureDirs();
-    return fs
-      .readdirSync(SESSIONS_DIR)
-      .filter((f) => f.endsWith(".json"))
-      .map((f) => {
+    const rows = listStmt.all() as { data: string }[];
+    return rows
+      .map((r) => {
         try {
-          return JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, f), "utf8")) as SessionLog;
+          return JSON.parse(r.data) as SessionLog;
         } catch {
           return null;
         }
       })
-      .filter((s): s is SessionLog => s !== null)
-      .sort((a, b) => a.startTime - b.startTime);
+      .filter((s): s is SessionLog => s !== null);
   } catch (err) {
     console.error("[store] Failed to list sessions:", err);
     return [];
   }
 }
 
-/** Append a raw event for the audit trail (best-effort, non-blocking of logic). */
+const appendEventStmt = db.prepare(
+  "INSERT INTO events (ts, sessionId, type, payload) VALUES (?, ?, ?, ?)",
+);
+
+/** Append a raw event for the audit trail (best-effort). */
 export function appendEvent(event: Record<string, unknown>): void {
   try {
-    ensureDirs();
-    fs.appendFileSync(EVENTS_LOG, JSON.stringify({ ts: Date.now(), ...event }) + "\n", "utf8");
+    const { sessionId, type, ...rest } = event as {
+      sessionId?: string;
+      type?: string;
+    } & Record<string, unknown>;
+    appendEventStmt.run(
+      Date.now(),
+      sessionId ?? null,
+      type ?? null,
+      JSON.stringify(rest),
+    );
   } catch {
     /* audit log is best-effort */
   }
 }
 
 // ── Assignment counter persistence (counterbalancing survives restarts) ──
-const ASSIGNMENT_FILE = path.join(DATA_DIR, "assignment.json");
-
 export interface AssignmentState {
   assignedCount: number;
   blockQueue: ("A" | "B")[];
 }
 
+const loadAssignmentStmt = db.prepare(
+  "SELECT assignedCount, blockQueue FROM assignment WHERE id = 1",
+);
+
 export function loadAssignmentState(): AssignmentState | undefined {
   try {
-    if (!fs.existsSync(ASSIGNMENT_FILE)) return undefined;
-    return JSON.parse(fs.readFileSync(ASSIGNMENT_FILE, "utf8")) as AssignmentState;
+    const row = loadAssignmentStmt.get() as
+      | { assignedCount: number; blockQueue: string }
+      | undefined;
+    if (!row) return undefined;
+    return {
+      assignedCount: row.assignedCount,
+      blockQueue: JSON.parse(row.blockQueue) as ("A" | "B")[],
+    };
   } catch {
     return undefined;
   }
 }
 
+const saveAssignmentStmt = db.prepare(`
+  INSERT INTO assignment (id, assignedCount, blockQueue)
+  VALUES (1, @assignedCount, @blockQueue)
+  ON CONFLICT(id) DO UPDATE SET
+    assignedCount = excluded.assignedCount,
+    blockQueue    = excluded.blockQueue
+`);
+
 export function saveAssignmentState(state: AssignmentState): void {
   try {
-    ensureDirs();
-    writeJsonAtomic(ASSIGNMENT_FILE, state);
+    saveAssignmentStmt.run({
+      assignedCount: state.assignedCount,
+      blockQueue: JSON.stringify(state.blockQueue),
+    });
   } catch (err) {
     console.error("[store] Failed to save assignment state:", err);
   }

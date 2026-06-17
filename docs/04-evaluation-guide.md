@@ -35,31 +35,39 @@
 
 ## 3. Instrumentos de Medición
 
+> **Diseño *post-only* (Entregable 3):** no hay formularios al inicio. Toda la batería se
+> administra una sola vez al final de la sesión. Esto reduce la fricción inicial, evita el
+> *priming* de las medidas previas y traslada la carga de auto-reporte a un único momento.
+
 | **Instrumento Validado** | **Propósito** | **Momento de Administración** |
 |---|---|---|
-| **PANAS-SF** (10 ítems) | Medir estado afectivo (afecto positivo y negativo) | **PRE-interacción** (línea base) y **POST-interacción** (cambio de estado) |
-| **Godspeed Questionnaire** (5 subescalas semánticas diferenciales) | Evaluar antropomorfismo, vitalidad, amabilidad, inteligencia percibida y seguridad | Post-sesión completa |
-| **SUS — System Usability Scale** (10 ítems Likert 1-5) | Medir usabilidad del sistema | Cierre de la sesión completa |
-| **NASA-TLX** (6 dimensiones con escala analógica) | Medir carga cognitiva percibida | Post-interacción completa |
-| **SIMS — Situational Intrinsic Motivation Scale** (16 ítems) | Medir motivación intrínseca situacional | Post-tarea (inmediatamente después de completar o agotar tiempo) |
-| **Escala ad-hoc de Perceived Pedagogical Support** (5 ítems Likert) | Medir apoyo pedagógico percibido adaptada de Essel et al. (2024) | Post-tarea 1 y Post-tarea 2 |
-| **Métricas Log-based Automáticas** | Registro de latencia (ms), turnos conversacionales, % resolución sin código directo, tiempo por tarea | Continuo durante la sesión |
-| **Cuestionario Demográfico** | Perfil demográfico, experiencia previa en programación y con IA | Inicio de sesión (antes de exposición al agente) |
+| **Cuestionario Demográfico** | Perfil demográfico, experiencia previa en programación y con IA | Batería final (1.º) |
+| **Godspeed Questionnaire** (5 subescalas semánticas diferenciales) | Antropomorfismo, vitalidad, amabilidad, inteligencia percibida, seguridad (RQ1) | Batería final |
+| **SUS — System Usability Scale** (10 ítems Likert 1-5) | Usabilidad del sistema | Batería final |
+| **NASA-TLX** (6 dimensiones con escala analógica) | Carga cognitiva percibida (RQ3) | Batería final |
+| **PANAS-SF** (10 ítems) | Estado afectivo **post-sesión** (afecto positivo/negativo, RQ3) | Batería final (una sola toma) |
+| **Preguntas Cualitativas Abiertas** (3 ítems) | Apreciación general, lo que más/menos gustó | Batería final (último) |
+| **Métricas conductuales automáticas** | Latencia (TTFT, p95), turnos, % resolución autónoma (pruebas ocultas), tiempo por tarea, *think-time* entre turnos, verbosidad (caracteres/palabras), uso de voz vs. teclado, anillos | Continuo, sin auto-reporte |
 
-**Orden de Administración de Cuestionarios Post-Interacción (por este orden):**
-1. PANAS-SF (post)
+**Orden de la batería final única (por este orden):**
+1. Demográficos
 2. Godspeed
 3. SUS
 4. NASA-TLX
-5. SIMS
-6. Perceived Pedagogical Support (si no fue respondido por tarea)
+5. PANAS-SF (post)
+6. Preguntas cualitativas abiertas
+
+*Nota:* SIMS y la escala ad-hoc de Perceived Pedagogical Support se retiraron de la batería
+para reducir la fatiga del participante; ninguna respondía a una RQ de forma directa.
 
 ---
 
 ## 4. Procedimiento de la Sesión (Paso a Paso)
 
-1. **Inicio de Sesión — Cuestionario Demográfico y PANAS-SF (PRE):**
-   El participante completa un cuestionario demográfico (experiencia con programación, IA) y la versión PRE de PANAS-SF para establecer la línea base afectiva, **antes de cualquier exposición al agente o condición experimental**.
+1. **Inicio de Sesión — Sin formularios previos:**
+   El participante pulsa **PRESS START** y entra directo a la experiencia. No se administran
+   cuestionarios al inicio; toda la batería (incluido el demográfico y PANAS-SF) se aplica una
+   sola vez al final de la sesión.
 
 2. **Asignación de Condición Experimental (Aleatorizada):**
    El participante es asignado aleatoriamente a:
@@ -74,7 +82,7 @@
    - **Tarea 2:** Análisis de complejidad y optimización algorítmica (max. 10 minutos / 600 segundos)
 
 4. **Fase de Interacción (Debugging):**
-   El participante intenta resolver el problema interactuando de forma multimodal (voz vía Whisper STT o texto escrito) con el agente en un navegador web. El sistema (Sonic Kaplay 2D + Piper TTS neuronal + Whisper STT + anillos s) aplicará técnicas de andamiaje y preguntas reflexivas sin entregar el código corregido. En Condición A, el avatar Sonic reacciona visualmente (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) y el sistema otorga/retira anillos según el avance socrático del participante; Piper TTS vocaliza las respuestas del agente con prosodia natural. Tras 60 s de inactividad, se envía automáticamente un mensaje proactivo (pool de 4 pistas específicas por tarea, sin repetición). El participante responde a Perceived Pedagogical Support después de completar o agotar el tiempo de cada tarea.
+   El participante intenta resolver el problema interactuando de forma multimodal (voz vía Whisper STT o texto escrito) con el agente en un navegador web. El sistema (Sonic Kaplay 2D + Piper TTS neuronal + Whisper STT + anillos s) aplicará técnicas de andamiaje y preguntas reflexivas sin entregar el código corregido. En Condición A, el avatar Sonic reacciona visualmente (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`) y el sistema otorga/retira anillos según el avance socrático del participante; Piper TTS vocaliza las respuestas del agente con prosodia natural. Tras 60 s de inactividad, se envía automáticamente un mensaje proactivo (pool de 4 pistas específicas por tarea, sin repetición). Durante toda la interacción, el sistema registra automáticamente la telemetría conductual (latencia, turnos, *think-time*, verbosidad, uso de voz, anillos) sin interrumpir al participante.
 
 5. **Observación Heurística Continua (por Docentes/Senior Managers):**
    Los evaluadores con experiencia pedagógica STEM registran durante la interacción del estudiante:
@@ -94,24 +102,22 @@
    
    | Componente | Duración | Descripción |
    |---|---|---|
-   | **1. Consentimiento Informado + Cuestionario Demográfico** | ~3 minutos | Lectura de consentimiento, firma digital, preguntas demográficas y experiencia previa |
-   | **2. PANAS-SF (PRE)** | ~1 minuto | Línea base del estado afectivo |
-   | **3. TAREA 1 — Depuración de bucle infinito (print_numbers)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B) |
-   | **4. TaskTransitionGame (mini-juego Kaplay)** | ~0.5 minutos | Transición gamificada entre tareas (Condición A solo) |
-   | **5. TAREA 2 — Optimización algoritmo (find_duplicates)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B) |
-   | **6. Cuestionarios POST (Godspeed, SUS, NASA-TLX, SIMS, Pedagogical Support)** | ~5 minutos | Evaluación de percepción, usabilidad, carga cognitiva y motivación |
-   | **7. Entrevista Breve Cualitativa** | ~5 minutos | Preguntas semi-estructuradas sobre experiencia |
-   | **TOTAL POR PARTICIPANTE** | **~34–35 minutos** | Ambas condiciones (A y B) siguen el mismo protocolo temporal |
+   | **1. TAREA 1 — Depuración de bucle infinito (print_numbers)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B). **Sin formularios previos.** |
+   | **2. TaskTransitionGame (mini-juego Kaplay)** | ~0.5 minutos | Transición gamificada entre tareas (Condición A solo) |
+   | **3. TAREA 2 — Optimización algoritmo (find_duplicates)** | ~10 minutos (600 seg) | Interacción socrática multimodal (Condición A) o texto (Condición B) |
+   | **4. Batería final única (Demográficos, Godspeed, SUS, NASA-TLX, PANAS-SF, Cualitativo)** | ~6 minutos | Todos los instrumentos al final, una sola vez |
+   | **TOTAL POR PARTICIPANTE** | **~26–27 minutos** | Ambas condiciones (A y B) siguen el mismo protocolo temporal |
    
    > **Nota crítica:** La duración de **interacción pura con las tareas es de 20 minutos** (10 min + 10 min = 20 min, sin incluir transiciones y cuestionarios).
 
-7. **Evaluación Post-Interacción (Cuestionarios):**
+7. **Evaluación Post-Interacción (Batería Única al Final):**
    El participante completa los siguientes cuestionarios en orden:
-   1. PANAS-SF (POST) — medir cambio afectivo
+   1. Demográficos
    2. Godspeed Questionnaire — naturalidad y presencia social
    3. SUS — usabilidad del sistema
    4. NASA-TLX — carga cognitiva percibida
-   5. SIMS — motivación intrínseca situacional
+   5. PANAS-SF (post) — afecto post-sesión
+   6. Preguntas cualitativas abiertas
    
 8. **Entrevista Breve del Estudiante (Cualitativa):**
    El estudiante participa en una breve entrevista semi-estructurada (~5 minutos) donde comenta:

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PANAS_SF, SUS, SIMS, NASA_TLX, GODSPEED } from "@/shared/config/questionnaires";
+import { PANAS_SF, SUS, NASA_TLX, GODSPEED } from "@/shared/config/questionnaires";
 
 // Build a responses object that answers every "qN"/"gN"/slider field with `v`.
 function answerAll(ids: string[], v: number): Record<string, number> {
@@ -25,14 +25,6 @@ describe("questionnaire scoring", () => {
     const best: Record<string, number> = {};
     SUS.fields.forEach((f, i) => (best[f.id] = i % 2 === 0 ? 5 : 1));
     expect(SUS.score!(best).total).toBe(100);
-  });
-
-  it("SIMS averages its four 4-item subscales", () => {
-    const s = SIMS.score!(answerAll(fieldIds(SIMS), 4));
-    expect(s.intrinsic).toBe(4);
-    expect(s.identified).toBe(4);
-    expect(s.external).toBe(4);
-    expect(s.amotivation).toBe(4);
   });
 
   it("NASA-TLX raw load is the mean of the 6 dimensions", () => {

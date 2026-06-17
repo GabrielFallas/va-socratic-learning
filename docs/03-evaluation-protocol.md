@@ -11,16 +11,19 @@
 
 ## 📋 Cronograma Experimental (Ambas Condiciones A y B)
 
+> **Diseño *post-only* (actualizado para el Entregable 3):** no se administran formularios
+> al inicio. El participante entra directo a la experiencia y toda la batería se aplica una
+> sola vez al final. PANAS-SF mide el afecto **post-sesión** por condición (sin toma previa);
+> no se recoge consentimiento como instrumento in-app. La eficacia autónoma y la latencia se
+> capturan automáticamente (sin auto-reporte).
+
 | Fase | Duración |
 |---|---|
-| Consentimiento + Demográfico | ~3 min |
-| PANAS-SF (PRE) | ~1 min |
 | **Tarea 1 (print_numbers, Chemical Plant)** | **10 min** |
 | TaskTransitionGame (Condición A solo) | ~0.5 min |
 | **Tarea 2 (find_duplicates, Speed Highway)** | **10 min** |
-| Cuestionarios POST | ~5 min |
-| Entrevista Cualitativa | ~5 min |
-| **TOTAL** | **~34–35 min** |
+| Batería final única: Demográficos · Godspeed · SUS · NASA-TLX · PANAS-SF · Cualitativo | ~6 min |
+| **TOTAL** | **~26–27 min** |
 | **Interacción pura con tareas** | **20 min** |
 
 ---

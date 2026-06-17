@@ -33,7 +33,9 @@ export default function TaskTransitionGame({
   const [bossDefeated,   setBossDefeated]   = useState(false);
 
   const isConditionA    = condition === "A";
-  const ringCount       = Math.max(1, Math.min(earnedRings, 10));
+  // Keep the lane visually populated even when few rings were earned (e.g. the
+  // give-up path passes earnedRings=0); cap at 10 so the run stays short.
+  const ringCount       = Math.max(5, Math.min(earnedRings, 10));
   const bossDefeatedRef = useRef(false);
 
   // Refs so callbacks don't get stale
@@ -138,17 +140,24 @@ export default function TaskTransitionGame({
       k.scene("transition", () => {
         k.setGravity(2400);
         const GROUND_Y   = 250;
-        const BG_W       = 1600;
+        // One viewport width per background tile → seamless horizontal scroll.
+        const BG_W       = 800;
         // World-scroll speed: rings + other objects move LEFT toward Sonic.
         // This gives the "Sonic running through the world" feel while Sonic
         // stays at a fixed screen X (no camera needed).
         const WORLD_SPD  = 170;
 
         // ── Backgrounds ──────────────────────────────────────
+        // chemical-bg.png is 1920×1080. Cover-fit it to the 800×300 viewport
+        // (scale = 800/1920) so the whole plant scene shows and scrolls — the
+        // old scale(2.67) zoomed into its dark top-left corner, which read as
+        // an empty background.
+        const BG_SCALE = BG_W / 1920;                 // ≈0.417 → 800×450
+        const BG_Y     = (300 - 1080 * BG_SCALE) / 2; // centre vertically (≈ -75)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),    k.scale(2.67), k.z(0)]);
+        const bg1: any = k.add([k.sprite("bg"), k.pos(0, BG_Y),    k.scale(BG_SCALE), k.z(0)]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2.67), k.z(0)]);
+        const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, BG_Y), k.scale(BG_SCALE), k.z(0)]);
 
         // Zone-2 warm tint overlay (transitioning to Speed Highway / Optimización zone)
         k.add([
@@ -526,12 +535,22 @@ export default function TaskTransitionGame({
 
       {/* ── Game canvas / Condition B placeholder ─────────── */}
       {isConditionA ? (
-        <canvas
-          ref={canvasRef}
-          className="flex-1 w-full"
-          style={{ imageRendering: "pixelated", display: "block", outline: "none" }}
-          tabIndex={0}
-        />
+        // Centre the canvas and lock it to the game's 8:3 logical aspect so the
+        // Kaplay letterbox doesn't leave huge black bars on tall viewports.
+        <div className="flex-1 flex items-center justify-center overflow-hidden" style={{ minHeight: 0 }}>
+          <canvas
+            ref={canvasRef}
+            style={{
+              width: "100%",
+              aspectRatio: "8 / 3",
+              maxHeight: "100%",
+              imageRendering: "pixelated",
+              display: "block",
+              outline: "none",
+            }}
+            tabIndex={0}
+          />
+        </div>
       ) : (
         /* Condition B: warm zone-2 palette (Speed Highway sunset) */
         <div

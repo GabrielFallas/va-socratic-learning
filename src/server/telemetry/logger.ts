@@ -155,7 +155,13 @@ export function getSessionSummary(sessionId: string) {
   };
 }
 
-/** All sessions (for the facilitator results view + export). */
+/** All sessions (for the facilitator results view + export).
+ *  Merges the on-disk store with the in-memory cache so an in-progress session
+ *  still appears even if a disk write lagged or failed; the in-memory copy wins
+ *  on conflicts (it is at least as fresh as disk). */
 export function getAllSessions(): SessionLog[] {
-  return listSessions();
+  const byId = new Map<string, SessionLog>();
+  for (const s of listSessions()) byId.set(s.sessionId, s);
+  for (const s of sessions.values()) byId.set(s.sessionId, s);
+  return [...byId.values()].sort((a, b) => a.startTime - b.startTime);
 }

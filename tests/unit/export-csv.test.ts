@@ -8,9 +8,11 @@ const session: SessionLog = {
   startTime: 1_000,
   endTime: 61_000,
   messages: [
-    { id: "1", role: "user", content: "hola", timestamp: 1000 },
+    { id: "1", role: "user", content: "hola", timestamp: 1000, inputMode: "text" },
     { id: "2", role: "assistant", content: "¿qué ves?", timestamp: 1500, latencyMs: 900 },
-    { id: "3", role: "assistant", content: "otra", timestamp: 2000, latencyMs: 2000 },
+    // user replies 2s after the tutor → think-time = 2000ms, composed by voice
+    { id: "3", role: "user", content: "el contador no cambia", timestamp: 3500, inputMode: "voice" },
+    { id: "4", role: "assistant", content: "otra", timestamp: 4000, latencyMs: 2000 },
   ],
   taskResults: [
     {
@@ -23,6 +25,7 @@ const session: SessionLog = {
       codeRunAttempts: 3,
       testsPassed: true,
       codeEdited: true,
+      ringsCollected: 12,
     },
   ],
   questionnaires: {
@@ -47,5 +50,28 @@ describe("sessionsToCsv", () => {
     const row = csv.trim().split("\n")[1].split(",");
     const idx = cols.indexOf("pctTtftUnder1500");
     expect(row[idx]).toBe("50"); // one of two readings < 1500
+  });
+
+  it("emits behavioural telemetry columns derived from the message stream", () => {
+    const csv = sessionsToCsv([session]);
+    const cols = csv.trim().split("\n")[0].split(",");
+    const row = csv.trim().split("\n")[1].split(",");
+    const get = (c: string) => row[cols.indexOf(c)];
+
+    expect(cols).toContain("avgThinkTimeMs");
+    expect(get("userMsgCount")).toBe("2");
+    expect(get("avgThinkTimeMs")).toBe("2000"); // single assistant→user gap of 2s
+    expect(get("voiceInputCount")).toBe("1");
+    expect(get("voiceInputRatio")).toBe("0.5"); // 1 voice of 2 tagged inputs
+    expect(get("totalRings")).toBe("12");
+    expect(get("task1_rings")).toBe("12");
+    expect(cols).toContain("p95TtftMs");
+  });
+
+  it("no longer emits consent or pre-phase questionnaire columns", () => {
+    const csv = sessionsToCsv([session]);
+    const header = csv.trim().split("\n")[0];
+    expect(header).not.toContain("q_consent");
+    expect(header).not.toContain("_pre_");
   });
 });

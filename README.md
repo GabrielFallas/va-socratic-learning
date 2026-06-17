@@ -11,6 +11,11 @@ Repositorio del proyecto de investigación sobre un agente virtual de tutoría s
 > **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/6yjbrtIlXa4)**  
 > *(~3 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
 
+## 📄 Artículo Académico (Paper)
+
+> **Fuente LaTeX:** [`paper/`](paper/) (plantilla IEEE, lista para Overleaf — ver [`paper/README.md`](paper/README.md)).  
+> **PDF compilado:** `paper/main.pdf` (generar con `latexmk -pdf main.tex` o Overleaf).
+
 ---
 
 ## Propósito y Motivación
@@ -23,7 +28,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 |---|---|
 | **RQ1** | ¿Cómo afecta la presencia del avatar corporizado  (Sonic Kaplay 2D, Piper TTS, Whisper STT, anillos, zonas temáticas) frente a un chatbot de texto en la percepción de naturalidad, presencia social y *perceived pedagogical support*? |
 | **RQ2** | ¿En qué medida la modalidad corpórea y  influye en la eficacia pedagógica autónoma del participante (resolución sin código directo, turnos conversacionales, tiempo por tarea)? |
-| **RQ3** | ¿Qué relación existe entre la modalidad del agente (Condición A vs B) y la carga cognitiva percibida (NASA-TLX) y el estado afectivo (PANAS-SF) durante la sesión? |
+| **RQ3** | ¿Qué relación existe entre la modalidad del agente (Condición A vs B) y la carga cognitiva percibida (NASA-TLX) y el estado afectivo post-sesión (PANAS-SF, medido una vez al final)? |
 | **RQ4** | ¿Se mantiene la latencia de respuesta multimodal por debajo de 1.5 segundos de forma consistente? |
 
 ## Rol del Agente — Sonic
@@ -59,7 +64,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 ### Flujo de Interacción
 
 1. El participante accede a `localhost:3000` y pulsa **PRESS START**. El servidor lo asigna a la Condición A o B mediante **contrabalanceo por bloques** (sin que el participante elija) y emite un ID secuencial (`P-001`, …).
-2. Flujo `/intake`: consentimiento informado → datos demográficos → PANAS-SF (pre). Luego se presenta la Tarea 1 (`print_numbers()`, Chemical Plant). El código es **editable**; al pulsar Ejecutar corre en Pyodide contra pruebas ocultas. Tras ambas tareas, el flujo `/post` administra Godspeed, SUS, NASA-TLX, SIMS, PANAS-SF (post) y preguntas cualitativas, antes de mostrar los resultados.
+2. **Sin formularios al inicio:** el participante entra directo a la Tarea 1 (`print_numbers()`, Chemical Plant). El código es **editable**; al pulsar Ejecutar corre en Pyodide contra pruebas ocultas. Toda la batería de cuestionarios se administra **una sola vez al final** (flujo `/post`): datos demográficos → Godspeed → SUS → NASA-TLX → PANAS-SF → preguntas cualitativas, antes de mostrar los resultados. Esto elimina la fricción inicial y evita sesgos de anclaje de las medidas previas.
 3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
 4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
 5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A: Piper TTS vocaliza la respuesta, el canvas Kaplay anima el sprite Sonic al estado indicado, y el sistema de anillos se actualiza (ganado/perdido). En Condición B: solo texto.
@@ -71,14 +76,16 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 
 | Fase | Duración | Notas |
 |---|---|---|
-| **1. Consentimiento + Demográfico** | ~3 min | Firma digital, experiencia previa con programación/IA |
-| **2. PANAS-SF (PRE)** | ~1 min | Línea base afectiva |
-| **3. TAREA 1 (print_numbers)** | **10 min** | Depuración de bucle infinito, Chemical Plant zone |
-| **4. TaskTransitionGame** | ~0.5 min | Mini-juego Kaplay entre tareas (Condición A solo) |
-| **5. TAREA 2 (find_duplicates)** | **10 min** | Optimización O(n³)→O(n), Speed Highway zone |
-| **6. Cuestionarios POST** | ~5 min | Godspeed, SUS, NASA-TLX, SIMS, Pedagogical Support |
-| **7. Entrevista Cualitativa** | ~5 min | Semi-estructurada, feedback del participante |
-| **TOTAL** | **~34–35 min** | **Interacción pura con tareas: 20 minutos** |
+| **1. TAREA 1 (print_numbers)** | **10 min** | Depuración de bucle infinito, Chemical Plant zone. **Sin formularios previos.** |
+| **2. TaskTransitionGame** | ~0.5 min | Mini-juego Kaplay entre tareas (Condición A solo) |
+| **3. TAREA 2 (find_duplicates)** | **10 min** | Optimización O(n³)→O(n), Speed Highway zone |
+| **4. Batería de cuestionarios (única, al final)** | ~6 min | Demográficos, Godspeed, SUS, NASA-TLX, PANAS-SF, cualitativo |
+| **TOTAL** | **~26–27 min** | **Interacción pura con tareas: 20 minutos** |
+
+> **Diseño:** todos los instrumentos se aplican una sola vez al final (diseño *post-only*).
+> PANAS-SF mide el afecto post-sesión por condición; no hay toma previa. No se recoge
+> consentimiento como instrumento in-app. La eficacia autónoma (RQ2) y la latencia (RQ4) se
+> capturan automáticamente, sin auto-reporte.
 
 ---
 
@@ -143,9 +150,9 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 ### 5. Ejecutar la Sesión Experimental
 
 1. Abre `http://localhost:3000` en Chrome, Edge o Safari (navegadores con soporte Web Speech API para Whisper fallback).
-2. Verifica en la consola que **Ollama**, **Piper TTS** (Docker) y **Whisper STT** estén disponibles:
+2. Verifica el estado de los servicios mediante el **badge de salud** en la *landing page* (verde = listo) o con `GET /api/health`. Manualmente:
    - `curl http://localhost:11434/api/tags` (Ollama)
-   - `curl http://localhost:8000/health` (Piper TTS)
+   - `curl http://localhost:5001/health` (Piper TTS + Whisper STT)
 3. Selecciona **"Iniciar Sesión (Aleatoria)"** para asignación automática de condición (A = Sonic multimodal, B = texto plano).
 4. **Condición A:** Lee/escucha instrucción inicial, interactúa con Sonic via texto o voz (micrófono), gana/pierde anillos, visualiza avatar reactivo.
 5. **Condición B:** Interfaz de chat de texto plano, sin voz, sin avatar, sin anillos (control baseline).
@@ -176,6 +183,8 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`docs/02-architecture.md`](docs/02-architecture.md) | Arquitectura y diseño del sistema. |
 | [`docs/03-evaluation-protocol.md`](docs/03-evaluation-protocol.md) | Protocolo de evaluación y matriz de consistencia metodológica. |
 | [`docs/04-evaluation-guide.md`](docs/04-evaluation-guide.md) | Guía paso a paso para la evaluación experimental. |
+| [`docs/05-data-dictionary.md`](docs/05-data-dictionary.md) | Diccionario de datos: todas las columnas del CSV de exportación. |
+| [`paper/`](paper/) | Artículo académico (Entregable 3) en LaTeX — fuente `main.tex` + `references.bib`. |
 | [`docs/project-canvas.html`](docs/project-canvas.html) | Canvas del proyecto (formato interactivo). |
 | [`docs/experimental-instrument.html`](docs/experimental-instrument.html) | Consentimiento informado e instrumento experimental web. |
 | [`context/Cuestionarios-20260522/`](context/Cuestionarios-20260522/) | Cuestionarios validados: PANAS-SF, Godspeed, SUS, NASA-TLX, SIMS, entre otros. |
@@ -199,11 +208,12 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`src/services/audio/sfx.ts`](src/services/audio/sfx.ts) | Gestor de efectos de sonido (ring, jump, hurt, victory) y música de fondo por zona. |
 | [`src/prompts/tutor-system.ts`](src/prompts/tutor-system.ts) | System prompt socrático **neutral, idéntico para ambas condiciones**; la Condición A añade el bloque de control `[AVATAR_STATE]`. Aísla el embodiment manteniendo constante el texto del tutor. |
 | [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Tareas de depuración + arnés de pruebas ocultas (Pyodide) que determina la resolución autónoma. |
-| [`src/shared/config/questionnaires.ts`](src/shared/config/questionnaires.ts) | Instrumentos validados (consentimiento, demográficos, PANAS-SF, Godspeed, SUS, NASA-TLX, SIMS, cualitativo) con funciones de puntuación. |
+| [`src/shared/config/questionnaires.ts`](src/shared/config/questionnaires.ts) | Instrumentos validados de la batería *post-only* (demográficos, Godspeed, SUS, NASA-TLX, PANAS-SF, cualitativo) con funciones de puntuación. |
 | [`src/client/code/pyodideRunner.ts`](src/client/code/pyodideRunner.ts) · [`public/pyodide.worker.js`](public/pyodide.worker.js) | Ejecución de Python en el navegador (Web Worker) con timeout que mata bucles infinitos. |
 | [`src/server/experiment/assignment.ts`](src/server/experiment/assignment.ts) | Asignación contrabalanceada (bloques permutados) persistida. |
 | [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) · [`store.ts`](src/server/telemetry/store.ts) · [`export.ts`](src/server/telemetry/export.ts) | Telemetría persistente, almacén JSON en `data/` y exportación CSV/JSON. |
-| [`src/app/intake/page.tsx`](src/app/intake/page.tsx) · [`src/app/post/page.tsx`](src/app/post/page.tsx) · [`src/app/admin/page.tsx`](src/app/admin/page.tsx) | Flujo pre-tarea, batería post-tarea y panel del facilitador. |
+| [`src/app/post/page.tsx`](src/app/post/page.tsx) · [`src/app/admin/page.tsx`](src/app/admin/page.tsx) | Batería única de cuestionarios al final y panel del facilitador (con estadística descriptiva A/B). |
+| [`src/app/api/health/route.ts`](src/app/api/health/route.ts) | *Preflight* de salud — verifica Ollama y el servicio de voz antes de iniciar una sesión. |
 
 ### Pruebas
 
@@ -224,9 +234,10 @@ npm run typecheck # verificación de tipos
 Cada sesión se persiste en `data/sessions/<id>.json` (más un log `data/events.jsonl`),
 por lo que los datos sobreviven a reinicios del servidor. Para el análisis:
 
-- **Panel del facilitador:** [`/admin`](http://localhost:3000/admin) — tabla de sesiones, balance A/B y botones de exportación.
-- **CSV:** `GET /api/export?format=csv` — una fila por participante con métricas por tarea y puntajes de cuestionarios (`q_<instrumento>_<fase>_<score>`).
+- **Panel del facilitador:** [`/admin`](http://localhost:3000/admin) — tabla de sesiones, balance A/B, **estadística descriptiva por condición** (media, DE y n de resolución, turnos, tiempo, TTFT, % latencia <1.5 s, think-time, SUS, NASA-TLX, Godspeed, PANAS) y botones de exportación.
+- **CSV:** `GET /api/export?format=csv` — una fila por participante con métricas por tarea, **telemetría conductual automática** (verbosidad, *think-time* entre turnos, percentil 95 de TTFT, uso de voz, anillos) y puntajes de cuestionarios (`q_<instrumento>_<fase>_<score>`). Ver el diccionario completo en [`docs/05-data-dictionary.md`](docs/05-data-dictionary.md).
 - **JSON:** `GET /api/export?format=json` — sesión completa con fidelidad total.
+- **Salud del sistema:** `GET /api/health` — comprueba que Ollama (y el servicio de voz) estén disponibles antes de iniciar una sesión; la *landing page* muestra un *badge* de estado.
 
 > Los datos quedan bajo un identificador anónimo (`P-001`, …). La carpeta `data/` está en `.gitignore`.
 

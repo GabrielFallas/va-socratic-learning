@@ -66,6 +66,12 @@ services:
     container_name: va-app
     ports:
       - "3000:3000"
+    volumes:
+      # Persist research data on the host so it survives container rebuilds and
+      # is directly inspectable/exportable (./data/sonic.db). Without this the
+      # SQLite DB lives only inside the ephemeral container and the facilitator
+      # panel/export read an empty store.
+      - ./data:/app/data
     environment:
       NODE_ENV: production
       OLLAMA_BASE_URL: http://ollama:11434

@@ -17,19 +17,17 @@ interface Props {
 function isAnswered(field: Field, v: Value | undefined): boolean {
   if (field.type === "info" || field.optional) return true;
   if (field.type === "check") return v === true;
-  if (field.type === "slider") return true; // slider always has a value
+  // Sliders must be explicitly moved — a default midpoint must NOT count as a
+  // real response (it would silently pollute NASA-TLX data with un-given answers).
+  if (field.type === "slider") return v !== undefined;
   return v !== undefined && v !== "";
 }
 
 export default function Questionnaire({ instrument, stepIndex, stepCount, onSubmit }: Props) {
-  const [responses, setResponses] = useState<Responses>(() => {
-    // sliders default to midpoint
-    const init: Responses = {};
-    instrument.fields.forEach((f) => {
-      if (f.type === "slider") init[f.id] = Math.round(((f.min ?? 0) + (f.max ?? 100)) / 2);
-    });
-    return init;
-  });
+  // No pre-filled values: every field (including sliders) starts unanswered so
+  // the participant must interact with it before the form can be submitted.
+  const [responses, setResponses] = useState<Responses>({});
+  const lastStep = stepCount !== undefined && (stepIndex ?? 0) + 1 >= stepCount;
 
   const set = (id: string, v: Value) => setResponses((p) => ({ ...p, [id]: v }));
 
@@ -76,7 +74,7 @@ export default function Questionnaire({ instrument, stepIndex, stepCount, onSubm
             className="mt-7 w-full py-3 rounded-xl font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#0F3B82" }}
           >
-            {complete ? "Continuar →" : "Complete todos los campos requeridos"}
+            {complete ? (lastStep ? "Finalizar ✓" : "Continuar →") : "Complete todos los campos requeridos"}
           </button>
         </div>
       </div>
@@ -107,7 +105,7 @@ function FieldView({ field, value, onChange }: { field: Field; value: Value | un
         <div className="flex justify-between gap-2">
           {(field.options ?? []).map((opt, i) => (
             <label key={i} className="flex-1 flex flex-col items-center text-center cursor-pointer">
-              <input type="radio" name={field.id} checked={value === i + 1} onChange={() => onChange(i + 1)} className="mb-1 w-5 h-5" style={{ accentColor: "#0F3B82" }} />
+              <input type="radio" name={field.id} value={i + 1} checked={value === i + 1} onChange={() => onChange(i + 1)} className="mb-1 w-5 h-5" style={{ accentColor: "#0F3B82" }} />
               <span className="text-[11px] leading-tight" style={{ color: "#666" }}>{opt}</span>
             </label>
           ))}
@@ -120,7 +118,7 @@ function FieldView({ field, value, onChange }: { field: Field; value: Value | un
           <div className="flex gap-2 flex-1 justify-center">
             {Array.from({ length: field.points ?? 5 }, (_, i) => (
               <label key={i} className="cursor-pointer flex flex-col items-center">
-                <input type="radio" name={field.id} checked={value === i + 1} onChange={() => onChange(i + 1)} className="w-5 h-5" style={{ accentColor: "#0F3B82" }} />
+                <input type="radio" name={field.id} value={i + 1} checked={value === i + 1} onChange={() => onChange(i + 1)} className="w-5 h-5" style={{ accentColor: "#0F3B82" }} />
                 <span className="text-[11px]" style={{ color: "#999" }}>{i + 1}</span>
               </label>
             ))}
@@ -131,10 +129,10 @@ function FieldView({ field, value, onChange }: { field: Field; value: Value | un
 
       {field.type === "slider" && (
         <div>
-          <input type="range" min={field.min ?? 0} max={field.max ?? 100} value={Number(value ?? 50)} onChange={(e) => onChange(Number(e.target.value))} className="w-full" style={{ accentColor: "#0F3B82" }} />
+          <input type="range" min={field.min ?? 0} max={field.max ?? 100} value={Number(value ?? Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2))} onChange={(e) => onChange(Number(e.target.value))} className="w-full" style={{ accentColor: value === undefined ? "#bbb" : "#0F3B82" }} />
           <div className="flex justify-between text-xs mt-1" style={{ color: "#888" }}>
             <span>{field.leftLabel}</span>
-            <span className="font-bold" style={{ color: "#0F3B82" }}>{Number(value ?? 50)}</span>
+            <span className="font-bold" style={{ color: value === undefined ? "#bbb" : "#0F3B82" }}>{value === undefined ? "— mueva el control —" : Number(value)}</span>
             <span>{field.rightLabel}</span>
           </div>
         </div>
@@ -148,7 +146,7 @@ function FieldView({ field, value, onChange }: { field: Field; value: Value | un
         <div className="flex flex-wrap gap-3">
           {(field.options ?? []).map((opt) => (
             <label key={opt} className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: "#333" }}>
-              <input type="radio" name={field.id} checked={value === opt} onChange={() => onChange(opt)} className="w-4 h-4" style={{ accentColor: "#0F3B82" }} />
+              <input type="radio" name={field.id} value={opt} checked={value === opt} onChange={() => onChange(opt)} className="w-4 h-4" style={{ accentColor: "#0F3B82" }} />
               {opt}
             </label>
           ))}

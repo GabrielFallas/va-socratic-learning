@@ -26,6 +26,20 @@ export default function HomePage() {
   const [isStarting, setIsStarting] = useState(false);
   const [sonicX, setSonicX] = useState(-120);
   const [sonicFlip, setSonicFlip] = useState(false);
+  const [health, setHealth] = useState<{ ready: boolean; ollama: { ok: boolean }; speech: { ok: boolean } } | null>(null);
+
+  // Preflight: confirm backend services are reachable before a session starts.
+  useEffect(() => {
+    let alive = true;
+    const probe = () =>
+      fetch("/api/health")
+        .then((r) => r.json())
+        .then((d) => { if (alive) setHealth(d); })
+        .catch(() => { if (alive) setHealth({ ready: false, ollama: { ok: false }, speech: { ok: false } }); });
+    probe();
+    const t = setInterval(probe, 15000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
 
   // Inject extra keyframes not in globals.css
   useEffect(() => {
@@ -65,7 +79,9 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error("assign failed");
-      router.push(`/intake?id=${data.sessionId}&condition=${data.condition}`);
+      // No intake forms: the participant goes straight into the experience.
+      // The full questionnaire battery runs once at the END (see POST_FLOW).
+      router.push(`/session?id=${data.sessionId}&condition=${data.condition}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);
     }
@@ -81,9 +97,8 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "init", sessionId, condition }),
       });
-      // Pilot now runs through the intake flow (consent + demographics + panas-pre)
-      // so the full experiment time is tracked from the first survey onward.
-      router.push(`/intake?id=${sessionId}&condition=${condition}`);
+      // Straight into the session — no intake. Questionnaires are all at the end.
+      router.push(`/session?id=${sessionId}&condition=${condition}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);
     }
@@ -338,7 +353,26 @@ export default function HomePage() {
           </div>
         </div>
 
-        <p className="text-center text-xs mt-6 font-mono">
+        {/* System health badge — preflight for the facilitator */}
+        {health && (
+          <div
+            className="flex items-center gap-2 mt-6 px-4 py-1.5 rounded-full text-xs font-mono"
+            style={{
+              background: "rgba(0,0,0,0.55)",
+              border: `1px solid ${health.ready ? "#4caf50" : "#ff6666"}`,
+              color: health.ready ? "#9be59b" : "#ff9999",
+            }}
+            data-testid="health-badge"
+          >
+            <span style={{ color: health.ollama.ok ? "#4caf50" : "#ff5555" }}>●</span>
+            <span>LLM {health.ollama.ok ? "listo" : "no disponible"}</span>
+            <span className="opacity-40">·</span>
+            <span style={{ color: health.speech.ok ? "#4caf50" : "#ffaa00" }}>●</span>
+            <span>Voz {health.speech.ok ? "lista" : "no disp. (Cond. B ok)"}</span>
+          </div>
+        )}
+
+        <p className="text-center text-xs mt-3 font-mono">
           Powered by Ollama Gemma 3 12B · Piper TTS · Whisper STT
         </p>
       </div>
