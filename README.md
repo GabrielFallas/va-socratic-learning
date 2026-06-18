@@ -8,7 +8,7 @@ Repositorio del proyecto de investigación sobre un agente virtual de tutoría s
 
 ## 🎥 Video de Demostración
 
-> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/6yjbrtIlXa4)**  
+> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/6yjbrtIlXa4p)**  
 > *(~3 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
 
 ## 📄 Artículo Académico (Paper)
@@ -51,7 +51,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 | **Reconocimiento de Voz (STT)** | Whisper STT (local via `/api/stt` Next.js) | Reconocimiento de voz local sin dependencias de nube, español, baja latencia, integrado en backend. |
 | **Gamificación** | Sistema de anillos + TaskTransitionGame (Kaplay mini-juego) | Anillos visuales (ring burst anim) ganados/perdidos según progreso socrático; mini-juego ~15 s entre tareas; SFX/BGM por zona temática. |
 | **Framework / Orquestación** | Next.js 14 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
-| **Telemetría** | `logger.ts` + `store.ts` (JSON persistente en `data/`) | Registra TTFT y latencia total, turnos, tiempo por tarea, resolución autónoma (pruebas ocultas), intentos de ejecución y respuestas de cuestionarios. Persistente entre reinicios; exportable a CSV/JSON; panel `/admin` (RQ1–RQ4). |
+| **Telemetría** | `logger.ts` + `store.ts` + `db.ts` (**SQLite** en `data/sonic.db`) | Registra TTFT y latencia total, turnos, tiempo por tarea, resolución autónoma (pruebas ocultas), intentos de ejecución, conversaciones completas y respuestas de cuestionarios. Base de datos local de un solo archivo (inspeccionable con *DB Browser for SQLite*); persistente entre reinicios; exportable a CSV/JSON/transcripciones; panel `/admin` (RQ1–RQ4). |
 
 ### Componentes Principales
 
@@ -64,7 +64,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 ### Flujo de Interacción
 
 1. El participante accede a `localhost:3000` y pulsa **PRESS START**. El servidor lo asigna a la Condición A o B mediante **contrabalanceo por bloques** (sin que el participante elija) y emite un ID secuencial (`P-001`, …).
-2. **Sin formularios al inicio:** el participante entra directo a la Tarea 1 (`print_numbers()`, Chemical Plant). El código es **editable**; al pulsar Ejecutar corre en Pyodide contra pruebas ocultas. Toda la batería de cuestionarios se administra **una sola vez al final** (flujo `/post`): datos demográficos → Godspeed → SUS → NASA-TLX → PANAS-SF → preguntas cualitativas, antes de mostrar los resultados. Esto elimina la fricción inicial y evita sesgos de anclaje de las medidas previas.
+2. **Sin formularios al inicio:** el participante entra directo a la Tarea 1 (`print_numbers()`, Chemical Plant). El código es **editable**; al pulsar Ejecutar corre en Pyodide contra pruebas ocultas. Toda la batería de cuestionarios se administra **una sola vez al final** (flujo `/post`): datos demográficos → Godspeed → apoyo pedagógico percibido → SUS → NASA-TLX → PANAS-SF → preguntas cualitativas, antes de mostrar los resultados. Esto elimina la fricción inicial y evita sesgos de anclaje de las medidas previas.
 3. El participante interactúa con Sonic mediante texto (ambas condiciones) o voz via Whisper STT (solo Condición A).
 4. El servidor procesa el historial de conversación y lo envía a Ollama vía streaming NDJSON, extrayendo tags `[AVATAR_STATE:estado]` del system prompt socrático.
 5. La respuesta socrática se transmite al cliente mediante SSE. En Condición A: Piper TTS vocaliza la respuesta, el canvas Kaplay anima el sprite Sonic al estado indicado, y el sistema de anillos se actualiza (ganado/perdido). En Condición B: solo texto.
@@ -79,7 +79,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 | **1. TAREA 1 (print_numbers)** | **10 min** | Depuración de bucle infinito, Chemical Plant zone. **Sin formularios previos.** |
 | **2. TaskTransitionGame** | ~0.5 min | Mini-juego Kaplay entre tareas (Condición A solo) |
 | **3. TAREA 2 (find_duplicates)** | **10 min** | Optimización O(n³)→O(n), Speed Highway zone |
-| **4. Batería de cuestionarios (única, al final)** | ~6 min | Demográficos, Godspeed, SUS, NASA-TLX, PANAS-SF, cualitativo |
+| **4. Batería de cuestionarios (única, al final)** | ~6 min | Demográficos, Godspeed, apoyo pedagógico, SUS, NASA-TLX, PANAS-SF, cualitativo |
 | **TOTAL** | **~26–27 min** | **Interacción pura con tareas: 20 minutos** |
 
 > **Diseño:** todos los instrumentos se aplican una sola vez al final (diseño *post-only*).
@@ -90,6 +90,33 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 ---
 
 ## Ejecución de la Prueba de Concepto (PoC)
+
+### Opción recomendada: Docker Compose (reproducible)
+
+El sistema completo (app Next.js + Ollama + servicio de voz) se levanta con Docker Compose.
+Es la forma en que se ejecuta el laboratorio y la más sencilla de reproducir.
+
+```bash
+git clone https://github.com/GabrielFallas/va-socratic-learning.git
+cd va-socratic-learning
+
+# 1) Descargar el modelo (una sola vez, ~7 GB)
+docker compose up ollama -d
+docker compose exec ollama ollama pull gemma3:12b
+
+# 2) Levantar todo (producción)
+docker compose up --build -d
+#   o, para desarrollo con recarga en caliente:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+La interfaz queda en `http://localhost:3000`; el panel del facilitador en
+`http://localhost:3000/admin`. Los datos se persisten en `./data/sonic.db` **en el host**
+(volumen montado), de modo que sobreviven a reconstrucciones del contenedor y pueden abrirse con
+*DB Browser for SQLite*. Requiere GPU NVIDIA con drivers de Docker para Gemma 3 12B (sin GPU,
+Ollama usa CPU con mayor latencia).
+
+> Para correr la app sin Docker (Node local), siga los pasos manuales más abajo.
 
 ### 1. Requisitos Previos
 
@@ -184,6 +211,8 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`docs/03-evaluation-protocol.md`](docs/03-evaluation-protocol.md) | Protocolo de evaluación y matriz de consistencia metodológica. |
 | [`docs/04-evaluation-guide.md`](docs/04-evaluation-guide.md) | Guía paso a paso para la evaluación experimental. |
 | [`docs/05-data-dictionary.md`](docs/05-data-dictionary.md) | Diccionario de datos: todas las columnas del CSV de exportación. |
+| [`docs/06-coding-scheme.md`](docs/06-coding-scheme.md) | Esquema de codificación cualitativa para las transcripciones y preguntas abiertas. |
+| [`docs/07-facilitator-guide.md`](docs/07-facilitator-guide.md) | Guía del facilitador: cómo correr una sesión real sin contaminar la base de datos. |
 | [`paper/`](paper/) | Artículo académico (Entregable 3) en LaTeX — fuente `main.tex` + `references.bib`. |
 | [`docs/project-canvas.html`](docs/project-canvas.html) | Canvas del proyecto (formato interactivo). |
 | [`docs/experimental-instrument.html`](docs/experimental-instrument.html) | Consentimiento informado e instrumento experimental web. |
@@ -208,10 +237,11 @@ La interfaz de tutoría estará disponible en `http://localhost:3000`.
 | [`src/services/audio/sfx.ts`](src/services/audio/sfx.ts) | Gestor de efectos de sonido (ring, jump, hurt, victory) y música de fondo por zona. |
 | [`src/prompts/tutor-system.ts`](src/prompts/tutor-system.ts) | System prompt socrático **neutral, idéntico para ambas condiciones**; la Condición A añade el bloque de control `[AVATAR_STATE]`. Aísla el embodiment manteniendo constante el texto del tutor. |
 | [`src/shared/config/tasks.ts`](src/shared/config/tasks.ts) | Tareas de depuración + arnés de pruebas ocultas (Pyodide) que determina la resolución autónoma. |
-| [`src/shared/config/questionnaires.ts`](src/shared/config/questionnaires.ts) | Instrumentos validados de la batería *post-only* (demográficos, Godspeed, SUS, NASA-TLX, PANAS-SF, cualitativo) con funciones de puntuación. |
+| [`src/shared/config/questionnaires.ts`](src/shared/config/questionnaires.ts) | Instrumentos validados de la batería *post-only* (demográficos, Godspeed, apoyo pedagógico percibido, SUS, NASA-TLX, PANAS-SF, cualitativo) con funciones de puntuación. |
 | [`src/client/code/pyodideRunner.ts`](src/client/code/pyodideRunner.ts) · [`public/pyodide.worker.js`](public/pyodide.worker.js) | Ejecución de Python en el navegador (Web Worker) con timeout que mata bucles infinitos. |
 | [`src/server/experiment/assignment.ts`](src/server/experiment/assignment.ts) | Asignación contrabalanceada (bloques permutados) persistida. |
-| [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) · [`store.ts`](src/server/telemetry/store.ts) · [`export.ts`](src/server/telemetry/export.ts) | Telemetría persistente, almacén JSON en `data/` y exportación CSV/JSON. |
+| [`src/server/telemetry/logger.ts`](src/server/telemetry/logger.ts) · [`db.ts`](src/server/telemetry/db.ts) · [`store.ts`](src/server/telemetry/store.ts) · [`export.ts`](src/server/telemetry/export.ts) | Telemetría persistente en **SQLite** (`data/sonic.db`, con migración de datos JSON heredados) y exportación CSV/JSON/transcripciones. |
+| [`scripts/analyze.py`](scripts/analyze.py) | Análisis A vs B sobre el CSV: descriptivos + Mann-Whitney U, δ de Cliff y d de Cohen (scipy opcional). |
 | [`src/app/post/page.tsx`](src/app/post/page.tsx) · [`src/app/admin/page.tsx`](src/app/admin/page.tsx) | Batería única de cuestionarios al final y panel del facilitador (con estadística descriptiva A/B). |
 | [`src/app/api/health/route.ts`](src/app/api/health/route.ts) | *Preflight* de salud — verifica Ollama y el servicio de voz antes de iniciar una sesión. |
 
@@ -231,15 +261,19 @@ npm run typecheck # verificación de tipos
 
 ### Recolección de Datos y Exportación
 
-Cada sesión se persiste en `data/sessions/<id>.json` (más un log `data/events.jsonl`),
-por lo que los datos sobreviven a reinicios del servidor. Para el análisis:
+Cada sesión se persiste en una base de datos **SQLite** local (`data/sonic.db`), un único
+archivo inspeccionable con *DB Browser for SQLite* y consultable con SQL para análisis ad-hoc.
+Para el análisis:
 
-- **Panel del facilitador:** [`/admin`](http://localhost:3000/admin) — tabla de sesiones, balance A/B, **estadística descriptiva por condición** (media, DE y n de resolución, turnos, tiempo, TTFT, % latencia <1.5 s, think-time, SUS, NASA-TLX, Godspeed, PANAS) y botones de exportación.
+- **Panel del facilitador:** [`/admin`](http://localhost:3000/admin) — tabla de sesiones, balance A/B, **gráficos comparativos A vs B** y **estadística descriptiva por condición** (media, DE y n de resolución, turnos, tiempo, TTFT, % latencia <1.5 s, think-time, SUS, NASA-TLX, apoyo pedagógico, subescalas Godspeed, PANAS) y botones de exportación.
 - **CSV:** `GET /api/export?format=csv` — una fila por participante con métricas por tarea, **telemetría conductual automática** (verbosidad, *think-time* entre turnos, percentil 95 de TTFT, uso de voz, anillos) y puntajes de cuestionarios (`q_<instrumento>_<fase>_<score>`). Ver el diccionario completo en [`docs/05-data-dictionary.md`](docs/05-data-dictionary.md).
 - **JSON:** `GET /api/export?format=json` — sesión completa con fidelidad total.
+- **Transcripciones (JSONL):** `GET /api/export?format=transcripts` — un mensaje por línea (solo participantes reales) para **codificación cualitativa** de las conversaciones; esquema en [`docs/06-coding-scheme.md`](docs/06-coding-scheme.md).
+- **Análisis inferencial:** `python scripts/analyze.py <sessions.csv>` — descriptivos por condición y (con `scipy`) Mann-Whitney U, δ de Cliff y d de Cohen por métrica; alternativa: jamovi/R.
 - **Salud del sistema:** `GET /api/health` — comprueba que Ollama (y el servicio de voz) estén disponibles antes de iniciar una sesión; la *landing page* muestra un *badge* de estado.
 
 > Los datos quedan bajo un identificador anónimo (`P-001`, …). La carpeta `data/` está en `.gitignore`.
+> Para iniciar una recolección limpia, ver la guía del facilitador en [`docs/07-facilitator-guide.md`](docs/07-facilitator-guide.md).
 
 ---
 
@@ -261,7 +295,7 @@ por lo que los datos sobreviven a reinicios del servidor. Para el análisis:
 ## Consideraciones de Seguridad
 
 - **API Keys:** No se requieren API keys externas para la PoC. Ollama, Piper TTS y Whisper STT corren completamente local.
-- **Datos de sesión:** Los logs de conversación, telemetría (latencia, turnos, resolución, anillos acumulados) se almacenan en memoria en el servidor bajo un ID alfanumérico único (ej. `P-001`), sin nombre legal ni correo del participante.
+- **Datos de sesión:** Los logs de conversación y la telemetría (latencia, turnos, resolución, anillos acumulados) se almacenan en una base SQLite local (`data/sonic.db`) bajo un ID alfanumérico único (ej. `P-001`), sin nombre legal ni correo del participante.
 - **`.env.local`:** El archivo de variables de entorno está incluido en `.gitignore` y nunca debe subirse al repositorio.
 - **Reproducibilidad:** Todos los servicios (Ollama, Piper, Next.js) corren en máquinas locales del laboratorio. No hay dependencias de nube. Las sesiones pueden ser replicadas con idéntico hardware y configuración.
 

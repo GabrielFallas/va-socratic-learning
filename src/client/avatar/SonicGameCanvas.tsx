@@ -173,7 +173,12 @@ export default function SonicGameCanvas({
       k.scene("main", () => {
         k.setGravity(2200);
         const GROUND_Y = 215;
-        const BG_W     = 960;
+        // chemical-bg.png is 1920×1080; cover-fit it to the 480×260 viewport
+        // (one scaled copy = one screen wide) instead of the old scale(2) that
+        // zoomed into its dark top-left corner.
+        const BG_W       = 480;
+        const BG_SCALE   = BG_W / 1920;                 // 0.25 → 480×270
+        const BG_Y       = (260 - 1080 * BG_SCALE) / 2; // centre vertically (≈ -5)
         const SKY_W    = 925;
 
         // ── 3-layer parallax background ───────────────────────
@@ -191,9 +196,9 @@ export default function SonicGameCanvas({
 
         // Layer 2 (nearest): chemical plant — fastest scroll
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bg1: any = k.add([k.sprite("bg"), k.pos(0, 0),    k.scale(2), k.z(0)]);
+        const bg1: any = k.add([k.sprite("bg"), k.pos(0, BG_Y),    k.scale(BG_SCALE), k.z(0)]);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, 0), k.scale(2), k.z(0)]);
+        const bg2: any = k.add([k.sprite("bg"), k.pos(BG_W, BG_Y), k.scale(BG_SCALE), k.z(0)]);
 
         // Zone colour overlay — zone 1: red Chemical Plant, zone 2: Speed Highway sunset
         k.add([

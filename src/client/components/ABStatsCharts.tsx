@@ -33,7 +33,11 @@ interface MetricDef {
 const METRICS: MetricDef[] = [
   { id: "sus",              label: "SUS (0–100)",         fmt: (v) => v.toFixed(1), higherIsBetter: true,  axisMax: 100 },
   { id: "nasaTlx",          label: "NASA-TLX (RTLX)",     fmt: (v) => v.toFixed(1), higherIsBetter: false, axisMax: 100 },
+  { id: "pedSupport",       label: "Apoyo pedagóg. (1–5)", fmt: (v) => v.toFixed(2), higherIsBetter: true,  axisMax: 5 },
   { id: "godspeed",         label: "Godspeed (overall)",  fmt: (v) => v.toFixed(2), higherIsBetter: true,  axisMax: 5 },
+  { id: "godspeedAnthropomorphism", label: "Godspeed: antropom.", fmt: (v) => v.toFixed(2), higherIsBetter: true, axisMax: 5 },
+  { id: "godspeedLikeability",      label: "Godspeed: agrado",    fmt: (v) => v.toFixed(2), higherIsBetter: true, axisMax: 5 },
+  { id: "godspeedIntelligence",     label: "Godspeed: intelig.",  fmt: (v) => v.toFixed(2), higherIsBetter: true, axisMax: 5 },
   { id: "panasPositive",    label: "PANAS afecto +",      fmt: (v) => v.toFixed(1), higherIsBetter: true },
   { id: "panasNegative",    label: "PANAS afecto −",      fmt: (v) => v.toFixed(1), higherIsBetter: false },
   { id: "resolutionRate",   label: "Tasa de resolución",  fmt: (v) => `${Math.round(v * 100)}%`, higherIsBetter: true, axisMax: 1 },

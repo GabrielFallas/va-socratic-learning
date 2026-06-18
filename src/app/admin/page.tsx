@@ -29,6 +29,7 @@ const STAT_ROWS: { id: string; label: string; fmt: (v: number) => string }[] = [
   { id: "avgThinkTimeMs",  label: "Think-time (ms)",        fmt: (v) => v.toFixed(0) },
   { id: "sus",             label: "SUS (0-100)",            fmt: (v) => v.toFixed(1) },
   { id: "nasaTlx",         label: "NASA-TLX (RTLX)",        fmt: (v) => v.toFixed(1) },
+  { id: "pedSupport",      label: "Apoyo pedagóg. (1-5)",   fmt: (v) => v.toFixed(2) },
   { id: "godspeed",        label: "Godspeed (overall)",     fmt: (v) => v.toFixed(2) },
   { id: "panasPositive",   label: "PANAS afecto +",         fmt: (v) => v.toFixed(1) },
   { id: "panasNegative",   label: "PANAS afecto −",         fmt: (v) => v.toFixed(1) },
@@ -91,6 +92,14 @@ export default function AdminPage() {
               style={{ background: "rgba(255,255,255,0.08)", border: "1px solid #444466" }}
             >
               ⬇ Exportar JSON
+            </a>
+            <a
+              href="/api/export?format=transcripts"
+              className="px-4 py-2 rounded-lg text-sm font-bold"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid #444466" }}
+              title="Conversaciones (JSONL) para codificación cualitativa"
+            >
+              ⬇ Transcripciones
             </a>
             <button
               onClick={load}

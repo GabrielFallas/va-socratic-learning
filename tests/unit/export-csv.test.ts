@@ -68,6 +68,17 @@ describe("sessionsToCsv", () => {
     expect(cols).toContain("p95TtftMs");
   });
 
+  it("emits a stable header-only CSV when there are no sessions", () => {
+    const csv = sessionsToCsv([]);
+    const lines = csv.split("\n").filter((l) => l.length > 0);
+    expect(lines.length).toBe(1); // header only, no data rows
+    const header = lines[0];
+    expect(header).toContain("sessionId");
+    expect(header).toContain("condition");
+    expect(header).toContain("task1_resolved");
+    expect(header).toContain("avgThinkTimeMs");
+  });
+
   it("no longer emits consent or pre-phase questionnaire columns", () => {
     const csv = sessionsToCsv([session]);
     const header = csv.trim().split("\n")[0];

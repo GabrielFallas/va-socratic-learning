@@ -165,6 +165,10 @@ function sessionMetrics(s: SessionLog): Record<string, number | undefined> {
     sus: q("sus", "total"),
     nasaTlx: q("nasa-tlx", "rawTlx"),
     godspeed: q("godspeed", "overall"),
+    godspeedAnthropomorphism: q("godspeed", "anthropomorphism"),
+    godspeedLikeability: q("godspeed", "likeability"),
+    godspeedIntelligence: q("godspeed", "intelligence"),
+    pedSupport: q("pedsupport", "total"),
     panasPositive: q("panas-sf", "positiveAffect"),
     panasNegative: q("panas-sf", "negativeAffect"),
   };
@@ -183,7 +187,9 @@ function summarise(values: number[]): StatCell {
 
 export const STAT_METRICS = [
   "resolutionRate", "turns", "avgTaskTimeSec", "avgTtftMs", "pctTtftUnder1500",
-  "avgThinkTimeMs", "sus", "nasaTlx", "godspeed", "panasPositive", "panasNegative",
+  "avgThinkTimeMs", "sus", "nasaTlx", "godspeed", "godspeedAnthropomorphism",
+  "godspeedLikeability", "godspeedIntelligence", "pedSupport",
+  "panasPositive", "panasNegative",
 ] as const;
 
 export type StatMetric = (typeof STAT_METRICS)[number];
@@ -212,11 +218,57 @@ function csvEscape(v: string | number): string {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+/**
+ * Conversation transcripts as JSONL (one message per line) for qualitative
+ * coding outside the app. Pilots are excluded by default so coders only see
+ * real participants. Each line: sessionId, condition, turn index, role,
+ * timestamp (ISO), inputMode, latencyMs, content.
+ */
+export function sessionsToTranscriptJsonl(
+  sessions: SessionLog[],
+  { includePilots = false }: { includePilots?: boolean } = {},
+): string {
+  const pool = includePilots ? sessions : sessions.filter((s) => !isPilot(s.sessionId));
+  const lines: string[] = [];
+  for (const s of pool) {
+    s.messages.forEach((m, i) => {
+      lines.push(
+        JSON.stringify({
+          sessionId: s.sessionId,
+          condition: s.condition,
+          turn: i,
+          role: m.role,
+          timestamp: iso(m.timestamp),
+          inputMode: m.inputMode ?? "",
+          latencyMs: m.latencyMs ?? "",
+          content: m.content,
+        }),
+      );
+    });
+  }
+  return lines.join("\n") + (lines.length ? "\n" : "");
+}
+
+/** Deterministic base columns (everything except questionnaire scores, which
+ *  vary by what each participant completed). Derived from an empty skeleton
+ *  session so the header can never drift from `sessionRow`'s real output — used
+ *  to emit a stable header even when no sessions exist yet (so a facilitator who
+ *  exports before collecting data still gets a valid, header-only CSV). */
+function baseColumns(): string[] {
+  const skeleton: SessionLog = {
+    sessionId: "", condition: "A", startTime: 0, messages: [],
+    taskResults: [], questionnaires: {},
+  } as unknown as SessionLog;
+  return Object.keys(sessionRow(skeleton));
+}
+
 export function sessionsToCsv(sessions: SessionLog[]): string {
   const rows = sessions.map(sessionRow);
   // Union of all columns (questionnaire columns vary by what was completed).
-  const cols: string[] = [];
-  const seen = new Set<string>();
+  // Seed with the deterministic base columns so an empty export is still a
+  // valid header-only CSV rather than a blank line.
+  const cols: string[] = [...baseColumns()];
+  const seen = new Set<string>(cols);
   for (const r of rows) {
     for (const k of Object.keys(r)) {
       if (!seen.has(k)) {

@@ -101,7 +101,12 @@ conversacionales corporizados, evidenciando efectos positivos de la presencia so
 resultados heterog\'eneos seg\'un la tarea. Trabajos en realidad virtual e interacci\'on
 multimodal~\cite{elhajji2025architecture,yang2025embodied} sugieren que la corporizaci\'on
 puede mejorar el aprendizaje de programaci\'on, aunque advierten sobre la carga cognitiva
-adicional y el riesgo del Valle Inquietante~\cite{mori1970uncanny}.
+adicional y el riesgo del Valle Inquietante~\cite{mori1970uncanny}. Los meta-an\'alisis
+recientes matizan el panorama: los agentes pedag\'ogicos producen un efecto positivo
+peque\~no sobre el aprendizaje~\cite{xu2026educationalagents} y solo reducen ligeramente la
+carga cognitiva, llegando incluso a \emph{aumentarla} en materiales complejos o sesiones
+prolongadas~\cite{li2025cognitiveload}; un punto especialmente relevante para una tarea
+cognitivamente densa como la depuraci\'on de c\'odigo.
 
 \subsection{Brecha y posicionamiento}
 La literatura aborda por separado (a) la calidad socr\'atica del di\'alogo y (b) el efecto de la
@@ -210,7 +215,18 @@ La Tabla~\ref{tab:instruments} resume la bater\'ia. Las medidas de auto-reporte 
 administradas una sola vez al final) se complementan con m\'etricas conductuales capturadas
 autom\'aticamente del flujo de mensajes, sin interrumpir al participante: latencia
 (\emph{time-to-first-token} medio y percentil 95), turnos, tiempo por tarea, \emph{think-time}
-entre turnos, verbosidad (caracteres/palabras), uso de voz vs.\ teclado y anillos.
+entre turnos, verbosidad (caracteres/palabras), uso de voz vs.\ teclado y anillos. Esta
+combinaci\'on es deliberada: las medidas de auto-reporte y las conductuales suelen correlacionar
+d\'ebilmente~\cite{dang2020selfreport}, por lo que ante una muestra peque\~na se prioriza la
+evidencia conductual y un an\'alisis cualitativo de las conversaciones (codificaci\'on tem\'atica)
+sobre los puntajes de cuestionarios.
+
+\paragraph{Verificaci\'on de la manipulaci\'on}
+La asignaci\'on de condici\'on se aplica en el servidor y determina de forma determinista la
+interfaz: la Condici\'on~A habilita el avatar Kaplay, la voz Piper/STT y la gamificaci\'on por
+anillos, mientras que la Condici\'on~B las elimina por completo; el \emph{texto} del tutor es
+id\'entico en ambas. As\'i, cualquier diferencia observada es atribuible al \emph{embodiment} y
+no al contenido del tutor.
 
 \begin{table}[t]
   \caption{Bater\'ia de instrumentos (dise\~no \emph{post-only}).}
@@ -223,6 +239,7 @@ entre turnos, verbosidad (caracteres/palabras), uso de voz vs.\ teclado y anillo
     \midrule
     Demogr\'aficos & Perfil de la muestra & --- \\
     Godspeed~\cite{bartneck2009godspeed} & Antropomorfismo, agrado & RQ1 \\
+    Apoyo pedag\'ogico (5 \'items)~\cite{essel2024aimediated} & Apoyo socr\'atico percibido & RQ1 \\
     SUS~\cite{brooke1996sus} & Usabilidad & RQ1 \\
     NASA-TLX~\cite{hart1988nasatlx} & Carga cognitiva (RTLX) & RQ3 \\
     PANAS-SF~\cite{thompson2007ipanas} & Afecto post-sesi\'on & RQ3 \\
@@ -240,10 +257,13 @@ an\'onimo. (2) Resuelve la Tarea~1 (10~min) interactuando por texto (ambas condi
 env\'ia mensajes proactivos tras 60~s de inactividad, sin entregar c\'odigo.
 
 \subsection{Recolecci\'on de datos}
-Cada sesi\'on se persiste bajo un identificador an\'onimo (\texttt{P-001}, \dots), sin nombre ni
-correo. El sistema exporta un CSV con una fila por participante (ver el diccionario de datos del
-repositorio) y un JSON de fidelidad completa. El an\'alisis descriptivo por condici\'on est\'a
-disponible en vivo en el panel del facilitador.
+Cada sesi\'on se persiste en una base de datos SQLite local bajo un identificador an\'onimo
+(\texttt{P-001}, \dots), sin nombre ni correo. El sistema exporta un CSV con una fila por
+participante (ver el diccionario de datos del repositorio), un JSON de fidelidad completa y las
+transcripciones de conversaci\'on en JSONL para la codificaci\'on cualitativa. El an\'alisis
+descriptivo por condici\'on est\'a disponible en vivo en el panel del facilitador; el an\'alisis
+inferencial (Mann--Whitney $U$, $\delta$ de Cliff, $d$ de Cohen) se ejecuta sobre el CSV con el
+script de an\'alisis incluido en el repositorio.
 
 %--------------------------------------------------------------
 \section{Resultados}
@@ -267,6 +287,7 @@ La Tabla~\ref{tab:results} resume las m\'etricas principales.
     \% latencia $<1.5$\,s & \todo{} & \todo{} \\
     \emph{Think-time} (ms) & \todo{} & \todo{} \\
     SUS (0--100) & \todo{} & \todo{} \\
+    Apoyo pedag\'ogico (1--5) & \todo{} & \todo{} \\
     NASA-TLX (RTLX) & \todo{} & \todo{} \\
     Godspeed (global) & \todo{} & \todo{} \\
     PANAS afecto $+$ & \todo{} & \todo{} \\
@@ -289,10 +310,18 @@ hallazgos se contrastan con la literatura revisada: la heterogeneidad reportada 
 Sonlu et al.~\cite{sonlu2024scoping} y los efectos de presencia social~\cite{elhajji2025architecture}.
 La latencia (RQ4) se eval\'ua contra el objetivo de 1.5~s usando el percentil 95.
 
+Dado que la tarea de depuraci\'on es cognitivamente densa, se contrasta expl\'icitamente la
+hip\'otesis de que la corporizaci\'on incremente la carga (NASA-TLX) en lugar de reducirla,
+en l\'inea con el meta-an\'alisis de~\cite{li2025cognitiveload}. Cuando los cuestionarios no
+alcancen significancia ---resultado esperable con $N$ peque\~no y dada la d\'ebil correlaci\'on
+auto-reporte/conducta~\cite{dang2020selfreport}--- la interpretaci\'on se apoya en las m\'etricas
+conductuales y en la codificaci\'on cualitativa de las conversaciones.
+
 \paragraph{Limitaciones}
 Tama\~no muestral y reclutamiento por conveniencia; medici\'on de afecto \emph{post-only} (sin
-l\'inea base, por lo que no se estima cambio intra-sujeto); posible efecto de novedad del avatar;
-dependencia del hardware local para la latencia. \todo{ampliar seg\'un los datos obtenidos}.
+l\'inea base, por lo que no se estima cambio intra-sujeto); posible efecto de novedad del avatar
+que infla la valoraci\'on inicial de la Condici\'on~A; dependencia del hardware local para la
+latencia. \todo{ampliar seg\'un los datos obtenidos}.
 
 %--------------------------------------------------------------
 \section{Conclusiones y Trabajo Futuro}

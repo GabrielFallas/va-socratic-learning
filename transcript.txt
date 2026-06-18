@@ -1,0 +1,619 @@
+SPK_1
+0:00
+Evaluation List que es para medir el soporte social percibido de los participantes, la RQ que es para las percepciones del usuario y el BANAS para evaluar el afecto o los estados de ánimo.
+
+SPK_1
+0:13
+Y también guardamos las conversaciones que tuvieron los participantes para analizarlas posteriormente y realizar una codificación cualitativa con el fin de descubrir los temas e intenciones en las conversaciones.
+
+SPK_1
+0:29
+Ahora, en cuanto al ente virtual que nosotros utilizamos, lo desarrollamos nosotros mismos usando Unity y WebGL e incluimos la sincronización de labios, animaciones de respiración y parpadeo para mejorar el realismo y lo desplegamos en la web.
+
+SPK_1
+0:43
+En cuanto a lo que viene a ser nuestra arquitectura del procesamiento del diálogo, utilizamos lo que era Whisper para transcribir el mensaje de los participantes a texto, luego enviamos ese mensaje a una instancia de ChatGPT para generar la respuesta de la gente y finalmente la convertimos en respuesta a la gente, la convertimos de vuelta a audio con la API de Text to Speech de OpenAI.
+
+SPK_1
+1:09
+En lo que viene a ser el prompt de la gente, lo diseñamos para actuar como un compañero amigable de apoyo, utilizando también indicadores de memoria limitada y nuestro sistema de memoria consistía en recordar eventos y conversaciones previas para luego hacer referencia a estos eventos en conversaciones futuras.
+
+SPK_1
+1:30
+Ahora, en lo que viene a ser nuestro procedimiento, inicialmente tuvimos una sesión de introducción por con los participantes para obtener primero el consentimiento para el estudio, aplicar las encuestas de línea base previa, la primera interacción y simplemente para demostrar cómo utilizar el agente.
+
+SPK_1
+1:48
+Luego les proporcionamos los credenciales de inicio de sesión y les indicamos que hablaran con el agente al menos una vez al día antes de la primera interacción.
+
+SPK_1
+1:57
+Aplicamos el cuestionario para medir la soledad para obtener una línea base, así como el cuestionario del soporte interpersonal percibido y después del día 1 llenaron el AERQ y el PANAS, después del día 4 llenaron el ARQ y después del día 7 de nuevo el ARQ, el PANAS y el cuestionario para la soledad para realizar comparaciones posteriores a la interacción.
+
+SPK_1
+2:24
+Y por último tuvimos una entrevista de salida con algunas preguntas sobre su experiencia y sus percepciones.
+
+SPK_1
+2:33
+OK, ahora lo que viene a ser los resultados, contrario a nuestras expectativas, nosotros no vimos ningún cambio significativo en la soledad entre la etapa previa y posterior a la interacción.
+
+SPK_1
+2:46
+Y esto fue sorprendente para nosotros, dado que el trabajo previo ha demostrado que estos agentes sí ayudan en la soledad.
+
+SPK_1
+2:53
+Sin embargo, creemos que una de las razones probable por la que sucedió esto es que nuestros participantes no se sentían solos.
+
+SPK_1
+2:59
+Para empezar, en nuestro cuestionario que medía el apoyo social percibido de las personas, aproximadamente el 98% de nuestros participantes se encontraban en las categorías de apoyo social, media y alta.
+
+SPK_1
+3:13
+Por lo tanto, no estaban solos o no sentían soledad al inicio y tenían un buen círculo social de apoyo, entonces no había mucho margen para mejor.
+
+SPK_1
+3:25
+Ahora bien, sí vimos tres cambios en nuestros resultados en lo que viene a ser el afecto positivo, la nerviosidad y la disposición a interactuar con el agente.
+
+SPK_1
+3:33
+Las tres disminuyendo a lo largo de los siete días.
+
+SPK_1
+3:38
+Aquí, la imagen que obtuvimos de esto es que los participantes estaban menos entusiasmados de hablar con el agente a medida que pasaba la semana, probablemente debido a que el efecto de novedad desaparecía.
+
+SPK_1
+3:49
+Y también estaban menos nerviosos al hablar con el agente a medida que las interacciones se volvían familiares.
+
+SPK_1
+3:55
+Y también vimos una caída en la disposición a seguir interactuando con el agente.
+
+SPK_1
+3:58
+Pero vamos a conectar eso con los patrones de interacción más adelante.
+
+SPK_1
+4:05
+Ahora, en lo que viene a ser los patrones de participación, también vimos una clara disminución tanto en la frecuencia de los mensajes como en el tipo de interacción.
+
+SPK_1
+4:15
+En promedio, los participantes comenzaron con alrededor de 12 mensajes en el día 1, disminuyendo hasta 8 mensajes para el día 7.
+
+SPK_1
+4:24
+Y de la misma manera, sus conversaciones Duraban alrededor de 10 minutos en el día 1 y bajaron hasta sólo 5 minutos para el día 7.
+
+SPK_1
+4:32
+Y esta disminución de los mensajes y el tiempo dedicado a la gente también refleja lo que vimos en los datos de afecto en la anterior diapositiva.
+
+SPK_1
+4:42
+Y una de nuestras explicaciones probables para esto es que los usuarios se familiarizaron con la forma de la que la gente conversaba.
+
+SPK_1
+4:48
+Y posiblemente a medida que el efecto de novedad desaparecía, esto hizo que los participantes se interesaran menos en hablar con él.
+
+SPK_1
+4:56
+Y esto es consistente con trabajo previo también que mostraba una reducción en la disposición a interactuar una vez que los usuarios se dan cuenta de las capacidades y limitaciones del agente.
+
+SPK_1
+5:08
+Ahora, como se mencionó anteriormente, nosotros también realizamos una codificación cualitativa de las conversaciones que tuvieron los participantes y descubrimos que los usuarios utilizaron el agente principalmente para hablar sobre cosas que disfrutan, es decir, pasatiempos, gustos y aficiones, entre otros.
+
+SPK_1
+5:26
+También para hablar sobre eventos pasados, como qué tal estuvo el trabajo qué hicieron el fin de semana, o tal vez compartir detalles sobre un viaje pasado, y para discutir eventos futuros, como planes que tenían para el fin de semana, tal vez futuros viajes, entre otras cosas.
+
+SPK_1
+5:42
+Sin embargo, también hablaron con la gente sobre temas como su vida social, la expresión de emociones y sentimientos, y la búsqueda de apoyo.
+
+SPK_1
+5:50
+Concepto Entonces, vimos una gran variedad de temas, pero las cosas que disfrutan, eventos pasados y eventos futuros fueron los más comunes.
+
+SPK_1
+6:01
+Ahora, en lo que viene a ser la dinámica de las conversaciones, vimos que los participantes de hecho se sintieron generalmente cómodos al compartir pensamientos personales y emociones, y sus conversaciones a menudo incluyeron temas, como ya mencionamos, de cosas que disfrutan, experiencias pasadas y planes futuros.
+
+SPK_1
+6:18
+Pero no sólo eso, sino que también vimos a los participantes compartiendo aspectos personales, expresando emociones y sentimientos, y buscando consejos y apoyos.
+
+SPK_1
+6:27
+Por lo tanto, no sólo utilizaron a la gente como una herramienta, sino que también tuvieron conversaciones que habrían podido tener con otra persona en la vida real, demostrando cómo la gente lo utilizó para reflexión personal a medida que lo iba conociendo.
+
+SPK_1
+6:42
+Esto se ve respaldado por algunas de las respuestas de los participantes, como ven Noah, por ejemplo, lo describieron como amigable, sin prejuicios y fácil de hablar, mientras otro, por ejemplo, el participante mencionó que se sintió como un espacio para pensar en voz alta sin ser juzgado.
+
+SPK_1
+7:02
+A pesar de eso, no todo fue positivo, ya que los participantes también señalaron algunas de las limitaciones.
+
+SPK_1
+7:08
+Por ejemplo, una de ellas fue que Noa no podía expresar preferencias ni opiniones propias, y de hecho solía enfatizar su artificialidad en las respuestas.
+
+SPK_1
+7:17
+Vimos que eso es algo que los participantes sí querían de la gente, querían que comparta más sobre él, y era frustrante cuando uno lo podía hacer.
+
+SPK_1
+7:24
+Podemos ver un ejemplo de eso en la diapositiva.
+
+SPK_1
+7:28
+Otra de las limitaciones fue alrededor del sistema de memoria.
+
+SPK_1
+7:33
+Como mencionamos, era un poco básico y consistía en recordar eventos de conversaciones previas para luego referenciar en conversaciones futuras, pero no tenía memoria sobre el contexto alrededor del evento.
+
+SPK_1
+7:45
+Por ejemplo, podrías recordar un evento, como un partido de fútbol, pero no podría recordar detalles como con quién era el partido o si eras parte de un torneo, por ejemplo.
+
+SPK_1
+7:57
+Y la última estuve relacionada con un estilo de conversación un poco interrogatorio o tipo entrevista, que la gente muchas veces tendía a hacer preguntas en cada respuesta del participante, lo que hacía que los intercambios se sientan un poco menos naturales.
+
+SPK_1
+8:13
+Sin embargo, a pesar de esas limitaciones, muchas de esas conversaciones sí fueron ricas en contenido emocional y de carácter relacional en lugar de transaccional.
+
+SPK_1
+8:22
+Y los participantes sí utilizaron a NOA para procesar pensamientos y sentimientos, incluso sin una reciprocidad real.
+
+SPK_1
+8:30
+Así que, para resumir lo que aprendimos de este primer estudio, destacaron cuatro hallazgos.
+
+SPK_1
+8:35
+El primero es que los usuarios si quieren reciprocidad, buscan un agente que pueda compartir sus propias experiencias, opiniones, preferencias, y cuando no se puede, resulta notorio y frustrante.
+
+SPK_1
+8:47
+Lo segundo es que los temas relacionales predominaron en todos los participantes.
+
+SPK_1
+8:51
+Como ya se mencionó, utilizaron ANOVA principalmente para hablar sobre cosas que disfrutan, eventos pasados y planes futuros.
+
+SPK_1
+8:59
+El tercero es que la memoria fue funcional para la conexión.
+
+SPK_1
+9:03
+Cuando la gente recordaba con éxito algo, se sentía más como un compañero de verdad.
+
+SPK_1
+9:08
+Cuando no podía, rompía esa sensación de continuidad.
+
+SPK_1
+9:13
+Y cuarto es que las interacciones a menudo se sintieron unilaterales o tipo entrevista, y lo que dificultó mantener una interacción que fluyera de manera natural.
+
+SPK_1
+9:23
+Y estos cuatro hallazgos principales son los que motivaron directamente la dirección de nuestros siguientes dos estudios.
+
+SPK_1
+9:35
+Así que ahora vamos a pasar a nuestro segundo estudio, llamado El impacto de los niveles de autodivulgación en la percepción del usuario.
+
+SPK_1
+9:44
+La pregunta que queríamos responder con este estudio era qué tanto debería compartir realmente un agente virtual social sobre sí mismo.
+
+SPK_1
+9:52
+Este estudio estuvo directamente motivado por uno de esos hallazgos que vimos en la anterior diapositiva, que era que los usuarios quieren reciprocidad, y la incapacidad de la gente para autodivulgar se estaba interponiendo en el camino de eso.
+
+SPK_1
+10:06
+Ahora, por previas investigaciones en relaciones humanas, también sabemos que la autodivulgación es un mecanismo clave para construir confianza, empatía y cercanía relacional.
+
+SPK_1
+10:16
+Por lo tanto, tiene todo el sentido del mundo incorporar eso en el diseño de los agentes virtuales sociales.
+
+SPK_1
+10:22
+Sin embargo, trasladar la autodivulgación a un agente virtual social es complicado, ya que si la divulgación es muy poca, la gente se siente impersonal.
+
+SPK_1
+10:33
+Si es demasiada, empieza a verse poco auténtico.
+
+SPK_1
+10:36
+Entonces, el desafío era encontrar ese punto medio para este estudio.
+
+SPK_1
+10:41
+Por lo tanto, el objetivo de este estudio fue examinar cómo los diferentes grados de autodivulgación en las respuestas de un agente conversacional afectan el nivel de interacción del usuario y la calidad de la interacción.
+
+SPK_1
+10:54
+Esto nos planteó dos preguntas.
+
+SPK_1
+10:56
+La primera es cómo los diferentes niveles de autodivulgación de la gente afectan a los sentimientos de confianza e idoneidad por parte de los usuarios.
+
+SPK_1
+11:05
+Y la segunda pregunta es si una autodivulgación moderada fomenta niveles más altos de autodivulación recíproca por parte del usuario.
+
+SPK_1
+11:15
+Y con esas preguntas en mente, vamos a ver el estudio que diseñamos.
+
+SPK_1
+11:20
+Para este estudio utilizamos un diseño experimental intrasujeto con 36 participantes, lo cual se determinó a través de un análisis de poder estadístico.
+
+SPK_1
+11:29
+Como pueden ver en la diapositiva, tuvimos tres sin autodivulgación, autodivulgación moderada y autodivulgación alta.
+
+SPK_1
+11:38
+Cada participante pasó por las tres condiciones, una por día durante los tres días.
+
+SPK_1
+11:43
+Para controlar para los efectos de orden, utilizamos un diseño completamente contrabalanceado.
+
+SPK_1
+11:48
+Por lo tanto, los participantes fueron asignados a uno de los seis órdenes posibles de las condiciones, como pueden ver en la imagen de la derecha.
+
+SPK_1
+11:57
+Y los niveles de autodivulgación en sí se basaron en una escala de intimidad de 7 puntos basada en trabajo previo, lo que nos permitió variar de manera sistemática qué tan personales eran las respuestas del agente.
+
+SPK_1
+12:12
+En este estudio utilizamos el mismo agente del estudio anterior, que se llama NOVA.
+
+SPK_1
+12:17
+Sin embargo, actualizamos la arquitectura, una implementación completamente local posteada en la Universidad de Florida.
+
+SPK_1
+12:23
+En lugar de utilizar APIs externas, la participación fue remota y cada participante interactuó con el agente durante tres días consecutivos, experimentando una condición por día.
+
+SPK_1
+12:35
+Y un aspecto importante de este estudio es que las sesiones fueron independientes, sin transferencia de memoria entre los tres días.
+
+SPK_1
+12:41
+Y esto fue una decisión que tomamos para evitar que una condición influyera en la siguiente después de cada interacción.
+
+SPK_1
+12:48
+Similar al anterior estudio, llenaron unos cuestionarios, incluidos el ARQ, el PANAS y esta vez el User Engagement Scale.
+
+SPK_1
+12:56
+Y las conversaciones de la gente igual se guardaron para su posterior análisis.
+
+SPK_1
+13:01
+Ahora, antes de examinar los resultados, también realizamos una verificación de la manipulación experimental para comprobar que nuestros prompts hayan creado con éxito las tres condiciones de autodivulgación.
+
+SPK_1
+13:13
+Y de hecho, confirmamos que las tres condiciones se establecieron exitosamente.
+
+SPK_1
+13:18
+Y para el análisis cualitativo adoptamos dos enfoques.
+
+SPK_1
+13:22
+Primero, realizamos un diagrama de afinidad sobre las respuestas de los cuestionarios.
+
+SPK_1
+13:26
+Y segundo, llevamos a cabo una codificación cualitativa de las conversaciones, donde codificamos todos los mensajes de la gente y del usuario para determinar si cada mensaje constituía o no a una autodivulgación y de ser así, qué nivel de intimidad presentaba.
+
+SPK_1
+13:48
+Entonces, pasando a los resultados de este estudio, cuando analizamos lo que nos indicaron los cuestionarios, los participantes no mostraron diferencias significativas entre las condiciones en cuanto a sus percepciones de la gente, los niveles de afecto o el nivel de interacción.
+
+SPK_1
+14:05
+Como pueden observar en los gráficos de la izquierda y el del centro, las puntuaciones son prácticamente idénticas en las tres condiciones.
+
+SPK_1
+14:13
+Sin embargo, cuando analizamos directamente las conversaciones, encontramos que los participantes intercambiaron significativamente más mensajes en la condición sin autodivulgación en comparación a las condiciones moderada y alta.
+
+SPK_1
+14:26
+Por lo tanto, a nivel conductual vimos que algo era diferente, simplemente los cuestionarios no lo estaban capturando.
+
+SPK_1
+14:35
+Y como veremos en la si próximas diapositivas, los datos cualitativos lo hicieron más evidente.
+
+SPK_1
+14:45
+Ahora bien, al analizar si los usuarios realmente correspondieron a la autodivulgación de la gente, lo que encontramos fue que la frecuencia de divulgación no difirió significativamente entre las condiciones.
+
+SPK_1
+14:58
+Qué es lo que esto quiere decir es que los usuarios compartieron información personal aproximadamente la misma cantidad de veces, independiente de lo que hiciera la gente.
+
+SPK_1
+15:08
+Sin embargo, la profundidad de la autodivulgación sí varió.
+
+SPK_1
+15:11
+A medida que la gente compartía información de manera más íntima, los usuarios igualaban esa profundidad.
+
+SPK_1
+15:18
+Podemos observar que las divulgaciones de alta intimidad por parte de los usuarios se cuadruplicaron, pasando de un 6% en la condición sin autodivulgación a un 23% en la condición de alta divulgación.
+
+SPK_1
+15:32
+Y al mismo tiempo, las revelaciones de baja intimidad disminuyeron.
+
+SPK_1
+15:36
+Por lo tanto, los usuarios no estaban compartiendo información con mayor frecuencia, sino que lo hacían de manera más profunda, guiados por el comportamiento de la gente.
+
+SPK_1
+15:48
+Ahora, cuando analizamos la reciprocidad dentro de la misma sesión, es decir, qué tanto replicaban los usuarios el comportamiento de divulgación de la gente en una misma conversación, aquí surgió algo interesante, y lo que pasa es que la condición moderada mostró la reciprocidad más fuerte y consistente con una correlación de entre los conteos de divulgación de la gente y del usuario.
+
+SPK_1
+16:18
+La condición alta, aquí es donde se pone un poco interesante, ya que en esa condición los usuarios sí compartieron de manera más profunda en general, como vimos en la diapositiva anterior, pero la reciprocidad fue más débil y más variable.
+
+SPK_1
+16:31
+Lo que eso significa es que la alta divulgación impulsó a los usuarios a abrirse más, pero no de una manera consistente o predecible, y de hecho, algunos usuarios respondieron al exceso de información de la gente dejando de compartir en lugar de igualar a la gente.
+
+SPK_1
+16:49
+La condición moderada, por otro lado, generó una dinámica más estable y equilibrada, donde los usuarios igualaron de manera más constante lo que la gente estaba haciendo.
+
+SPK_1
+17:01
+Ahora, analizando lo que los participantes realmente valoraron y criticaron a lo largo de las tres condiciones En la condición de sin autodivulgación, los participantes apreciaron la amplitud de conocimiento de la gente y la fluidez que tenía al conversar, era un agente competente y educado.
+
+SPK_1
+17:20
+Sin embargo, también lo encontraron un poco frío y con falta de personalidad, y varios señalaron explícitamente que se negaba a compartir cualquier cosa sobre sí mismo, lo que hacía que se sintiera como una entrevista, que es lo mismo que observamos en el primer estudio.
+
+SPK_1
+17:35
+En la condición moderada, la apreciación de los participantes se desplazó hacia el aspecto relacional, describieron a la gente como más humano, se sintieron escuchados, experimentaron una sensación de seguridad.
+
+SPK_1
+17:48
+La principal crítica de esta condición fue largo de las respuestas, ya que los mensajes de la gente a veces se sentían demasiado largos para una conversación natural, muy probablemente debido a la introducción de la autodivulgación.
+
+SPK_1
+18:02
+Y en la condición alta, los participantes valoraron el apoyo emocional y el intercambio recíproco de la agencia, pero también sintieron que la gente empatizaba en exceso y compartía anécdotas personales en cada respuesta.
+
+SPK_1
+18:15
+Y muchos cuestionaron por completo que lo que la gente revelaba sea posible.
+
+SPK_1
+18:23
+Y como pueden ver en el diagrama, esto se plasma en un espectro que va desde una conversación un poco desigual, pasa por un compañero equilibrado y llega al exceso de la autodipulación.
+
+SPK_1
+18:38
+Y por último, uno de los hallazgos más interesantes de este estudio es lo que llamamos la paradoja de la autenticidad.
+
+SPK_1
+18:44
+Podría esperarse que cuanto más comparte un agente virtual, más auténtico se siente.
+
+SPK_1
+18:49
+Pero eso no fue lo que encontramos en este estudio.
+
+SPK_1
+18:52
+Cuando les preguntamos a los participantes qué día sintieron la interacción más auténtica, el 47 eligió la condición moderada, comparado con 28 para la nula y 25 para la alta.
+
+SPK_1
+19:05
+Y lo que esto nos indica es que mayor divulgación no se traduce en mayor autenticidad.
+
+SPK_1
+19:10
+Y cuando la gente compartía información de manera demasiado profunda o íntima, los usuarios identificaban la fabricación o la simulación.
+
+SPK_1
+19:19
+Y ese conocimiento rompía la simulación que nosotros queríamos construir.
+
+SPK_1
+19:25
+La autodivulgación moderada, en cambio, logró que la gente se sintiera como un verdadero compañero o amigo sin cruzar la línea hacia un terreno de incredibilidad.
+
+SPK_1
+19:35
+Por lo tanto, el el desafío del diseño no consiste en maximizar la autodivulgación, sino en calibrarla.
+
+SPK_1
+19:44
+Así que, para resumir lo que aprendimos de este segundo estudio, tres hallazgos claves.
+
+SPK_1
+19:49
+El primero es que los cuestionarios no siempre capturan todo.
+
+SPK_1
+19:53
+Los cuestionarios en este estudio no mostraron diferencias significativas entre las condiciones.
+
+SPK_1
+19:58
+Sin embargo, los datos conductuales y los cualitativos nos dieron otra historia, una que habríamos pasado por alto si hubiéramos copiado únicamente en los cuestionarios.
+
+SPK_1
+20:10
+Segundo es que la autodivulgación moderada destacó como el punto de equilibrio ideal.
+
+SPK_1
+20:15
+Los usuarios respondieron de la manera más abierta y auténtica cuando el agente compartió un nivel moderado, lo que produjo patrones de reciprocidad más fuertes y calificaciones de autenticidad más altas.
+
+SPK_1
+20:27
+Y el tercero es la parada de la autenticidad, que es el hallazgo que nos muestra que autodivulgación más profunda puede, de hecho, dejar al descubierto la simulación que pretendía ocultar.
+
+SPK_1
+20:39
+Y estos resultados, combinados con lo que aprendimos en el primer estudio, preparan ahora el escenario para el tercer estudio.
+
+SPK_1
+20:48
+El tercer estudio se llama Efectos de múltiples agentes sociales en la experiencia del usuario y la carga mental.
+
+SPK_1
+20:59
+Para este estudio.
+
+SPK_1
+21:00
+Este fue motivado por la segunda limitación que nosotros identificamos en el primer estudio, la cual era que las interacciones se sentían unilaterales y un poco tipo entrevista.
+
+SPK_1
+21:12
+Queríamos explorar si la introducción de múltiples agentes con diferentes roles sociales podría generar una experiencia de conversación más dinámica y equilibrada.
+
+SPK_1
+21:21
+Y cuando pensamos en cómo funcionan realmente las interacciones sociales en el mundo real, la verdad es que no siempre ocurren uno a uno.
+
+SPK_1
+21:30
+Nosotros interactuamos en grupos varias personas que aportan diferentes perspectivas.
+
+SPK_1
+21:36
+Y de hecho, trabajo previo sobre las interacciones grupales también ha demostrado que éstas brindan perspectivas diversas, apoyan el bienestar emocional y fomentan el involucramiento cognitivo de formas que las interacciones de uno a uno a veces no logran.
+
+SPK_1
+21:52
+Por lo tanto, esto planteó la pregunta de qué pasa si en lugar de un solo agente virtual social, le damos a los usuarios un grupo de agentes virtuales sociales.
+
+SPK_1
+22:01
+Y esto es lo que este estudio hizo explorar.
+
+SPK_1
+22:06
+El objetivo de este estudio fue examinar cómo el interactuar con múltiples agentes agentes virtuales sociales en comparación con un solo agente, afecta la experiencia de usuario y la carga mental.
+
+SPK_1
+22:18
+Y esto nos dio las dos preguntas de investigación.
+
+SPK_1
+22:20
+La primera es ¿Cuál es el impacto de las interacciones con agentes virtuales basadas en grupos sobre la confianza, la idoneidad y el nivel de interacción del usuario en comparación a las interacciones uno a uno?
+
+SPK_1
+22:33
+Y la segunda cuestión a si la interacción con múltiples agentes incrementa la carga del trabajo mental experimentada por los participantes.
+
+SPK_1
+22:43
+Para este estudio utilizamos un diseño de nuevo intersujeto con 60 participantes, determinado de nuevo a través de un análisis de poder estadístico, como pueden ver en la diapositiva.
+
+SPK_1
+22:54
+Y para este tuvimos dos condiciones.
+
+SPK_1
+22:57
+La primera condición era el agente único, que es el mismo agente que utilizamos en el estudio número 2.
+
+SPK_1
+23:04
+Y la segunda era múltiples agentes, que contaba con tres agentes y cada participante pasó por ambas.
+
+SPK_1
+23:11
+Este fue un estudio presencial realizado en nuestro laboratorio, donde los participantes interactuaron con el sistema en una computadora dedicada en lugar de remotamente.
+
+SPK_1
+23:20
+Y después de cada condición similar a los anteriores, completaron unos cuestionarios, incluyendo el ARQ, el PANAS, el User Engagement Scale y esta vez añadimos el NASA TLX para medir la carga de trabajo mental en la condición de múltiples agentes.
+
+SPK_1
+23:36
+Cada uno de los tres agentes tenía un rol diferenciado, diseñado para replicar la dinámica de un grupo natural.
+
+SPK_1
+23:44
+Teníamos a NOVA, que era el facilitador estaba encargado de mantener la conversación organizada y bajo control.
+
+SPK_1
+23:50
+Teníamos a Ángel, que era el desafiante, que estaba encargado de plantear preguntas y ofrecer nuevos puntos de vista alternativos y teníamos a Sol, que era el agente de apoyo, que estaba encargado de brindar respuestas empáticas y de validación.
+
+SPK_1
+24:07
+Para guiar la conversación y reducir la varianza que había entre participantes, diseñamos dos temas de conversación que estaban extraídos de los temas de conversación más comunes que identificamos en el estudio 1.
+
+SPK_1
+24:20
+Uno de ellos era centrado en experiencias pasadas y el otro en metas futuras, y cada participante pasó por ambos temas, uno por condición.
+
+SPK_1
+24:28
+También tuvimos una tarea de distracción entre las dos condiciones, que era un juego de encontrar un objeto oculto, y esto era para crear una separación cognitiva antes de pasar a la segunda condición.
+
+SPK_1
+24:41
+Y en cuanto a cómo decidían los cuándo hablar, ya que esto es bastante diferente de cuando sólo un agente donde habla uno responde el otro, implementamos un mecanismo de toma de turnos con dos componentes.
+
+SPK_1
+24:55
+Uno era la autoselección y el otro era la selección del siguiente hablante por parte del hablante actual.
+
+SPK_1
+25:05
+Para explicar cómo funciona el mecanismo de toma de turnos, un poquito mejor a la izquierda, tenemos el mecanismo de autoselección que pueden ver, recibe un mensaje del usuario y en ese momento los tres agentes pasan simultáneamente por un proceso de pensamiento en el que cada uno genera una propuesta de contribución y una puntuación de importancia del 0 al 9, la cual refleja qué tan relevante y urgente sería su respuesta dado su rol y el contexto de la conversación.
+
+SPK_1
+25:35
+El agente con la puntuación más alta responde al mensaje y si ningún agente decide hablar durante este proceso del sistema, entonces simplemente espera a que llegue el sistema mensaje del usuario.
+
+SPK_1
+25:49
+El segundo mecanismo es el del hablante actual selecciona el siguiente y esto funciona que cuando llega un mensaje que se dirige directamente a un agente.

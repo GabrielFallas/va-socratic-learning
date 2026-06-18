@@ -74,6 +74,7 @@ Formato de columna: `q_<instrumento>_<fase>_<score>`. Las fases sin distinción 
 | `q_godspeed_x_likeability` | 1–5 | Agrado. |
 | `q_godspeed_x_intelligence` | 1–5 | Inteligencia percibida. |
 | `q_godspeed_x_overall` | 1–5 | Media global Godspeed. |
+| `q_pedsupport_post_total` | 1–5 | Apoyo pedagógico percibido (media de 5 ítems, adaptado de Essel 2024) (RQ1). |
 | `q_sus_x_total` | 0–100 | System Usability Scale. |
 | `q_nasa-tlx_x_rawTlx` | 0–100 | Carga cognitiva (RTLX, media no ponderada) (RQ3). |
 | `q_panas-sf_post_positiveAffect` | 5–25 | Afecto positivo post-sesión (RQ3). |
@@ -82,3 +83,16 @@ Formato de columna: `q_<instrumento>_<fase>_<score>`. Las fases sin distinción 
 > Demográficos y preguntas cualitativas no generan columnas de puntaje (sus respuestas crudas
 > están en el export JSON). El panel `/admin` (`GET /api/session?stats=1`) resume media, DE y n
 > de las métricas principales por condición A/B.
+
+## Transcripciones para codificación cualitativa
+
+`GET /api/export?format=transcripts` produce **JSONL** (una línea por mensaje, solo
+participantes reales — los pilotos se excluyen) para análisis cualitativo externo. Campos por
+línea: `sessionId`, `condition`, `turn`, `role`, `timestamp`, `inputMode`, `latencyMs`,
+`content`. El esquema de codificación propuesto está en
+[`docs/06-coding-scheme.md`](06-coding-scheme.md).
+
+## Análisis inferencial
+
+`scripts/analyze.py <sessions.csv>` calcula descriptivos por condición y, si `scipy` está
+instalado, Mann-Whitney U + Cliff's delta + d de Cohen por métrica (alternativa: jamovi/R).

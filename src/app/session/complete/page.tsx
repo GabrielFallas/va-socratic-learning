@@ -23,23 +23,31 @@ interface SessionSummary {
 
 // ── Rank calculation (Sonic Runner style) ─────────────────────────
 function calcRank(summary: SessionSummary): { letter: string; color: string; label: string } {
-  const total    = summary.latencyUnder1500ms + summary.latencyOver1500ms;
-  const pct      = total > 0 ? (summary.latencyUnder1500ms / total) * 100 : 0;
-  const resolved = summary.taskResults.filter((t) => t.resolvedAutonomously).length;
-  const avgMs    = summary.avgLatencyMs;
+  const totalLatency = summary.latencyUnder1500ms + summary.latencyOver1500ms;
+  const pct          = totalLatency > 0 ? (summary.latencyUnder1500ms / totalLatency) * 100 : 0;
+  const tasks        = summary.taskResults.length;
+  const resolved     = summary.taskResults.filter((t) => t.resolvedAutonomously).length;
+  const resolvedFrac = tasks > 0 ? resolved / tasks : 0;
 
-  // Score: latency compliance + resolution bonus
-  let score = pct;
-  if (resolved >= 2) score += 30;
-  else if (resolved === 1) score += 15;
-  if (avgMs < 800) score += 10;
+  // Resolution is the PRIMARY signal — this is a tutoring study, so solving the
+  // task autonomously is the success criterion and must dominate the rank.
+  // Latency compliance is a secondary bonus that only applies when the
+  // participant actually conversed with the tutor; solving purely by editing
+  // code (no chat turns, hence no latency readings) must NOT be penalised.
+  let score = resolvedFrac * 60;                   // 0–60 (both tasks solved → 60)
+  if (totalLatency > 0) {
+    score += (pct / 100) * 30;                     // up to +30 for keeping TTFT < 1.5 s
+    if (summary.avgLatencyMs < 800) score += 10;   // speed bonus
+  } else {
+    score += 25;                                   // solved without needing tutor turns
+  }
 
-  if (score >= 120) return { letter: "S",  color: "#ffcc00", label: "¡SONIC SPEED!" };
-  if (score >= 100) return { letter: "A",  color: "#4caf50", label: "¡Excelente!" };
-  if (score >= 80)  return { letter: "B",  color: "#4da6ff", label: "Muy bien" };
-  if (score >= 60)  return { letter: "C",  color: "#ff8c00", label: "Bien" };
-  if (score >= 40)  return { letter: "D",  color: "#ff6600", label: "Regular" };
-  if (score >= 20)  return { letter: "E",  color: "#cc4444", label: "Intenta de nuevo" };
+  if (score >= 95) return { letter: "S",  color: "#ffcc00", label: "¡SONIC SPEED!" };
+  if (score >= 80) return { letter: "A",  color: "#4caf50", label: "¡Excelente!" };
+  if (score >= 65) return { letter: "B",  color: "#4da6ff", label: "Muy bien" };
+  if (score >= 50) return { letter: "C",  color: "#ff8c00", label: "Bien" };
+  if (score >= 35) return { letter: "D",  color: "#ff6600", label: "Regular" };
+  if (score >= 20) return { letter: "E",  color: "#cc4444", label: "Intenta de nuevo" };
   return             { letter: "F",  color: "#aa0000", label: "Game Over..." };
 }
 

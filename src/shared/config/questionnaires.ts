@@ -183,6 +183,34 @@ export const NASA_TLX: Instrument = {
   }),
 };
 
+// ── Perceived Pedagogical Support (5 items, RQ1) ──────────────────────────
+// Ad-hoc Likert adapted from Essel et al. (2024) on AI-mediated questioning &
+// engagement. Captures the Socratic-support construct that Godspeed/SUS do not
+// (guidance without giving answers, usefulness of graded hints, reflection).
+const PEDSUPPORT_ITEMS = [
+  "Las preguntas del agente me ayudaron a pensar por mí mismo/a.",
+  "Sentí que el agente me guiaba sin darme la respuesta directamente.",
+  "Las pistas graduales (andamiaje) fueron útiles para avanzar.",
+  "Me sentí acompañado/a durante la resolución del problema.",
+  "La interacción fomentó que reflexionara sobre mi propio razonamiento.",
+];
+
+export const PEDAGOGICAL_SUPPORT: Instrument = {
+  id: "pedsupport",
+  title: "Apoyo Pedagógico Percibido",
+  subtitle: "Indique su grado de acuerdo con las siguientes afirmaciones sobre la guía del agente.",
+  fields: PEDSUPPORT_ITEMS.map((label, i) => ({
+    id: `q${i}`,
+    type: "likert" as const,
+    label,
+    options: LIKERT5_AGREE,
+  })),
+  // Likert options are 1-5; store the mean (1-5) as the construct score.
+  score: (r) => ({
+    total: mean(PEDSUPPORT_ITEMS.map((_, i) => num(r, `q${i}`))),
+  }),
+};
+
 // ── Demographics ──────────────────────────────────────────────────────────
 export const DEMOGRAPHICS: Instrument = {
   id: "demographics",
@@ -231,6 +259,7 @@ export interface FlowStep {
 export const POST_FLOW: FlowStep[] = [
   { instrument: DEMOGRAPHICS },
   { instrument: GODSPEED },
+  { instrument: PEDAGOGICAL_SUPPORT, phase: "post" },
   { instrument: SUS },
   { instrument: NASA_TLX },
   { instrument: PANAS_SF, phase: "post" },
