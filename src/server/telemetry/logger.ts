@@ -33,21 +33,27 @@ function save(session: SessionLog): void {
   persistSession(session);
 }
 
-export function initSession(sessionId: string, condition: "A" | "B"): SessionLog {
+export function initSession(
+  sessionId: string,
+  condition: "A" | "B",
+  opts?: { design?: SessionLog["design"]; sequence?: SessionLog["sequence"] },
+): SessionLog {
   const existing = getOrLoad(sessionId);
   if (existing) return existing; // idempotent — don't clobber an in-progress session
 
   const log: SessionLog = {
     sessionId,
     condition,
+    design: opts?.design,
+    sequence: opts?.sequence,
     startTime: Date.now(),
     messages: [],
     taskResults: [],
     questionnaires: {},
   };
   save(log);
-  appendEvent({ type: "init", sessionId, condition });
-  console.log(`[SESSION] Init ${sessionId} — Condition ${condition}`);
+  appendEvent({ type: "init", sessionId, condition, design: opts?.design, sequence: opts?.sequence });
+  console.log(`[SESSION] Init ${sessionId} — ${opts?.sequence ? `crossover ${opts.sequence.join("→")}` : `Condition ${condition}`}`);
   return log;
 }
 
@@ -98,10 +104,13 @@ export function logQuestionnaire(
   const session = getOrLoad(sessionId);
   if (!session) return;
   session.questionnaires ??= {};
-  const key = `${response.instrument}:${response.phase ?? "_"}`;
+  // Key includes the condition so a crossover participant's two batteries (one
+  // per condition) don't overwrite each other. Falls back to phase/legacy key.
+  const tag = response.condition ?? response.phase ?? "_";
+  const key = `${response.instrument}:${tag}`;
   session.questionnaires[key] = response;
   save(session);
-  appendEvent({ type: "questionnaire", sessionId, instrument: response.instrument, phase: response.phase });
+  appendEvent({ type: "questionnaire", sessionId, instrument: response.instrument, phase: response.phase, condition: response.condition });
   console.log(`[QUESTIONNAIRE] Session ${sessionId} — ${key}`);
 }
 

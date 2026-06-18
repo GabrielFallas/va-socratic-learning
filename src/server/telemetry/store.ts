@@ -100,7 +100,10 @@ export function appendEvent(event: Record<string, unknown>): void {
 // ── Assignment counter persistence (counterbalancing survives restarts) ──
 export interface AssignmentState {
   assignedCount: number;
-  blockQueue: ("A" | "B")[];
+  /** Remaining counterbalanced condition orders for the crossover design, e.g.
+   *  [["A","B"],["B","A"]]. (Legacy persisted state held a flat ("A"|"B")[];
+   *  assignment.ts tolerates and discards that format on hydrate.) */
+  blockQueue: ("A" | "B")[][];
 }
 
 const loadAssignmentStmt = db.prepare(
@@ -115,7 +118,7 @@ export function loadAssignmentState(): AssignmentState | undefined {
     if (!row) return undefined;
     return {
       assignedCount: row.assignedCount,
-      blockQueue: JSON.parse(row.blockQueue) as ("A" | "B")[],
+      blockQueue: JSON.parse(row.blockQueue) as ("A" | "B")[][],
     };
   } catch {
     return undefined;

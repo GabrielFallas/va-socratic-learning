@@ -86,26 +86,28 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error("assign failed");
-      // No intake forms: the participant goes straight into the experience.
-      // The full questionnaire battery runs once at the END (see POST_FLOW).
-      router.push(`/session?id=${data.sessionId}&condition=${data.condition}&task=task-1-infinite-loop`);
+      // Crossover (4 exercises): the server returns a counterbalanced condition
+      // ORDER (A→B / B→A). The participant does BOTH tasks in the first condition,
+      // then BOTH tasks in the opposite. `cond` carries the active block.
+      const seq: Condition[] = Array.isArray(data.sequence) ? data.sequence : [data.condition];
+      router.push(`/session?id=${data.sessionId}&cond=${seq[0]}&seq=${seq.join("")}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);
     }
   };
 
-  // Pilot/testing only — forces a condition. NOT for real participants.
-  const startPilot = async (condition: Condition) => {
+  // Pilot/testing only — forces a counterbalanced ORDER. NOT for real participants.
+  const startPilot = async (sequence: Condition[]) => {
     setIsStarting(true);
     const sessionId = `P-PILOT-${Date.now().toString(36).toUpperCase()}`;
     try {
       await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "init", sessionId, condition }),
+        body: JSON.stringify({ action: "init", sessionId, condition: sequence[0], sequence }),
       });
-      // Straight into the session — no intake. Questionnaires are all at the end.
-      router.push(`/session?id=${sessionId}&condition=${condition}&task=task-1-infinite-loop`);
+      // Straight into the session — no intake. Crossover flow, like the real path.
+      router.push(`/session?id=${sessionId}&cond=${sequence[0]}&seq=${sequence.join("")}&task=task-1-infinite-loop`);
     } catch {
       setIsStarting(false);
     }
@@ -332,7 +334,7 @@ export default function HomePage() {
           {showPilot && (
           <div className="grid grid-cols-2 gap-3 opacity-60">
             <button
-              onClick={() => startPilot("A")}
+              onClick={() => startPilot(["A", "B"])}
               disabled={isStarting}
               className="py-3 font-bold text-sm text-white rounded-xl transition-all"
               style={{
@@ -341,12 +343,12 @@ export default function HomePage() {
                 boxShadow: "0 4px 0 #003399",
                 fontFamily: "'Courier New', monospace",
               }}
-              data-testid="start-condition-a"
+              data-testid="start-seq-ab"
             >
-              [A] Prueba A
+              Prueba A→B
             </button>
             <button
-              onClick={() => startPilot("B")}
+              onClick={() => startPilot(["B", "A"])}
               disabled={isStarting}
               className="py-3 font-bold text-sm text-white rounded-xl transition-all"
               style={{
@@ -355,9 +357,9 @@ export default function HomePage() {
                 boxShadow: "0 4px 0 #111133",
                 fontFamily: "'Courier New', monospace",
               }}
-              data-testid="start-condition-b"
+              data-testid="start-seq-ba"
             >
-              💬 Prueba B
+              Prueba B→A
             </button>
           </div>
           )}

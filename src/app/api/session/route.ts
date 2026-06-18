@@ -23,11 +23,15 @@ export async function POST(req: NextRequest) {
     // and balance is guaranteed per block.
     case "assign": {
       const assignment = assignNext();
-      const session = initSession(assignment.participantId, assignment.condition);
+      const session = initSession(assignment.participantId, assignment.condition, {
+        design: "crossover",
+        sequence: assignment.sequence,
+      });
       return NextResponse.json({
         ok: true,
         sessionId: session.sessionId,
         condition: assignment.condition,
+        sequence: assignment.sequence,
         ordinal: assignment.ordinal,
       });
     }
@@ -36,8 +40,14 @@ export async function POST(req: NextRequest) {
       if (!sessionId || !/^P-/.test(sessionId) || (condition !== "A" && condition !== "B")) {
         return NextResponse.json({ error: "Invalid sessionId or condition" }, { status: 400 });
       }
-      const session = initSession(sessionId, condition);
-      return NextResponse.json({ ok: true, sessionId: session.sessionId });
+      // Optional crossover sequence (pilot testing of the A→B / B→A flow).
+      const seq = Array.isArray(body.sequence) ? (body.sequence as ("A" | "B")[]) : undefined;
+      const validSeq = seq && seq.length === 2 && seq.every((c) => c === "A" || c === "B") ? seq : undefined;
+      const session = initSession(sessionId, condition, {
+        design: validSeq ? "crossover" : undefined,
+        sequence: validSeq,
+      });
+      return NextResponse.json({ ok: true, sessionId: session.sessionId, sequence: validSeq });
     }
 
     case "close": {

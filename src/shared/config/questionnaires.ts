@@ -247,15 +247,36 @@ export const QUALITATIVE: Instrument = {
 };
 
 // ── Flow definitions (instrument + phase) ─────────────────────────────────
-// All instruments are administered ONCE, at the END of the session, so the
-// participant starts the experience with zero forms (no intake). PANAS is a
-// single post-session affect measure (no pre/post split); informed consent is
-// no longer collected as an in-app instrument.
 export interface FlowStep {
   instrument: Instrument;
   phase?: "pre" | "post";
 }
 
+// CONDITION_FLOW — the condition-specific battery. In the crossover design it is
+// administered TWICE (once immediately after the task in each condition) so each
+// participant rates Condition A and Condition B separately. Each submission is
+// tagged with the active condition (see QuestionnaireFlow / post page).
+export const CONDITION_FLOW: FlowStep[] = [
+  { instrument: GODSPEED },
+  { instrument: PEDAGOGICAL_SUPPORT, phase: "post" },
+  { instrument: SUS },
+  { instrument: NASA_TLX },
+  { instrument: PANAS_SF, phase: "post" },
+];
+
+// FINAL_FLOW — condition-INDEPENDENT instruments, administered ONCE at the very
+// end of the session. These are never condition-tagged.
+export const FINAL_FLOW: FlowStep[] = [
+  { instrument: DEMOGRAPHICS },
+  { instrument: QUALITATIVE },
+];
+
+// Instruments that must never be condition-tagged even when they appear inside a
+// condition battery run (used by QuestionnaireFlow to decide tagging).
+export const CONDITION_INDEPENDENT = new Set([DEMOGRAPHICS.id, QUALITATIVE.id]);
+
+// POST_FLOW — legacy single battery (between-subjects) administered once at the
+// end. Retained for the legacy /post path and any non-crossover session.
 export const POST_FLOW: FlowStep[] = [
   { instrument: DEMOGRAPHICS },
   { instrument: GODSPEED },

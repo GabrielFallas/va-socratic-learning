@@ -56,9 +56,16 @@ function RingHUD({ rings, multiplier }: { rings: number; multiplier: number }) {
 
 // ── Zone name map ────────────────────────────────────────────────
 const ZONE_NAMES: Record<string, { name: string; act: number }> = {
-  "task-1-infinite-loop":        { name: "BUCLE INFINITO",            act: 1 },
-  "task-2-algorithm-complexity": { name: "OPTIMIZACIÓN ALGORÍTMICA",  act: 2 },
+  "task-1-infinite-loop":         { name: "BUCLE INFINITO",            act: 1 },
+  "task-2-algorithm-complexity":  { name: "OPTIMIZACIÓN ALGORÍTMICA",  act: 2 },
+  "task-1b-infinite-loop":        { name: "BUCLE INFINITO",            act: 1 },
+  "task-2b-algorithm-complexity": { name: "OPTIMIZACIÓN ALGORÍTMICA",  act: 2 },
 };
+
+// Slot 1 (loop) and slot 2 (complexity) task ids per block. Block 1 uses the
+// original variants; block 2 uses the second variants so no exact task repeats.
+const SLOT1 = { first: "task-1-infinite-loop",        second: "task-1b-infinite-loop" };
+const SLOT2 = { first: "task-2-algorithm-complexity", second: "task-2b-algorithm-complexity" };
 
 // ── Multiplier calc ──────────────────────────────────────────────
 function calcMultiplier(lastMsgTime: number, turnCount: number): number {
@@ -76,15 +83,31 @@ function SessionContent() {
 
   const rawId        = searchParams.get("id");
   const rawCondition = searchParams.get("condition");
+  const rawCond      = searchParams.get("cond"); // active block condition (crossover)
+  const rawSeq       = searchParams.get("seq");  // condition ORDER, e.g. "AB" / "BA"
   const taskId       = searchParams.get("task") ?? "task-1-infinite-loop";
+
+  // Crossover (within-subjects): the participant does BOTH tasks in BOTH
+  // conditions = 4 exercises. `seq` is the counterbalanced condition ORDER
+  // (e.g. A→B): the first condition block runs Task 1 then Task 2, then the
+  // second block repeats Task 1 then Task 2 in the opposite condition. The
+  // active block's condition is carried in `cond`. Absent → legacy
+  // between-subjects single-condition session.
+  const sequence: Condition[] | null =
+    rawSeq && /^[AB]{2}$/.test(rawSeq) ? (rawSeq.split("") as Condition[]) : null;
 
   // Validate params. A session MUST arrive with a real participant id and a
   // valid condition (assigned on the landing page). Previously a missing id
   // was silently replaced by a fabricated one, producing telemetry that no
   // /api/session record existed for (orphaned data). Now we redirect home.
-  const paramsValid = !!rawId && /^P-/.test(rawId) && (rawCondition === "A" || rawCondition === "B");
+  const effCond = rawCond ?? rawCondition;
+  const paramsValid = !!rawId && /^P-/.test(rawId) && (effCond === "A" || effCond === "B");
   const sessionId = rawId ?? "";
-  const condition = (rawCondition === "A" ? "A" : "B") as Condition;
+  // Active condition for THIS exercise: the block condition (`cond`) when
+  // crossover, else the single `condition` param.
+  const condition = ((sequence ? (rawCond === "B" ? "B" : "A") : rawCondition === "A" ? "A" : "B")) as Condition;
+  const seqStr = sequence ? sequence.join("") : null;
+  const isFirstBlock = sequence ? condition === sequence[0] : true;
 
   useEffect(() => {
     if (!paramsValid) router.replace("/");
@@ -99,7 +122,10 @@ function SessionContent() {
   const [taskCompleted,       setTaskCompleted]       = useState(false);
   const [latencyReadings,     setLatencyReadings]     = useState<number[]>([]);
   const [showSummary,         setShowSummary]         = useState(false);
-  const [taskStartTime]                               = useState(Date.now());
+  // Start time of the CURRENT exercise. A ref (not state) so it can be reset on
+  // every task/condition change without an extra render; read at completion to
+  // compute time spent on this specific exercise (crossover repeats tasks).
+  const taskStartRef                                  = useRef(Date.now());
   const [resolvedAutonomously, setResolvedAutonomously] = useState(false);
   const [ringsCollected,      setRingsCollected]      = useState(0);
   const [showRingAnimation,   setShowRingAnimation]   = useState(false);
@@ -121,15 +147,17 @@ function SessionContent() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Reset on task change
+  // Reset on task OR condition change (crossover repeats each task per condition).
   useEffect(() => {
     setTaskCompleted(false);
     setShowSummary(false);
     setTimeRemaining(task.maxTimeSeconds);
     setTurnCount(0);
+    turnCountRef.current = 0;
     setLatencyReadings([]);
     setResolvedAutonomously(false);
     setRingMultiplier(1);
+    taskStartRef.current = Date.now(); // time THIS exercise from now
     if (condition === "A") setShowZoneTitle(true);
   }, [taskId, task.maxTimeSeconds, condition]);
 
@@ -198,9 +226,10 @@ function SessionContent() {
       } catch { /**/ }
     }
 
-    const timeSpent = Math.round((Date.now() - taskStartTime) / 1000);
+    const timeSpent = Math.round((Date.now() - taskStartRef.current) / 1000);
     const result: TaskResult = {
       taskId: task.id,
+      condition,
       resolvedAutonomously: resolved,
       turns: turnCountRef.current,
       timeSpentSeconds: timeSpent,
@@ -224,23 +253,41 @@ function SessionContent() {
 
     // Delay modal so the player sees Sonic's victory animation (orbiting stars) first
     setTimeout(() => setShowSummary(true), 1800);
-  }, [taskCompleted, taskStartTime, latencyReadings, task.id, sessionId]);
+  }, [taskCompleted, latencyReadings, task.id, sessionId, condition]);
 
   // ── Navigation ────────────────────────────────────────────────
+  // Crossover (4 exercises): per condition block the order is
+  // Task 1 -> transition -> Task 2 -> battery(condition). After the FIRST
+  // block's battery the participant starts the SECOND block (both tasks again,
+  // opposite condition); after the SECOND block's battery + final instruments
+  // -> results.
+  const isSlot1 = taskId.includes("infinite-loop"); // slot 1 = loop task (either variant)
   const handleContinue = () => {
-    if (taskId === "task-1-infinite-loop") {
-      // Show transition game instead of direct navigation
+    if (isSlot1) {
+      // Within a block: Task 1 -> transition -> Task 2 (same condition).
       setShowSummary(false);
       setShowTransition(true);
+    } else if (seqStr) {
+      // End of a condition block -> rate that condition.
+      if (isFirstBlock) {
+        // First block done: battery for condition 1, then start block 2.
+        router.push(`/post?id=${sessionId}&seq=${seqStr}&stage=1&condition=${condition}`);
+      } else {
+        // Second block done: close session, then battery 2 + final instruments.
+        fetch("/api/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "close", sessionId }),
+        }).catch((err) => console.error("[session] Failed to close session:", err));
+        router.push(`/post?id=${sessionId}&seq=${seqStr}&stage=2&condition=${condition}`);
+      }
     } else {
-      // Close session before navigating to results — finalises endTime + latency stats
+      // Legacy between-subjects: single full battery after Task 2.
       fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "close", sessionId }),
       }).catch((err) => console.error("[session] Failed to close session:", err));
-      // Post-task questionnaire battery BEFORE the results screen (so seeing the
-      // rank/score doesn't bias affect/motivation answers).
       router.push(`/post?id=${sessionId}&condition=${condition}`);
     }
   };
@@ -256,7 +303,11 @@ function SessionContent() {
     // non-stop throughout all of task-2.
     setShowTransition(false);
     setTaskCompleted(false);
-    router.push(`/session?id=${sessionId}&condition=${condition}&task=task-2-algorithm-complexity`);
+    // Continue to Task 2 (slot 2) in the SAME condition block, using this block's
+    // task variant (block 1 → v1, block 2 → v2).
+    const slot2Id = isFirstBlock ? SLOT2.first : SLOT2.second;
+    const condParam = seqStr ? `&seq=${seqStr}&cond=${condition}` : `&condition=${condition}`;
+    router.push(`/session?id=${sessionId}${condParam}&task=${slot2Id}`);
   };
 
 
@@ -456,7 +507,7 @@ function SessionContent() {
               {[
                 { label: "Anillos 💍",  value: ringsCollected,                                    color: "#ffcc00" },
                 { label: "Turnos 💬",   value: turnCount,                                         color: "#4da6ff" },
-                { label: "Tiempo ⏱️",  value: `${Math.round((Date.now() - taskStartTime) / 1000)}s`, color: "#88ccff" },
+                { label: "Tiempo ⏱️",  value: `${Math.round((Date.now() - taskStartRef.current) / 1000)}s`, color: "#88ccff" },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -479,9 +530,11 @@ function SessionContent() {
                 fontFamily: "'Courier New', monospace",
               }}
             >
-              {taskId === "task-1-infinite-loop"
+              {isSlot1
                 ? "CORRER A LA ZONA 2"
-                : "VER RESULTADO FINAL"}
+                : seqStr && isFirstBlock
+                  ? "CONTINUAR"
+                  : "VER RESULTADO FINAL"}
             </button>
           </div>
         </div>

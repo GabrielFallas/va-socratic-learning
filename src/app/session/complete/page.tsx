@@ -14,6 +14,7 @@ interface SessionSummary {
   latencyOver1500ms: number;
   taskResults: Array<{
     taskId: string;
+    condition?: "A" | "B";
     resolvedAutonomously: boolean;
     turns: number;
     timeSpentSeconds: number;
@@ -73,6 +74,7 @@ function CompleteContent() {
   const router       = useRouter();
   const sessionId    = searchParams.get("id") ?? "";
   const condition    = searchParams.get("condition") ?? "B";
+  const seq          = searchParams.get("seq"); // crossover order, e.g. "AB"
 
   const [summary, setSummary] = useState<SessionSummary | null>(null);
   const [showRank, setShowRank]   = useState(false);
@@ -173,7 +175,7 @@ function CompleteContent() {
             <RingSprite size={32} />
           </div>
           <p className="text-white/40 text-sm font-mono">
-            Condición {condition} · {sessionId}
+            {seq && /^[AB]{2}$/.test(seq) ? `Secuencia ${seq[0]}→${seq[1]}` : `Condición ${condition}`} · {sessionId}
           </p>
         </div>
 
@@ -260,8 +262,20 @@ function CompleteContent() {
                 }}
               >
                 <h3 className="text-white font-bold mb-3 font-mono text-sm flex items-center gap-2">
-                  {result.resolvedAutonomously ? "🏆" : "📋"} Tarea {i + 1}:{" "}
+                  {result.resolvedAutonomously ? "🏆" : "📋"}{" "}
                   {result.taskId.includes("loop") ? "Bucle Infinito" : "Complejidad Algoritmo"}
+                  {result.condition && (
+                    <span
+                      className="ml-auto text-xs px-2 py-0.5 rounded font-mono"
+                      style={{
+                        background: result.condition === "A" ? "rgba(77,166,255,0.2)" : "rgba(120,120,150,0.2)",
+                        color: result.condition === "A" ? "#4da6ff" : "#aab",
+                        border: `1px solid ${result.condition === "A" ? "#4da6ff" : "#556"}`,
+                      }}
+                    >
+                      {result.condition === "A" ? "Cond. A · Sonic" : "Cond. B · Texto"}
+                    </span>
+                  )}
                 </h3>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div className="text-center rounded-lg p-2" style={{ background: "rgba(255,255,255,0.05)" }}>

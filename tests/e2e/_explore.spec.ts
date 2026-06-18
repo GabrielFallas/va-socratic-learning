@@ -32,7 +32,7 @@ function dump(label: string, bag: Bag) {
 const FIXED_TASK1 = `def print_numbers():
     counter = 1
     while counter <= 5:
-        print(f"Número: {counter}")
+        print(f"Number: {counter}")
         counter += 1
 
 print_numbers()`;

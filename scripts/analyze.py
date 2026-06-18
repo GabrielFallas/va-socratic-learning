@@ -40,28 +40,76 @@ try:
 except Exception:  # pragma: no cover - scipy optional
     HAVE_SCIPY = False
 
-# CSV columns (from export.ts sessionRow) → (human label, higher-is-better)
-METRICS = [
-    ("task1_resolved",            "T1 resuelta (0/1)",        True),
-    ("task2_resolved",            "T2 resuelta (0/1)",        True),
-    ("totalTurns",                "Turnos totales",           True),
-    ("task1_timeSec",             "Tiempo T1 (s)",            False),
-    ("task2_timeSec",             "Tiempo T2 (s)",            False),
-    ("avgTtftMs",                 "TTFT medio (ms)",          False),
-    ("pctTtftUnder1500",          "% TTFT < 1.5s",            True),
-    ("avgThinkTimeMs",            "Think-time (ms)",          True),
-    ("avgUserMsgWords",           "Palabras/mensaje",         True),
-    ("voiceInputRatio",           "Ratio uso de voz",         True),
-    ("q_sus_x_total",             "SUS (0-100)",              True),
-    ("q_nasa-tlx_x_rawTlx",       "NASA-TLX (RTLX)",          False),
-    ("q_pedsupport_post_total",   "Apoyo pedagógico (1-5)",   True),
-    ("q_godspeed_x_overall",      "Godspeed global (1-5)",    True),
-    ("q_godspeed_x_anthropomorphism", "Godspeed antropom.",   True),
-    ("q_godspeed_x_likeability",  "Godspeed agrado",          True),
-    ("q_godspeed_x_intelligence", "Godspeed intelig.",        True),
-    ("q_panas-sf_post_positiveAffect", "PANAS afecto +",      True),
-    ("q_panas-sf_post_negativeAffect", "PANAS afecto -",      False),
+# ── Metrics, design-agnostic ──────────────────────────────────────────────
+# Each metric is keyed by a normalized name; observations() pulls the right CSV
+# column for each per-condition observation (crossover vs between-subjects).
+#
+# Task-level outcome/behavioral metrics (per condition).  (key, label, higher?)
+TASK_METRICS = [
+    ("resolved",   "Tarea resuelta (0/1)", True),
+    ("turns",      "Turnos (tarea)",       True),
+    ("timeSec",    "Tiempo tarea (s)",     False),
+    ("avgTtftMs",  "TTFT medio (ms)",      False),
 ]
+# Questionnaire metrics: (instrument, score, label, higher?)
+QUEST_METRICS = [
+    ("sus",       "total",            "SUS (0-100)",            True),
+    ("nasa-tlx",  "rawTlx",           "NASA-TLX (RTLX)",        False),
+    ("pedsupport", "total",           "Apoyo pedagógico (1-5)", True),
+    ("godspeed",  "overall",          "Godspeed global (1-5)",  True),
+    ("godspeed",  "anthropomorphism", "Godspeed antropom.",     True),
+    ("godspeed",  "likeability",      "Godspeed agrado",        True),
+    ("godspeed",  "intelligence",     "Godspeed intelig.",      True),
+    ("panas-sf",  "positiveAffect",   "PANAS afecto +",         True),
+    ("panas-sf",  "negativeAffect",   "PANAS afecto -",         False),
+]
+# Ordered (key, label, higher?) used for the output table.
+METRICS = (
+    [(k, lbl, hi) for k, lbl, hi in TASK_METRICS]
+    + [(f"{inst}.{score}", lbl, hi) for inst, score, lbl, hi in QUEST_METRICS]
+)
+
+
+def _quest_value(row, inst, score, condition, design):
+    """Per-condition questionnaire score, handling crossover vs legacy columns."""
+    if design == "crossover":
+        return to_float(row.get(f"q_{inst}_{condition}_{score}"))
+    # Legacy between-subjects: phase tag was "x" (godspeed/sus/nasa-tlx) or
+    # "post" (pedsupport/panas-sf). Try both.
+    for tag in ("x", "post"):
+        v = to_float(row.get(f"q_{inst}_{tag}_{score}"))
+        if v is not None:
+            return v
+    return None
+
+
+def _cond_metrics(row, c, design):
+    """Outcome + questionnaire metrics for one condition, from the per-condition
+    aggregate columns (cond{A,B}_*) plus the condition's questionnaire battery."""
+    m = {
+        "resolved":  to_float(row.get(f"cond{c}_resolutionRate")),
+        "turns":     to_float(row.get(f"cond{c}_turns")),
+        "timeSec":   to_float(row.get(f"cond{c}_avgTimeSec")),
+        "avgTtftMs": to_float(row.get(f"cond{c}_avgTtftMs")),
+    }
+    for inst, score, _lbl, _hi in QUEST_METRICS:
+        m[f"{inst}.{score}"] = _quest_value(row, inst, score, c, design)
+    return m
+
+
+def observations(row):
+    """Expand a participant row into per-condition observations.
+
+    Crossover sessions contribute one observation per condition (both tasks of
+    that condition aggregated + that condition's questionnaire battery).
+    Between-subjects sessions contribute a single observation (their one
+    condition). Both pool into the same A-vs-B comparison.
+    """
+    design = (row.get("design") or "between").strip() or "between"
+    if design == "crossover":
+        return [(c, _cond_metrics(row, c, design)) for c in ("A", "B")]
+    c = row.get("condition")
+    return [(c, _cond_metrics(row, c, design))]
 
 
 def to_float(v):
@@ -118,11 +166,15 @@ def main():
     with open(path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
-    # Exclude pilots; split by condition.
+    # Exclude pilots; expand into per-condition observations (handles both the
+    # within-subjects crossover and legacy between-subjects designs, pooled).
     rows = [r for r in rows if not str(r.get("sessionId", "")).upper().startswith("P-PILOT")]
-    A = [r for r in rows if r.get("condition") == "A"]
-    B = [r for r in rows if r.get("condition") == "B"]
-    print(f"Participantes reales: n(A)={len(A)}  n(B)={len(B)}\n")
+    obs = [o for r in rows for o in observations(r)]
+    A = [m for c, m in obs if c == "A"]
+    B = [m for c, m in obs if c == "B"]
+    n_cross = sum(1 for r in rows if (r.get("design") or "between") == "crossover")
+    print(f"Participantes reales: {len(rows)} (crossover={n_cross}, entre-sujetos={len(rows)-n_cross})")
+    print(f"Observaciones por condición: n(A)={len(A)}  n(B)={len(B)}\n")
     if not A or not B:
         print("Se necesitan datos en ambas condiciones para comparar.")
         return
@@ -133,9 +185,9 @@ def main():
     print(header)
     print("-" * len(header))
 
-    for col, label, _higher in METRICS:
-        a = [v for v in (to_float(r.get(col)) for r in A) if v is not None]
-        b = [v for v in (to_float(r.get(col)) for r in B) if v is not None]
+    for key, label, _higher in METRICS:
+        a = [v for v in (m.get(key) for m in A) if v is not None]
+        b = [v for v in (m.get(key) for m in B) if v is not None]
         cell_a = f"{fmt(mean(a))}({fmt(sd(a)).strip()}) {len(a)}" if a else "       — 0"
         cell_b = f"{fmt(mean(b))}({fmt(sd(b)).strip()}) {len(b)}" if b else "       — 0"
         line = f"{label:28} {cell_a:>20} {cell_b:>20}"

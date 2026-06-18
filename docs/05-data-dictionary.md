@@ -15,7 +15,9 @@ de mensajes íntegro. Generado por [`src/server/telemetry/export.ts`](../src/ser
 | Columna | Tipo | Descripción |
 |---|---|---|
 | `sessionId` | texto | Identificador anónimo del participante (`P-001`, …). Sin nombre ni correo. |
-| `condition` | `A`/`B` | Condición experimental: A = Sonic corporizado; B = chat de texto. |
+| `condition` | `A`/`B` | Condición (crossover: la **primera** de la secuencia; entre-sujetos: la única). |
+| `design` | `crossover`/`between` | Diseño de la sesión. `crossover` = intra-sujeto (ambas condiciones); `between` = una condición (sesiones iniciales). |
+| `sequence` | texto | Orden de condiciones en crossover, p. ej. `A→B` (vacío si entre-sujetos). |
 | `startTime` | ISO-8601 | Marca de inicio de la sesión. |
 | `endTime` | ISO-8601 | Marca de cierre (vacío si la sesión no se cerró). |
 | `durationSec` | entero | Duración total de la sesión en segundos. |
@@ -46,12 +48,27 @@ Derivadas del flujo de mensajes almacenado; **no** dependen de auto-reporte.
 | `voiceInputRatio` | 0–1 | Proporción de mensajes por voz sobre los mensajes con modo identificado. |
 | `totalRings` | entero | Anillos acumulados en la sesión (engagement gamificado, Condición A). |
 
-## Resultados por tarea (RQ2)
+## Agregados por condición (RQ2 — unidad principal del análisis A vs B)
 
-Prefijos `task1_` (bucle infinito) y `task2_` (complejidad algorítmica).
+En *crossover* cada condición incluye **ambas** tareas; en entre-sujetos, la(s) tarea(s) de la
+única condición. `analyze.py` y el panel `/admin` usan estas columnas para comparar A vs B.
 
 | Columna | Tipo | Descripción |
 |---|---|---|
+| `condA_resolutionRate` / `condB_*` | 0–1 | Proporción de tareas resueltas autónomamente en esa condición. |
+| `condA_turns` / `condB_*` | entero | Turnos promedio por tarea en esa condición. |
+| `condA_avgTimeSec` / `condB_*` | seg | Tiempo promedio por tarea en esa condición. |
+| `condA_avgTtftMs` / `condB_*` | ms | Latencia TTFT media de esa condición. |
+
+## Resultados por tarea (detalle, RQ2)
+
+Prefijos `task1_` (bucle infinito) y `task2_` (complejidad algorítmica) — en *crossover* reflejan
+la **primera** aparición de cada tarea (Bloque 1); el detalle completo de las 4 corridas está en el
+export JSON. Para el análisis use los agregados `cond{A,B}_*` de arriba.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `taskN_condition` | `A`/`B` | Condición en que se resolvió la tarea (crossover: difiere entre tareas; vacío en sesiones entre-sujetos). |
 | `taskN_resolved` | 0/1 | Resolución autónoma (pruebas ocultas pasaron sin código directo del tutor). |
 | `taskN_resolution` | texto | `tests-passed`, `timeout` o `gave-up`. |
 | `taskN_turns` | entero | Turnos conversacionales en la tarea. |
@@ -64,21 +81,27 @@ Prefijos `task1_` (bucle infinito) y `task2_` (complejidad algorítmica).
 
 ## Puntajes de cuestionarios
 
-Formato de columna: `q_<instrumento>_<fase>_<score>`. Las fases sin distinción aparecen como
-`x`; PANAS-SF se etiqueta `post` (medida única post-sesión).
+Formato de columna: `q_<instrumento>_<etiqueta>_<score>`. La **etiqueta** es:
+- **`A` / `B`** en sesiones *crossover* — la batería se aplica una vez por condición, así que cada
+  instrumento aparece dos veces, p. ej. `q_godspeed_A_overall` y `q_godspeed_B_overall`.
+- **`x`** (godspeed/sus/nasa-tlx) o **`post`** (pedsupport/panas-sf) en sesiones *entre-sujetos*
+  iniciales, p. ej. `q_godspeed_x_overall`, `q_pedsupport_post_total`.
 
-| Columna | Rango | Descripción |
+Las columnas legacy (`_x_` / `_post_`) y las de crossover (`_A_` / `_B_`) coexisten en el mismo CSV;
+el panel `/admin` y `scripts/analyze.py` agrupan ambas en la comparación A vs B por condición.
+
+| Columna (crossover / legacy) | Rango | Descripción |
 |---|---|---|
-| `q_godspeed_x_anthropomorphism` | 1–5 | Antropomorfismo percibido (RQ1). |
-| `q_godspeed_x_animacy` | 1–5 | Vitalidad percibida. |
-| `q_godspeed_x_likeability` | 1–5 | Agrado. |
-| `q_godspeed_x_intelligence` | 1–5 | Inteligencia percibida. |
-| `q_godspeed_x_overall` | 1–5 | Media global Godspeed. |
-| `q_pedsupport_post_total` | 1–5 | Apoyo pedagógico percibido (media de 5 ítems, adaptado de Essel 2024) (RQ1). |
-| `q_sus_x_total` | 0–100 | System Usability Scale. |
-| `q_nasa-tlx_x_rawTlx` | 0–100 | Carga cognitiva (RTLX, media no ponderada) (RQ3). |
-| `q_panas-sf_post_positiveAffect` | 5–25 | Afecto positivo post-sesión (RQ3). |
-| `q_panas-sf_post_negativeAffect` | 5–25 | Afecto negativo post-sesión (RQ3). |
+| `q_godspeed_{A,B}_anthropomorphism` / `q_godspeed_x_anthropomorphism` | 1–5 | Antropomorfismo percibido (RQ1). |
+| `q_godspeed_{A,B}_animacy` / `q_godspeed_x_animacy` | 1–5 | Vitalidad percibida. |
+| `q_godspeed_{A,B}_likeability` / `q_godspeed_x_likeability` | 1–5 | Agrado. |
+| `q_godspeed_{A,B}_intelligence` / `q_godspeed_x_intelligence` | 1–5 | Inteligencia percibida. |
+| `q_godspeed_{A,B}_overall` / `q_godspeed_x_overall` | 1–5 | Media global Godspeed. |
+| `q_pedsupport_{A,B}_total` / `q_pedsupport_post_total` | 1–5 | Apoyo pedagógico percibido (media de 5 ítems, adaptado de Essel 2024) (RQ1). |
+| `q_sus_{A,B}_total` / `q_sus_x_total` | 0–100 | System Usability Scale. |
+| `q_nasa-tlx_{A,B}_rawTlx` / `q_nasa-tlx_x_rawTlx` | 0–100 | Carga cognitiva (RTLX, media no ponderada) (RQ3). |
+| `q_panas-sf_{A,B}_positiveAffect` / `q_panas-sf_post_positiveAffect` | 5–25 | Afecto positivo post-sesión (RQ3). |
+| `q_panas-sf_{A,B}_negativeAffect` / `q_panas-sf_post_negativeAffect` | 5–25 | Afecto negativo post-sesión (RQ3). |
 
 > Demográficos y preguntas cualitativas no generan columnas de puntaje (sus respuestas crudas
 > están en el export JSON). El panel `/admin` (`GET /api/session?stats=1`) resume media, DE y n

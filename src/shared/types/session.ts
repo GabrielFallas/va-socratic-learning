@@ -58,6 +58,11 @@ export interface Task {
 
 export interface TaskResult {
   taskId: string;
+  /** Which experimental condition this task ran in. In the crossover design each
+   *  participant does Task 1 in one condition and Task 2 in the opposite, so the
+   *  condition is per-task. Undefined on legacy between-subjects sessions, where
+   *  the single `SessionLog.condition` applies to both tasks. */
+  condition?: Condition;
   /** Did the student resolve autonomously? Now backed by passing hidden tests, not self-report. */
   resolvedAutonomously: boolean;
   /** Number of conversation turns */
@@ -84,6 +89,10 @@ export interface QuestionnaireResponse {
   instrument: string;
   /** Optional phase for instruments administered twice (PANAS pre/post). */
   phase?: "pre" | "post";
+  /** Which condition this battery refers to (crossover: the battery is run once
+   *  per condition). Undefined for condition-independent instruments
+   *  (demographics, qualitative) and for legacy between-subjects sessions. */
+  condition?: Condition;
   /** Raw item responses keyed by item id. */
   responses: Record<string, number | string | boolean>;
   /** Optional derived score(s) for convenience in exports. */
@@ -93,7 +102,17 @@ export interface QuestionnaireResponse {
 
 export interface SessionLog {
   sessionId: string;
+  /** For crossover this is the FIRST condition (sequence[0]); per-task conditions
+   *  live on each TaskResult and per-condition questionnaires carry their own
+   *  `condition`. For legacy between-subjects sessions it is the single condition
+   *  applied to the whole session. */
   condition: Condition;
+  /** Experimental design of this session. Undefined = legacy between-subjects
+   *  (one condition for the whole session). "crossover" = within-subjects: the
+   *  participant experiences both conditions in `sequence` order. */
+  design?: "between" | "crossover";
+  /** Counterbalanced condition order for crossover sessions, e.g. ["A","B"]. */
+  sequence?: Condition[];
   startTime: number;
   endTime?: number;
   messages: ChatMessage[];

@@ -1,4 +1,4 @@
-import type { SessionLog, TaskResult } from "@/shared/types/session";
+import type { SessionLog, TaskResult, Condition } from "@/shared/types/session";
 
 // ============================================================
 // Export — flatten sessions to a researcher-friendly CSV (one row per
@@ -85,6 +85,7 @@ function behaviouralColumns(s: SessionLog): Record<string, string | number> {
 
 function taskColumns(prefix: string, r?: TaskResult): Record<string, string | number> {
   return {
+    [`${prefix}_condition`]: r?.condition ?? "",
     [`${prefix}_resolved`]: r ? (r.resolvedAutonomously ? 1 : 0) : "",
     [`${prefix}_resolution`]: r?.resolution ?? "",
     [`${prefix}_turns`]: r?.turns ?? "",
@@ -106,6 +107,8 @@ function sessionRow(s: SessionLog): Record<string, string | number> {
   const row: Record<string, string | number> = {
     sessionId: s.sessionId,
     condition: s.condition,
+    design: s.design ?? "between",
+    sequence: s.sequence ? s.sequence.join("→") : "",
     startTime: iso(s.startTime),
     endTime: iso(s.endTime),
     durationSec: s.endTime ? Math.round((s.endTime - s.startTime) / 1000) : "",
@@ -120,16 +123,32 @@ function sessionRow(s: SessionLog): Record<string, string | number> {
     Object.assign(row, taskColumns(`task${i + 1}`, s.taskResults.find((t) => t.taskId === id)));
   });
 
+  // Per-condition outcome aggregates (design-agnostic; the primary unit for the
+  // A-vs-B analysis). In crossover both tasks of a condition are aggregated; in
+  // between-subjects the single condition's tasks are aggregated. These let
+  // analyze.py treat both designs uniformly.
+  for (const cond of ["A", "B"] as const) {
+    const tasks = s.taskResults.filter((t) => (t.condition ?? s.condition) === cond);
+    if (!tasks.length) continue;
+    const m = taskMetrics(tasks);
+    row[`cond${cond}_resolutionRate`] = m.resolutionRate ?? "";
+    row[`cond${cond}_turns`] = m.turns ?? "";
+    row[`cond${cond}_avgTimeSec`] = m.avgTaskTimeSec ?? "";
+    row[`cond${cond}_avgTtftMs`] = m.avgTtftMs ?? "";
+  }
+
   row.totalRings = s.taskResults.reduce((sum, t) => sum + (t.ringsCollected ?? 0), 0);
 
   // Behavioural telemetry derived from the message stream.
   Object.assign(row, behaviouralColumns(s));
 
-  // Questionnaire scores → q_<instrument>_<phase>_<scoreName>
+  // Questionnaire scores → q_<instrument>_<tag>_<scoreName>, where tag is the
+  // condition for crossover batteries (q_godspeed_A_*, q_godspeed_B_*) or the
+  // phase for legacy between-subjects sessions (q_godspeed_x_*).
   for (const q of Object.values(s.questionnaires ?? {})) {
-    const phase = q.phase ?? "x";
+    const tag = q.condition ?? q.phase ?? "x";
     for (const [k, v] of Object.entries(q.scores ?? {})) {
-      row[`q_${q.instrument}_${phase}_${k}`] = v;
+      row[`q_${q.instrument}_${tag}_${k}`] = v;
     }
   }
   return row;
@@ -139,7 +158,37 @@ function sessionRow(s: SessionLog): Record<string, string | number> {
 // Descriptive statistics by condition (facilitator live view + paper results)
 // ============================================================
 
-/** Pull a per-session scalar for each metric we summarise by condition. */
+/** Find a questionnaire score, preferring the one tagged for `condition`
+ *  (crossover); falls back to an untagged entry (legacy between-subjects). */
+function qScore(s: SessionLog, instrument: string, score: string, condition?: Condition): number | undefined {
+  const entries = Object.values(s.questionnaires ?? {}).filter((x) => x.instrument === instrument);
+  const entry = condition
+    ? entries.find((x) => x.condition === condition) ?? entries.find((x) => !x.condition)
+    : entries[0];
+  const v = entry?.scores?.[score];
+  return typeof v === "number" ? v : undefined;
+}
+
+/** Behavioural/outcome metrics aggregated over a set of task results (in the
+ *  crossover design a condition block contains BOTH tasks). */
+function taskMetrics(tasks: TaskResult[]): Record<string, number | undefined> {
+  if (!tasks.length) {
+    return { resolutionRate: undefined, turns: undefined, avgTaskTimeSec: undefined, avgTtftMs: undefined, pctTtftUnder1500: undefined };
+  }
+  const ttfts = tasks.flatMap((t) => t.latencyReadings ?? []);
+  const under = ttfts.filter((l) => l < 1500).length;
+  const resolved = tasks.filter((t) => t.resolvedAutonomously).length;
+  return {
+    resolutionRate: resolved / tasks.length,
+    turns: avg(tasks.map((t) => t.turns)),
+    avgTaskTimeSec: avg(tasks.map((t) => t.timeSpentSeconds)),
+    avgTtftMs: ttfts.length ? avg(ttfts) : undefined,
+    pctTtftUnder1500: ttfts.length ? Math.round((under / ttfts.length) * 100) : undefined,
+  };
+}
+
+/** Pull a per-session scalar for each metric we summarise by condition
+ *  (whole-session aggregation — used for legacy between-subjects sessions). */
 function sessionMetrics(s: SessionLog): Record<string, number | undefined> {
   const ttfts = s.messages
     .filter((m) => m.role === "assistant" && m.latencyMs !== undefined)
@@ -148,12 +197,7 @@ function sessionMetrics(s: SessionLog): Record<string, number | undefined> {
   const tasks = s.taskResults;
   const resolved = tasks.filter((t) => t.resolvedAutonomously).length;
   const beh = behaviouralColumns(s);
-
-  const q = (key: string, score: string): number | undefined => {
-    const entry = Object.values(s.questionnaires ?? {}).find((x) => x.instrument === key);
-    const v = entry?.scores?.[score];
-    return typeof v === "number" ? v : undefined;
-  };
+  const q = (key: string, score: string) => qScore(s, key, score);
 
   return {
     resolutionRate: tasks.length ? resolved / tasks.length : undefined,
@@ -172,6 +216,41 @@ function sessionMetrics(s: SessionLog): Record<string, number | undefined> {
     panasPositive: q("panas-sf", "positiveAffect"),
     panasNegative: q("panas-sf", "negativeAffect"),
   };
+}
+
+/**
+ * One metric observation PER condition the session contributes to. A crossover
+ * session yields two observations (Task 1's condition and Task 2's), each scoped
+ * to that condition's task result + condition-tagged questionnaires. A legacy
+ * between-subjects session yields a single whole-session observation. This lets
+ * the A-vs-B comparison pool both designs together.
+ */
+function conditionObservations(s: SessionLog): Array<{ condition: Condition; metrics: Record<string, number | undefined> }> {
+  const isCrossover = s.design === "crossover" && Array.isArray(s.sequence) && s.sequence.length === 2;
+  if (isCrossover) {
+    const seen = new Set<Condition>();
+    return (s.sequence as Condition[])
+      .filter((c) => !seen.has(c) && (seen.add(c), true))
+      .map((c) => ({
+        condition: c,
+        metrics: {
+          ...taskMetrics(s.taskResults.filter((t) => t.condition === c)),
+          // Think-time is computed from the whole message stream and can't be
+          // cleanly attributed per condition, so it is omitted from crossover obs.
+          avgThinkTimeMs: undefined,
+          sus: qScore(s, "sus", "total", c),
+          nasaTlx: qScore(s, "nasa-tlx", "rawTlx", c),
+          godspeed: qScore(s, "godspeed", "overall", c),
+          godspeedAnthropomorphism: qScore(s, "godspeed", "anthropomorphism", c),
+          godspeedLikeability: qScore(s, "godspeed", "likeability", c),
+          godspeedIntelligence: qScore(s, "godspeed", "intelligence", c),
+          pedSupport: qScore(s, "pedsupport", "total", c),
+          panasPositive: qScore(s, "panas-sf", "positiveAffect", c),
+          panasNegative: qScore(s, "panas-sf", "negativeAffect", c),
+        },
+      }));
+  }
+  return [{ condition: s.condition, metrics: sessionMetrics(s) }];
 }
 
 interface StatCell { mean: number; sd: number; n: number; }
@@ -201,9 +280,10 @@ export function statsByCondition(
   { includePilots = false }: { includePilots?: boolean } = {}
 ): Record<"A" | "B", Record<StatMetric, StatCell>> {
   const pool = includePilots ? sessions : sessions.filter((s) => !isPilot(s.sessionId));
+  const observations = pool.flatMap(conditionObservations);
   const out = { A: {}, B: {} } as Record<"A" | "B", Record<StatMetric, StatCell>>;
   for (const cond of ["A", "B"] as const) {
-    const subset = pool.filter((s) => s.condition === cond).map(sessionMetrics);
+    const subset = observations.filter((o) => o.condition === cond).map((o) => o.metrics);
     for (const metric of STAT_METRICS) {
       out[cond][metric] = summarise(
         subset.map((m) => m[metric]).filter((v): v is number => v !== undefined)
