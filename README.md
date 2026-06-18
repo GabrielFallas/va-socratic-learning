@@ -8,8 +8,8 @@ Repositorio del proyecto de investigación sobre un agente virtual de tutoría s
 
 ## 🎥 Video de Demostración
 
-> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/6yjbrtIlXa4p)**  
-> *(~3 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
+> **[→ Ver demostración en YouTube (unlisted)](https://youtu.be/WmdkmiwA-gk)**  
+> *(~5 minutos · Muestra ambas condiciones experimentales, el avatar reactivo y el flujo de depuración socrática)*
 
 ## 📄 Artículo Académico (Paper)
 

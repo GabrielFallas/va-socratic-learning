@@ -27,6 +27,13 @@ export default function HomePage() {
   const [sonicX, setSonicX] = useState(-120);
   const [sonicFlip, setSonicFlip] = useState(false);
   const [health, setHealth] = useState<{ ready: boolean; ollama: { ok: boolean }; speech: { ok: boolean } } | null>(null);
+  // Pilot/testing controls are hidden during real data collection so a facilitator
+  // can't accidentally save a real participant as an excluded P-PILOT row (which
+  // would silently drop that data point). Reveal them only with ?pilot=1.
+  const [showPilot, setShowPilot] = useState(false);
+  useEffect(() => {
+    setShowPilot(new URLSearchParams(window.location.search).get("pilot") === "1");
+  }, []);
 
   // Preflight: confirm backend services are reachable before a session starts.
   useEffect(() => {
@@ -320,7 +327,9 @@ export default function HomePage() {
             {isStarting ? "⏳ INICIANDO..." : "▶ PRESS START"}
           </button>
 
-          {/* Pilot/testing controls — NOT part of the experiment data */}
+          {/* Pilot/testing controls — NOT part of the experiment data.
+              Hidden by default; append ?pilot=1 to the URL to reveal. */}
+          {showPilot && (
           <div className="grid grid-cols-2 gap-3 opacity-60">
             <button
               onClick={() => startPilot("A")}
@@ -351,6 +360,7 @@ export default function HomePage() {
               💬 Prueba B
             </button>
           </div>
+          )}
         </div>
 
         {/* System health badge — preflight for the facilitator */}
