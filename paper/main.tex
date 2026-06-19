@@ -491,44 +491,30 @@ completa y las transcripciones de conversaci\'on en JSONL para la codificaci\'on
   \centering
   \footnotesize
   \begin{tikzpicture}[
-    node distance=2.4mm and 4mm,
+    node distance=3mm and 3mm,
     step/.style={draw, rounded corners=2pt, fill=blue!7, align=center, font=\scriptsize,
-                 inner sep=3pt, text width=15mm, minimum height=8mm},
-    store/.style={draw, fill=green!10, align=center, font=\scriptsize, inner sep=3pt,
-                  text width=15mm, minimum height=8mm},
-    >={Stealth[length=1.6mm]}]
-    \node[step] (assign) {Asignaci\'on (servidor)};
-    \node[step, right=of assign] (inter) {Interacci\'on tutor + tareas};
-    \node[step, right=of inter] (quest) {Cuestionarios};
-    \node[store, right=of quest] (db) {SQLite \texttt{sonic.db}};
-    \node[step, below=6mm of db] (panel) {Panel del facilitador};
-    \node[store, left=of panel] (export) {Export CSV / JSON / JSONL};
-    \node[step, left=of export] (analysis) {An\'alisis (\emph{script})};
+                 inner sep=2pt, text width=12mm, minimum height=7mm},
+    store/.style={draw, fill=green!10, align=center, font=\scriptsize, inner sep=2pt,
+                  text width=12mm, minimum height=7mm},
+    >={Stealth[length=1.4mm]}]
+    \node[step] (assign) {Asignaci\'on};
+    \node[step, below=of assign] (inter) {Interacci\'on};
+    \node[step, below=of inter] (quest) {Cuestionarios};
+    \node[store, below=of quest] (db) {SQLite};
+    \node[store, below=of db] (export) {Export};
+    \node[step, below=of export] (analysis) {An\'alisis};
     \draw[->] (assign) -- (inter);
     \draw[->] (inter) -- (quest);
     \draw[->] (quest) -- (db);
-    \draw[->] (db) -- (panel);
     \draw[->] (db) -- (export);
     \draw[->] (export) -- (analysis);
-    \draw[->] (db.north) to[out=110,in=70] node[above,font=\scriptsize] {telemetr\'ia continua} (inter.north);
   \end{tikzpicture}
   \caption{Flujo de recolecci\'on y an\'alisis de datos, de extremo a extremo.}
   \label{fig:flow}
 \end{figure}
 
-El an\'alisis descriptivo por condici\'on est\'a disponible en vivo en el \textbf{panel del
-facilitador} (Fig.~\ref{fig:admin}), que muestra el balance A/B, gr\'aficos comparativos y la tabla
-de estad\'isticas; el an\'alisis inferencial (Mann--Whitney $U$, $\delta$ de Cliff, $d$ de Cohen) se
+El an\'alisis inferencial (Mann--Whitney $U$, $\delta$ de Cliff, $d$ de Cohen) se
 ejecuta sobre el CSV con el \emph{script} incluido en el repositorio.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/admin.png}
-  \caption{Panel del facilitador (programa real): balance por condici\'on, gr\'aficos comparativos
-  A vs.\ B, estad\'istica descriptiva y listado de participantes; los pilotos se excluyen de los
-  estad\'isticos.}
-  \label{fig:admin}
-\end{figure}
 
 %--------------------------------------------------------------
 \section{Resultados}
