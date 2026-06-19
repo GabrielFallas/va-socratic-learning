@@ -10,5 +10,3 @@ tests/e2e/.last-run.json
 
 tsconfig.tsbuildinfo
 data
-
-*.png
