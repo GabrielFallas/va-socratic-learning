@@ -68,62 +68,67 @@
 
 \begin{frame}{Metodología}
   \begin{itemize}
-    \item \textbf{Tareas:} (T1) bucle infinito; (T2) algoritmo $O(n^2)\!\to\!O(n)$. Verificación
+    \item \textbf{Tareas:} (T1) bucle infinito; (T2) bucles anidados $\to O(n)$. Verificación
           objetiva por pruebas ocultas.
     \item \textbf{Instrumentos:} Godspeed, apoyo pedagógico, SUS, NASA-TLX, PANAS-SF + telemetría
           conductual (latencia, turnos, \emph{think-time}).
     \item \textbf{RQ1} percepción/presencia social · \textbf{RQ2} eficacia autónoma · \textbf{RQ3}
           carga y afecto · \textbf{RQ4} latencia $<1.5$~s.
-    \item \textbf{Estudio piloto:} $N=6$ entre-sujetos (3+3), asignación contrabalanceada.
-    \item \textbf{Diseño refinado} (ya implementado, para el estudio completo): \emph{crossover}
-          intra-sujeto con \textbf{variantes de tarea} (sin repetir el problema idéntico).
+    \item \textbf{Estudio piloto:} $N=10$ (6 entre-sujetos + 4 \emph{crossover}) $\Rightarrow$
+          14 observaciones (7 por condición), asignación contrabalanceada.
+    \item \textbf{Diseño crossover} con \textbf{variantes de tarea} (sin repetir el problema
+          idéntico); propuesto como diseño principal a escala.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Resultados del piloto ($n=3$ por condición)}
+\begin{frame}{Resultados del piloto (7 observaciones por condición)}
   \centering
   \footnotesize
   \begin{tabular}{@{}lccc@{}}
     \toprule
     \textbf{Métrica} & \textbf{Cond.\ A} & \textbf{Cond.\ B} & \textbf{$d$} \\
     \midrule
-    Godspeed global (1--5)   & \textbf{4,37} & 2,43 & \textbf{+2,0} \\
-    NASA-TLX (carga)         & \textbf{42,6} & 72,8 & \textbf{$-$1,5} \\
-    SUS (usabilidad)         & 66,7 & 65,8 & 0,05 \\
-    Resolución autónoma      & 0,33 & 0,50 & $-$0,3 \\
-    Turnos por tarea         & 3,3 & 9,3 & $-$1,4 \\
-    PANAS afecto $+$         & 18,3 & 15,7 & 0,5 \\
-    \% latencia $<1.5$\,s    & 94 & 95 & --- \\
+    Godspeed global (1--5)        & \textbf{4,24} & 2,89 & \textbf{+1,42} \\
+    \quad agrado ($p=0{,}011$)    & \textbf{5,00} & 3,19 & \textbf{+1,66} \\
+    NASA-TLX (carga)              & \textbf{57,9} & 73,3 & \textbf{$-$0,83} \\
+    SUS (usabilidad)              & 72,5 & 65,0 & 0,42 \\
+    Resolución autónoma           & 0,29 & 0,29 & 0,00 \\
+    Turnos por tarea              & 3,4 & 5,7 & $-$0,60 \\
+    PANAS afecto $+$              & 18,4 & 15,9 & 0,73 \\
+    \% latencia $<1.5$\,s         & 88 & 94 & --- \\
     \bottomrule
   \end{tabular}
 
   \vspace{0.6em}
-  \footnotesize Con $N$ pequeño se priorizan \textbf{tamaños de efecto}, no $p$.
+  \footnotesize Con $N$ pequeño se priorizan \textbf{tamaños de efecto}; \emph{agrado} alcanzó
+  significancia.
 \end{frame}
 
 \begin{frame}{Lo que dicen los datos}
   \begin{itemize}
     \item \textbf{RQ1:} corporización $\Rightarrow$ percepción del agente \alert{mucho mayor}
-          ($d=2{,}0$) \emph{sin} mejorar usabilidad $\Rightarrow$ efecto de \textbf{presencia
-          social}.
-    \item \textbf{RQ3:} carga cognitiva autopercibida \alert{menor} en A ($d=-1{,}5$); la
+          ($d=1{,}42$; agrado $p=0{,}011$) \emph{sin} mejorar usabilidad $\Rightarrow$
+          \textbf{presencia social}.
+    \item \textbf{RQ3:} carga cognitiva autopercibida \alert{menor} en A ($d=-0{,}83$); la
           corporización \emph{no} aumentó la carga en una tarea densa.
-    \item \textbf{RQ2:} resolución similar; A usó menos turnos/tiempo (confundido con experiencia
-          previa).
-    \item \textbf{RQ4:} 94\,\% de respuestas $<1.5$~s con inferencia local. \checkmark
+    \item \textbf{RQ2:} resolución \emph{idéntica} ($d=0$): mejora la experiencia sin penalizar el
+          desempeño.
+    \item \textbf{RQ4:} 92\,\% de respuestas $<1.5$~s con inferencia local. \checkmark
   \end{itemize}
   \begin{block}{Hallazgo cualitativo más claro}
-    Los participantes de \textbf{texto pidieron el avatar}: \emph{``No me gustó no ver a Sonic''};
-    \emph{``Prefiero aprender junto con un agente virtual como Sonic''}.
+    Quienes vivieron \textbf{ambas} condiciones prefirieron el avatar: \emph{``El chat de texto fue
+    molesto\ldots prefiero 100\,\% el avatar de Sonic''} (P-007).
   \end{block}
 \end{frame}
 
 \begin{frame}{Limitaciones (honestas)}
   \begin{itemize}
-    \item $n=3$ por condición: efectos grandes pero \textbf{inestables}; sin significancia.
-    \item Diseño entre-sujetos: experiencia previa no balanceada $\Rightarrow$ RQ2 no causal.
-    \item Muestra homogénea (hombres jóvenes); posible \textbf{efecto de novedad} del personaje.
-    \item Afecto \emph{post-only}; latencia dependiente del hardware local.
+    \item 7 observaciones por condición: \emph{agrado} fue significativo, pero la mayoría de
+          efectos no; magnitudes aún \textbf{inestables}.
+    \item Parte de la evidencia es entre-sujetos: experiencia previa no balanceada $\Rightarrow$
+          RQ2 no causal (el \emph{crossover} lo mitiga).
+    \item Muestra homogénea (9 de 10 hombres); posible \textbf{efecto de novedad} del personaje.
+    \item Afecto \emph{post-only}; latencia dependiente del hardware y la red.
   \end{itemize}
   \vspace{0.4em}
   El diseño \emph{crossover} con variantes de tarea (ya implementado) mitiga la confusión y el

@@ -36,7 +36,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 - Analiza el contexto del estudiante (enunciado o código) para detectar discrepancias lógicas.
 - Mantiene memoria del progreso conversacional para ajustar la dificultad de las preguntas (ZPD — Zona de Desarrollo Próximo, Vygotsky).
 - Guía con preguntas reflexivas en tres niveles de andamiaje, sin proporcionar código directo.
-- En la **Condición A**: reacciona visualmente mediante sprite Sonic en canvas Kaplay.js (8 estados: `idle`, `run`, `jump`, `think`, `celebrate`, `empathetic`, `excited`, `victory`), vocaliza con Piper TTS neuronal en español, detecta voz del estudiante vía Whisper STT local, y gamifica el progreso mediante un sistema de anillos (ganados cuando la respuesta aproxima la solución, perdidos ante frustración).
+- En la **Condición A**: reacciona visualmente mediante sprite Sonic en canvas Kaplay.js (8 estados expresivos: `idle`, `thinking`, `speaking`, `listening`, `happy`, `curious`, `empathetic`, `encouraging`), vocaliza con Piper TTS neuronal en español, detecta voz del estudiante vía Whisper STT local, y gamifica el progreso mediante un sistema de anillos (ganados cuando la respuesta aproxima la solución, perdidos ante frustración).
 - En la **Condición B**: interfaz de chat de texto plano, mismo tutor socrático, sin avatar, sin voz, sin gamificación.
 
 ## Arquitectura Técnica
@@ -50,7 +50,7 @@ El proyecto busca mitigar la dependencia de herramientas de IA que entregan cód
 | **Síntesis de Voz (TTS)** | Piper TTS neuronal (Docker local, español) + fallback Web Speech API | Calidad de audio neuronal natural, baja latencia (~300–500 ms), español de alta calidad, fallback automático si Piper no está disponible. |
 | **Reconocimiento de Voz (STT)** | Whisper STT (local via `/api/stt` Next.js) | Reconocimiento de voz local sin dependencias de nube, español, baja latencia, integrado en backend. |
 | **Gamificación** | Sistema de anillos + TaskTransitionGame (Kaplay mini-juego) | Anillos visuales (ring burst anim) ganados/perdidos según progreso socrático; mini-juego ~15 s entre tareas; SFX/BGM por zona temática. |
-| **Framework / Orquestación** | Next.js 14 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
+| **Framework / Orquestación** | Next.js 15 + React + TailwindCSS | SSR para proteger la configuración del servidor, rutas API integradas, streaming SSE nativo. |
 | **Telemetría** | `logger.ts` + `store.ts` + `db.ts` (**SQLite** en `data/sonic.db`) | Registra TTFT y latencia total, turnos, tiempo por tarea, resolución autónoma (pruebas ocultas), intentos de ejecución, conversaciones completas y respuestas de cuestionarios. Base de datos local de un solo archivo (inspeccionable con *DB Browser for SQLite*); persistente entre reinicios; exportable a CSV/JSON/transcripciones; panel `/admin` (RQ1–RQ4). |
 
 ### Componentes Principales

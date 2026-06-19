@@ -14,6 +14,8 @@
 \usepackage{amsmath}
 \usepackage{url}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds,calc}
 \usepackage[hidelinks]{hyperref}
 
 % Marcador visible para los datos empíricos que el estudio aún debe completar.
@@ -45,15 +47,17 @@ gamificaci\'on por anillos; y una condici\'on de control (B) de chat de texto pl
 pruebas ocultas, se miden la eficacia aut\'onoma, la carga cognitiva (NASA-TLX), la percepci\'on
 del agente (Godspeed), la usabilidad (SUS), el afecto post-sesi\'on (PANAS-SF) y un conjunto de
 m\'etricas conductuales autom\'aticas (latencia, turnos, tiempo de reflexi\'on, uso de voz).
-En el piloto entre-sujetos ($N=6$; 3 por condici\'on), la condici\'on corporizada obtuvo
-puntuaciones de percepci\'on del agente marcadamente superiores (Godspeed global $d\approx2{,}0$)
-y una carga cognitiva autopercibida menor (NASA-TLX $d\approx-1{,}5$), con usabilidad (SUS)
-equivalente y eficacia de resoluci\'on similar; la latencia se mantuvo bajo 1.5~s en el 94\,\% de
-las respuestas. El an\'alisis cualitativo refuerza el patr\'on: los participantes de la condici\'on
-de texto pidieron expl\'icitamente el avatar. Dado el tama\~no muestral, los resultados son
-preliminares y se reportan como tama\~nos de efecto. Los hallazgos contribuyen a comprender el rol
-del \emph{embodiment} en tutores socr\'aticos para programaci\'on y su efecto sobre la
-autonom\'ia del aprendiz.
+En un estudio piloto de $N=10$ participantes (6 entre-sujetos y 4 intra-sujeto, que aportan 14
+observaciones, 7 por condici\'on), la condici\'on corporizada obtuvo puntuaciones de percepci\'on
+del agente marcadamente superiores (Godspeed global $d=1{,}42$; subescala de agrado $d=1{,}66$,
+\mbox{$p=0{,}011$}) y una carga cognitiva autopercibida menor (NASA-TLX $d=-0{,}83$), con
+usabilidad (SUS) ligeramente mejor y eficacia de resoluci\'on equivalente; el
+\emph{time-to-first-token} se mantuvo bajo 1.5~s en el 92\,\% de las respuestas. El an\'alisis
+cualitativo refuerza el patr\'on: varios participantes ---incluidos quienes experimentaron ambas
+condiciones--- prefirieron expl\'icitamente el avatar sobre el texto. Dado el tama\~no muestral,
+los resultados son preliminares y se reportan como tama\~nos de efecto. Los hallazgos contribuyen a
+comprender el rol del \emph{embodiment} en tutores socr\'aticos para programaci\'on y su efecto
+sobre la autonom\'ia del aprendiz.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -77,7 +81,7 @@ multimodal (avatar reactivo, voz neuronal, reconocimiento de voz y gamificaci\'o
 percepci\'on del agente y la eficacia pedag\'ogica aut\'onoma frente al mismo tutor en modo de
 texto plano. La contribuci\'on es triple: (i) un sistema reproducible, completamente local y
 sin dependencias de nube; (ii) un dise\~no experimental que a\'isla el \emph{embodiment}
-manteniendo constante el texto del tutor; y (iii) una bater\'ia de m\'etricas conductuales
+manteniendo constante el texto del tutor; y (iii) un conjunto de m\'etricas conductuales
 autom\'aticas que reduce la dependencia del auto-reporte.
 
 El resto del art\'iculo se organiza as\'i: la Secci\'on~\ref{sec:related} revisa los trabajos
@@ -90,76 +94,202 @@ concluye.
 \section{Trabajos Relacionados}
 \label{sec:related}
 
+\subsection{IA generativa y descarga cognitiva en programaci\'on}
+La irrupci\'on de asistentes de c\'odigo basados en LLM transform\'o la pr\'actica de aprender a
+programar. Phung et al.~\cite{phung2023generative} documentan tanto el potencial de estos modelos
+para generar retroalimentaci\'on como su capacidad de resolver directamente los ejercicios, y
+Raihan et al.~\cite{raihan2025llms} sintetizan su uso en educaci\'on en computaci\'on. El riesgo
+pedag\'ogico es la \emph{descarga cognitiva}: si el sistema devuelve la soluci\'on, el estudiante
+omite el ciclo de prueba, error y depuraci\'on del que dependen los modelos mentales robustos. De
+ah\'i el inter\'es por reorientar estos modelos de ``solucionadores'' a ``tutores'' que retienen la
+respuesta.
+
 \subsection{Tutor\'ia socr\'atica con modelos de lenguaje}
-Diversos trabajos exploran el uso de LLMs como tutores socr\'aticos que evitan entregar la
-respuesta. \emph{SocraticLM}~\cite{liu2024socraticlm} y \emph{SocraticAI}~\cite{sunil2025socraticai}
-estructuran la interacci\'on en niveles de andamiaje; \emph{MathDial}~\cite{macina2023mathdial}
-aporta un corpus de di\'alogos tutoriales con propiedades pedag\'ogicas ricas; y Jurenka et
-al.~\cite{jurenka2024problem} alinean el LLM con objetivos pedag\'ogicos mediante aprendizaje por
-refuerzo. Tack y Piech~\cite{tack2022clean} sientan bases para evaluar la calidad tutorial.
-Estudios recientes reportan ganancias de aprendizaje y compromiso metacognitivo en cursos STEM
-introductorios~\cite{ali2026tool,xi2026investigating,essel2024aimediated,kao2025socratic}.
+El m\'etodo socr\'atico ---guiar mediante preguntas en lugar de dar la respuesta--- se ha vuelto un
+patr\'on recurrente para esa reorientaci\'on. \emph{SocraticLM}~\cite{liu2024socraticlm} y
+\emph{SocraticAI}~\cite{sunil2025socraticai} estructuran la interacci\'on en niveles de andamiaje
+progresivo; \emph{MathDial}~\cite{macina2023mathdial} aporta un corpus de di\'alogos tutoriales con
+propiedades pedag\'ogicas ricas que sirve de referencia para entrenar y evaluar; y Jurenka et
+al.~\cite{jurenka2024problem} alinean el modelo con objetivos pedag\'ogicos para sostener la
+indagaci\'on sin revelar la soluci\'on. En el plano de la evaluaci\'on, Tack y
+Piech~\cite{tack2022clean} proponen criterios para juzgar la calidad tutorial de un agente, un
+problema no trivial dado que ``parecer'' un buen tutor no implica producir aprendizaje. Estudios
+m\'as recientes reportan ganancias de aprendizaje, compromiso metacognitivo y mejor percepci\'on
+del andamiaje en cursos STEM introductorios~\cite{ali2026tool,xi2026investigating,kao2025socratic},
+y Essel et al.~\cite{essel2024aimediated} vinculan espec\'ificamente el cuestionamiento mediado por
+IA con el compromiso del estudiante ---trabajo del que adaptamos nuestra escala de apoyo
+pedag\'ogico. Una limitaci\'on transversal es que la \emph{planificaci\'on adaptativa} del di\'alogo
+(decidir cu\'ando y cu\'anto andamiar) sigue siendo incipiente~\cite{dong2026learning}; nuestro
+sistema adopta una pol\'itica simple y expl\'icita de tres niveles ligada al estancamiento del
+estudiante.
 
 \subsection{Agentes conversacionales corporizados en educaci\'on}
-La revisi\'on de Sonlu et al.~\cite{sonlu2024scoping} sintetiza una d\'ecada de agentes
-conversacionales corporizados, evidenciando efectos positivos de la presencia social pero
-resultados heterog\'eneos seg\'un la tarea. Trabajos en realidad virtual e interacci\'on
-multimodal~\cite{elhajji2025architecture,yang2025embodied} sugieren que la corporizaci\'on
-puede mejorar el aprendizaje de programaci\'on, aunque advierten sobre la carga cognitiva
-adicional y el riesgo del Valle Inquietante~\cite{mori1970uncanny}. Los meta-an\'alisis
-recientes matizan el panorama: los agentes pedag\'ogicos producen un efecto positivo
-peque\~no sobre el aprendizaje~\cite{xu2026educationalagents} y solo reducen ligeramente la
-carga cognitiva, llegando incluso a \emph{aumentarla} en materiales complejos o sesiones
-prolongadas~\cite{li2025cognitiveload}; un punto especialmente relevante para una tarea
-cognitivamente densa como la depuraci\'on de c\'odigo.
+M\'as all\'a del texto, una l\'inea de trabajo dota al tutor de un cuerpo ---avatar, voz, gestos.
+La revisi\'on de alcance de Sonlu et al.~\cite{sonlu2024scoping} sintetiza una d\'ecada de agentes
+conversacionales corporizados y concluye que la \emph{presencia social} suele mejorar la
+experiencia, pero con resultados heterog\'eneos seg\'un la tarea, la poblaci\'on y el grado de
+realismo. En programaci\'on y entornos inmersivos, propuestas multimodales y de realidad
+virtual~\cite{elhajji2025architecture,yang2025embodied} sugieren que la corporizaci\'on puede
+favorecer el aprendizaje y la motivaci\'on, aunque advierten dos riesgos: una carga perceptiva
+adicional y el rechazo cuando el realismo es casi-humano pero imperfecto (\emph{Valle Inquietante})
+~\cite{mori1970uncanny}. Nuestro uso de un personaje estilizado y reconocible (un sprite 2D) en
+lugar de un humano fotorrealista es, en parte, una respuesta a este \'ultimo riesgo.
+
+\subsection{Carga cognitiva, novedad y medici\'on}
+La evidencia agregada invita a la cautela. El meta-an\'alisis de Xu et al.~\cite{xu2026educationalagents}
+estima un efecto \emph{positivo pero peque\~no} de los agentes pedag\'ogicos sobre el aprendizaje, y
+el de Li et al.~\cite{li2025cognitiveload} muestra que solo reducen levemente la carga cognitiva e
+incluso la \emph{aumentan} en materiales complejos o sesiones largas ---un riesgo directamente
+pertinente para una tarea densa como la depuraci\'on. A ello se suma que las medidas de auto-reporte
+y las conductuales correlacionan d\'ebilmente~\cite{dang2020selfreport}, por lo que apoyarse solo en
+cuestionarios puede inducir conclusiones fr\'agiles, especialmente con muestras peque\~nas. Estos
+hallazgos motivan nuestras decisiones metodol\'ogicas: medir la carga (NASA-TLX) y el afecto
+(PANAS-SF) con instrumentos validados, complementarlos con telemetr\'ia conductual objetiva, y
+tratar el atractivo inicial del personaje como un posible \emph{efecto de novedad} a controlar.
 
 \subsection{Brecha y posicionamiento}
-La literatura aborda por separado (a) la calidad socr\'atica del di\'alogo y (b) el efecto de la
-corporizaci\'on, frecuentemente con tutores cuyo \emph{contenido} difiere entre condiciones, lo
-que confunde el efecto del \emph{embodiment} con el de la persona. Adem\'as, la planificaci\'on
-adaptativa del di\'alogo a\'un es incipiente~\cite{dong2026learning}. Este trabajo se posiciona en
-esa brecha: compara dos condiciones con \emph{texto de tutor id\'entico}, aislando el
-\emph{embodiment} (avatar + voz + gamificaci\'on), y mide la autonom\'ia con verificaci\'on
-objetiva (pruebas ocultas) en lugar de auto-reporte.
+En conjunto, la literatura aborda por separado (a) la calidad socr\'atica del di\'alogo y (b) el
+efecto de la corporizaci\'on, y con frecuencia compara condiciones cuyo \emph{contenido} de tutor
+difiere, lo que confunde el efecto del \emph{embodiment} con el de una persona o un guion distinto.
+Adem\'as, la eficacia suele medirse por auto-reporte. Este trabajo se posiciona en esa brecha en
+tres puntos: (i)~compara dos condiciones con \emph{texto de tutor id\'entico}, aislando el
+\emph{embodiment} (avatar + voz + gamificaci\'on); (ii)~mide la eficacia aut\'onoma con
+verificaci\'on \emph{objetiva} (pruebas ocultas) en lugar de auto-reporte; y (iii)~combina
+auto-reporte, telemetr\'ia conductual y an\'alisis cualitativo para sortear la d\'ebil correlaci\'on
+entre tipos de medida.
 
 %--------------------------------------------------------------
 \section{Desarrollo del Agente}
 \label{sec:agent}
 
 \subsection{Arquitectura del sistema}
-El sistema es una aplicaci\'on web Next.js (App Router) con servicios de IA completamente
-locales, sin claves de API ni dependencias de nube. Los componentes principales son:
+El sistema es una aplicaci\'on web \textbf{Next.js 15} (App Router, React~19, TypeScript) cuyos
+servicios de IA corren \emph{en local}, sin claves de API ni dependencias de nube
+(Fig.~\ref{fig:arch}). Se organiza en tres capas: (i)~un \textbf{cliente} en el navegador con el
+panel de c\'odigo, el chat, el avatar y la voz; (ii)~un \textbf{servidor} Next.js que expone rutas
+de API y orquesta la inferencia; y (iii)~tres \textbf{servicios locales} ---el modelo de lenguaje,
+la s\'intesis y el reconocimiento de voz--- m\'as una base de datos embebida para la telemetr\'ia.
+
+\begin{figure}[t]
+  \centering
+  \footnotesize
+  \begin{tikzpicture}[
+    node distance=3.2mm,
+    box/.style={draw, rounded corners=2pt, align=center, inner sep=2.6pt, font=\scriptsize, minimum height=6.5mm},
+    cli/.style={box, fill=blue!8},
+    srv/.style={box, fill=orange!12},
+    svc/.style={box, fill=green!10},
+    lbl/.style={font=\scriptsize\bfseries},
+    >={Stealth[length=1.6mm]}]
+    % Client tier
+    \node[cli] (code) {Panel de c\'odigo\\(Pyodide \emph{worker})};
+    \node[cli, right=of code] (chat) {Chat socr\'atico};
+    \node[cli, right=of chat] (avatar) {Avatar Kaplay\\+ anillos};
+    \node[cli, right=of avatar] (voice) {Voz\\(TTS/STT)};
+    \node[lbl, left=2mm of code] (climbl) {Cliente};
+    \begin{scope}[on background layer]
+      \node[draw, dashed, rounded corners, fit=(climbl)(code)(chat)(avatar)(voice), inner sep=2.2mm] (clitier) {};
+    \end{scope}
+    % Server tier
+    \node[srv, below=10mm of chat] (chatapi) {\texttt{/api/chat}\\(SSE \emph{streaming})};
+    \node[srv, left=of chatapi] (sessapi) {\texttt{/api/session}};
+    \node[srv, right=of chatapi] (sttapi) {\texttt{/api/stt}};
+    \node[lbl, left=2mm of sessapi] (srvlbl) {Servidor};
+    \begin{scope}[on background layer]
+      \node[draw, dashed, rounded corners, fit=(srvlbl)(sessapi)(chatapi)(sttapi), inner sep=2.2mm] (srvtier) {};
+    \end{scope}
+    % Service tier
+    \node[svc, below=10mm of sessapi] (db) {SQLite\\\texttt{sonic.db}};
+    \node[svc, right=of db] (ollama) {Ollama\\Gemma~3 12B};
+    \node[svc, right=of ollama] (piper) {Piper TTS};
+    \node[svc, right=of piper] (whisper) {Whisper STT};
+    \node[lbl, left=2mm of db] {Servicios locales};
+    % edges
+    \draw[<->] (chat) -- (chatapi);
+    \draw[<->] (code.south) -- ++(0,-3mm) -| (sessapi.north);
+    \draw[<->] (voice.south) -- ++(0,-3mm) -| (sttapi.north);
+    \draw[<->] (chatapi) -- (ollama);
+    \draw[<->] (sessapi) -- (db);
+    \draw[<->] (sttapi) -- (whisper);
+    \draw[<->] (voice.east) to[out=-20,in=20] (piper.north east);
+  \end{tikzpicture}
+  \caption{Arquitectura en tres capas. El texto del tutor es id\'entico en ambas condiciones; el
+  avatar, la voz y la gamificaci\'on (sombreado) solo se activan en la Condici\'on~A.}
+  \label{fig:arch}
+\end{figure}
+
+Los componentes principales son:
 \begin{itemize}
-  \item \textbf{Motor de razonamiento.} Ollama con Gemma~3 12B (cuantizaci\'on Q4\_K\_M,
-        inferencia GPU local). El \emph{system prompt} socr\'atico proh\'ibe entregar c\'odigo,
-        define tres niveles de andamiaje (ZPD)~\cite{vygotsky1978mind} y detecta frustraci\'on.
-  \item \textbf{Avatar 2D (Condici\'on A).} Canvas Kaplay.js con sprite reactivo de 8 estados
-        expresivos, controlado por una etiqueta \texttt{[AVATAR\_STATE]} que el LLM emite al
-        final de cada respuesta y el cliente elimina antes de mostrar el texto.
+  \item \textbf{Motor de razonamiento.} Ollama sirve a Gemma~3 12B (cuantizaci\'on Q4\_K\_M,
+        inferencia en GPU local). La ruta \texttt{/api/chat} construye el \emph{system prompt}
+        socr\'atico, env\'ia el historial al modelo y retransmite la respuesta al cliente por
+        \emph{streaming} de tokens (Server-Sent Events) para minimizar la latencia percibida
+        (objetivo $<1.5$~s de \emph{time-to-first-token}).
+  \item \textbf{Avatar 2D (Condici\'on A).} Un \emph{canvas} Kaplay.js renderiza un sprite reactivo
+        con \textbf{ocho estados expresivos}; su control se detalla en la
+        Secci\'on~\ref{sec:scaffold}.
   \item \textbf{Voz (Condici\'on A).} S\'intesis neuronal Piper~TTS (espa\~nol) con respaldo a la
         Web Speech API; reconocimiento de voz local Whisper~STT v\'ia \texttt{/api/stt}.
-  \item \textbf{Gamificaci\'on (Condici\'on A).} Sistema de anillos, mini-juego de transici\'on
-        entre tareas y efectos de sonido/m\'usica por zona tem\'atica.
-  \item \textbf{Ejecuci\'on de c\'odigo.} Editor real con ejecuci\'on de Python en el navegador
-        (Pyodide, Web Worker con \emph{timeout}) contra un arn\'es de pruebas ocultas que
-        determina la resoluci\'on aut\'onoma.
-  \item \textbf{Telemetr\'ia.} Registro persistente en disco (JSON) de mensajes, latencias,
-        resultados de tareas y cuestionarios; exportaci\'on a CSV/JSON y panel del facilitador.
+  \item \textbf{Gamificaci\'on (Condici\'on A).} Sistema de anillos (recompensa al acertar),
+        mini-juego de transici\'on entre tareas y efectos de sonido/m\'usica por zona tem\'atica.
+  \item \textbf{Ejecuci\'on de c\'odigo.} Un editor real ejecuta Python en el navegador (Pyodide en
+        un \emph{Web Worker} con \emph{timeout}) y anexa un arn\'es de pruebas ocultas que
+        determina objetivamente la resoluci\'on aut\'onoma.
+  \item \textbf{Telemetr\'ia.} Persistencia en una base SQLite embebida; exportaci\'on a
+        CSV/JSON/transcripciones y panel del facilitador (Secci\'on~\ref{sec:telemetry}).
 \end{itemize}
-La comunicaci\'on usa \emph{streaming} de tokens v\'ia Server-Sent Events para minimizar la
-latencia percibida (objetivo $<1.5$~s de \emph{time-to-first-token}).
+
+\subsection{Andamiaje socr\'atico y control afectivo del avatar}
+\label{sec:scaffold}
+El comportamiento pedag\'ogico se especifica en un \emph{system prompt} compartido por ambas
+condiciones, con tres reglas duras: no generar ni corregir c\'odigo, no se\~nalar la l\'inea
+err\'onea, y terminar siempre con una pregunta reflexiva (respuestas de 3--4 oraciones, sin
+emojis). El conocimiento del error real se entrega al modelo solo para razonar, nunca para
+revelarlo.
+
+\paragraph{Tres niveles de andamiaje (ZPD)} Operacionalizando la Zona de Desarrollo
+Pr\'oximo~\cite{vygotsky1978mind}, la ayuda escala \emph{solo} si el estudiante acumula tres o m\'as
+turnos sin avanzar:
+\begin{itemize}
+  \item \textbf{Nivel 1 (turnos 1--2): preguntas amplias} sobre el objetivo del c\'odigo
+        (p.\,ej.\ ``¿qu\'e condici\'on debe volverse falsa para que el bucle se detenga?'').
+  \item \textbf{Nivel 2 (turnos 3--4): orientaci\'on conceptual} hacia la estructura o el invariante
+        (p.\,ej.\ ``¿qu\'e valor tiene esa variable en la primera iteraci\'on frente a la
+        segunda?'').
+  \item \textbf{Nivel 3 (turnos 5+): pista estructural, todav\'ia sin c\'odigo}, dirigiendo la
+        atenci\'on a la l\'inea o a la complejidad (``si la lista tiene $N$ elementos, ¿cu\'antas
+        comparaciones hace tu algoritmo?'').
+\end{itemize}
+
+\paragraph{Detecci\'on de estado afectivo} El sistema combina dos mecanismos. Primero, una
+\emph{regla de des-escalada}: ante marcadores l\'exicos de frustraci\'on (``no entiendo'', ``no
+s\'e'', ``me rindo'', ``ayuda'', ``no puedo'') el tutor valida el esfuerzo, retrocede un nivel de
+andamiaje y pide reformular el problema en palabras simples. Segundo, una \emph{inferencia
+afectiva} que el propio modelo realiza sobre el turno del estudiante para seleccionar el estado
+expresivo del avatar. Estos estados se transmiten mediante una etiqueta
+\texttt{[AVATAR\_STATE:\,estado]} que el modelo a\~nade al final de la respuesta (Condici\'on~A) y
+que el cliente \emph{elimina} antes de mostrar el texto, de modo que la transcripci\'on visible es
+id\'entica a la de la Condici\'on~B. Los ocho estados son: cuatro \emph{inferidos por el modelo}
+seg\'un el contenido ---\textbf{curious} (pregunta reflexiva, por defecto), \textbf{happy}
+(el estudiante se acerca a la soluci\'on), \textbf{empathetic} (frustraci\'on) y
+\textbf{encouraging} (motivar a seguir)--- y cuatro \emph{dirigidos por eventos de interacci\'on}
+en el cliente ---\textbf{thinking} (mientras se genera la respuesta), \textbf{speaking} (durante la
+locuci\'on TTS), \textbf{listening} (durante la captura de voz/espera) e \textbf{idle} (reposo).
+As\'i, el avatar reacciona tanto al \emph{qu\'e} dice el estudiante como al \emph{momento} de la
+interacci\'on.
 
 \subsection{Decisi\'on de dise\~no clave: aislar el \emph{embodiment}}
 Ambas condiciones comparten el \emph{mismo} texto de tutor; la \'unica diferencia a nivel de
-\emph{prompt} es el bloque de control del avatar a\~nadido en la Condici\'on~A. As\'i, la
-comparaci\'on A vs.\ B mide el efecto de la corporizaci\'on (sprite + voz + gamificaci\'on) y no
-una persona distinta.
+\emph{prompt} es el bloque de control del avatar a\~nadido en la Condici\'on~A (cuya \'unica salida,
+la etiqueta de estado, se elimina antes de mostrarse). As\'i, la comparaci\'on A vs.\ B mide el
+efecto de la corporizaci\'on (sprite + voz + gamificaci\'on) y no una persona o un texto distinto.
+Las Figuras~\ref{fig:condA} y~\ref{fig:condB} muestran ambas interfaces.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/condA-initial.png}
-  \caption{Condici\'on A (corporizada): avatar Sonic en canvas Kaplay.js, HUD de anillos y panel
-  de c\'odigo con ejecuci\'on en Pyodide.}
+  \caption{Condici\'on A (corporizada): avatar Sonic en \emph{canvas} Kaplay.js, HUD de anillos y
+  panel de c\'odigo con ejecuci\'on en Pyodide.}
   \label{fig:condA}
 \end{figure}
 
@@ -171,12 +301,51 @@ una persona distinta.
   \label{fig:condB}
 \end{figure}
 
+\subsection{Telemetr\'ia y datos registrados}
+\label{sec:telemetry}
+Toda la sesi\'on se persiste en una base SQLite embebida (\texttt{sonic.db}) anclada a la ra\'iz del
+proyecto. El esquema tiene cuatro tablas: \texttt{sessions} (una fila por participante con el
+registro completo en JSON m\'as columnas indexadas \texttt{condition}/\texttt{isPilot}/tiempos),
+\texttt{events} (bit\'acora append-only de hitos: inicio, resultado de tarea, cuestionario, cierre),
+\texttt{assignment} (contador de contrabalanceo persistente, para que la numeraci\'on
+P-001\dots\ y el balance A/B sobrevivan reinicios) y \texttt{meta}. Por cada sesi\'on se
+almacenan, y se usan as\'i:
+\begin{itemize}
+  \item \textbf{Mensajes:} rol, contenido, marca de tiempo, \texttt{inputMode} (voz/teclado) y
+        \texttt{latencyMs}/\texttt{ttftMs} por respuesta del tutor. Sirven para la latencia (RQ4),
+        el \emph{think-time} entre turnos (reflexi\'on, RQ2), la verbosidad y el uso de voz (RQ1).
+  \item \textbf{Resultados de tarea:} \texttt{resolvedAutonomously} y \texttt{testsPassed} (eficacia
+        objetiva, RQ2), \texttt{turns}, \texttt{timeSpentSeconds}, \texttt{codeRunAttempts} y
+        \texttt{codeEdited} (esfuerzo y proceso), \texttt{ringsCollected} (compromiso gamificado) y
+        la \texttt{condition} de esa tarea (clave del dise\~no \emph{crossover}).
+  \item \textbf{Cuestionarios:} respuestas crudas y puntajes derivados por instrumento, etiquetados
+        por condici\'on, que alimentan RQ1 (Godspeed, apoyo pedag\'ogico, SUS) y RQ3 (NASA-TLX,
+        PANAS-SF).
+  \item \textbf{Metadatos del dise\~no:} \texttt{design}, \texttt{sequence} y los tiempos de
+        inicio/cierre, que permiten combinar las observaciones entre-sujetos y \emph{crossover}.
+\end{itemize}
+Tres exportaciones derivan de esta base: un CSV con una fila por participante (m\'etricas y
+puntajes), un JSON de fidelidad completa y las transcripciones en JSONL para codificaci\'on
+cualitativa.
+
 \subsection{Implementaci\'on}
-Las tareas de depuraci\'on (Fig.~\ref{fig:pyodide}) son: (T1) un bucle \texttt{while} infinito
-por un contador que no se incrementa; y (T2) un algoritmo \texttt{find\_duplicates} $O(n^3)$ que
-debe optimizarse a $O(n)$ con un conjunto. La resoluci\'on no se auto-reporta: el arn\'es oculto
-ejecuta el c\'odigo del estudiante y, en T2, impone una compuerta de rendimiento sobre 40\,000
-elementos.
+El cliente y el servidor se construyeron como una \'unica aplicaci\'on Next.js con renderizado del
+lado del cliente para las vistas interactivas. El \textbf{chat} mantiene el historial en React y
+consume \texttt{/api/chat}, que abre una conexi\'on SSE: el servidor invoca a Ollama, lee el flujo
+de tokens y los reenv\'ia conforme llegan, midiendo el \emph{time-to-first-token} en el primer
+fragmento. El \textbf{panel de c\'odigo} integra un editor y un \emph{Web Worker} que inicializa
+Pyodide una sola vez; al ejecutar, concatena el c\'odigo del estudiante con el arn\'es de pruebas
+oculto y captura la l\'inea \texttt{\_\_TESTS\_\_} que reporta \emph{passed}/\emph{detail}, con un
+\emph{timeout} que sirve adem\'as para detectar bucles infinitos (Fig.~\ref{fig:pyodide}). El
+\textbf{avatar} se dibuja en un \emph{canvas} Kaplay.js independiente; la \textbf{voz} usa el
+endpoint \texttt{/api/stt} (Whisper) para transcribir y Piper para sintetizar la respuesta. La
+\textbf{asignaci\'on} de condici\'on/orden se resuelve en el servidor por bloques permutados y se
+persiste, evitando que el participante elija condici\'on. Las \textbf{tareas} de depuraci\'on son:
+(T1) un bucle \texttt{while} que no termina por un contador que no se actualiza; y (T2) un
+algoritmo de fuerza bruta con bucles anidados que debe optimizarse a $O(n)$ con un conjunto; para el dise\~no \emph{crossover}
+existe una segunda variante equivalente de cada una. Todo el sistema se empaqueta con Docker
+Compose (la aplicaci\'on, Ollama y el servicio de voz) para una ejecuci\'on reproducible con un solo
+comando.
 
 \begin{figure}[t]
   \centering
@@ -184,6 +353,14 @@ elementos.
   \caption{Verificaci\'on objetiva de la resoluci\'on: el arn\'es de pruebas ocultas confirma que
   la correcci\'on del estudiante pasa.}
   \label{fig:pyodide}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/landing.png}
+  \caption{Pantalla de inicio. El participante pulsa \emph{PRESS START} y el servidor asigna la
+  condici\'on/orden; los botones de prueba quedan ocultos durante la recolecci\'on real.}
+  \label{fig:landing}
 \end{figure}
 
 %--------------------------------------------------------------
@@ -203,43 +380,45 @@ elementos.
 \end{itemize}
 
 \subsection{Dise\~no del estudio}
-Este art\'iculo reporta un \emph{estudio piloto de viabilidad}. El piloto adopta un dise\~no
-\textbf{entre-sujetos} de dos condiciones (A corporizada, B texto): cada participante se asigna a
-\emph{una} condici\'on y resuelve en ella las dos tareas de depuraci\'on. La asignaci\'on la
-realiza el servidor mediante \emph{aleatorizaci\'on por bloques permutados} (bloques de tama\~no
-par con igual n\'umero de A y B), de modo que el participante nunca elige su condici\'on y el
-balance A/B se garantiza por bloque. Se adopta un esquema \emph{post-only}: \textbf{no se
-administran formularios al inicio} ---el participante entra directo a la experiencia--- y la
-bater\'ia completa se aplica una sola vez al final, lo que reduce la fricci\'on inicial y evita el
-\emph{priming} de medidas previas. El objetivo del piloto es validar la viabilidad t\'ecnica del
-sistema, depurar los instrumentos y obtener evidencia preliminar de tama\~nos de efecto que oriente
-el estudio completo.
+Este art\'iculo reporta un \emph{estudio piloto de viabilidad} ejecutado en dos fases con un
+dise\~no mixto. La \textbf{Fase~1} (6 participantes) emple\'o un dise\~no \textbf{entre-sujetos}:
+cada participante se asign\'o a \emph{una} condici\'on (A corporizada o B texto) y resolvi\'o en
+ella las dos tareas de depuraci\'on. La \textbf{Fase~2} (4 participantes) emple\'o un dise\~no
+\textbf{intra-sujeto (\emph{crossover})}, en el que cada participante resolvi\'o ambas tareas en
+\emph{ambas} condiciones. En ambas fases la asignaci\'on (de condici\'on o de orden) la realiza el
+servidor mediante \emph{aleatorizaci\'on por bloques permutados}, de modo que el participante nunca
+elige su condici\'on y el balance A/B queda garantizado por bloque. Se adopta un esquema
+\emph{post-only}: \textbf{no se administran formularios al inicio} ---el participante entra directo
+a la experiencia--- lo que reduce la fricci\'on inicial y evita el \emph{priming} de medidas
+previas. Como cada sesi\'on \emph{crossover} aporta una observaci\'on por condici\'on y cada sesi\'on
+entre-sujetos aporta una, ambos dise\~nos se combinan en el contraste A vs.\ B por condici\'on
+(14~observaciones; 7 por condici\'on).
 
-\paragraph{Protocolo refinado para el estudio completo}
-A partir de las lecciones del piloto, el sistema desplegado implementa adem\'as un dise\~no
-\textbf{intra-sujeto (\emph{crossover})} que se propone para la recolecci\'on formal: cada
-participante resuelve ambas tareas en \emph{ambas} condiciones (cuatro ejercicios en dos bloques),
-con el \emph{orden} de condiciones contrabalanceado (A$\to$B / B$\to$A) por bloques permutados.
-Para evitar que el participante resuelva el problema id\'entico dos veces (efecto de
-pr\'actica/memoria ---se\~nalado por un participante del piloto), cada tarea tiene \textbf{dos
+\paragraph{Dise\~no \emph{crossover} con variantes de tarea}
+En la Fase~2, cada participante realiza cuatro ejercicios en dos bloques (las dos tareas en una
+condici\'on y luego en la opuesta), con el \emph{orden} de condiciones contrabalanceado (A$\to$B /
+B$\to$A). Para evitar que el participante resuelva el problema id\'entico dos veces (efecto de
+pr\'actica/memoria ---se\~nalado por un participante de la Fase~1), cada tarea tiene \textbf{dos
 variantes equivalentes} en dificultad y constructo (dos errores de terminaci\'on de bucle
-distintos; dos algoritmos $O(n^2)$ optimizables a $O(n)$ con un \emph{set}): el Bloque~1 usa la
+distintos; dos algoritmos de fuerza bruta con bucles anidados optimizables a $O(n)$ con un \emph{set}): el Bloque~1 usa la
 variante~1 y el Bloque~2 la variante~2. Como la variante est\'a ligada a la posici\'on del bloque y
 el orden de condiciones es contrabalanceado, la dificultad de variante queda balanceada entre A y
-B. Un dise\~no intra-sujeto controla las diferencias individuales y maximiza la potencia con la $N$
-peque\~na t\'ipica de un estudio de curso; las bater\'ias espec\'ificas de condici\'on se aplican
-una vez por bloque.
+B. El dise\~no intra-sujeto controla las diferencias individuales y maximiza la potencia con la $N$
+peque\~na t\'ipica de un estudio de curso; los cuestionarios espec\'ificos de cada condici\'on se
+responden una vez por bloque y se propone como dise\~no principal para la recolecci\'on a escala.
 
 \subsection{Participantes}
-La muestra piloto fue de $N=6$ participantes reclutados por conveniencia (3 en la Condici\'on~A,
-3 en la Condici\'on~B), con edad media de 21{,}8 a\~nos (DE${}=3{,}1$; rango 19--25) y g\'enero
-masculino en todos los casos. La experiencia previa en programaci\'on fue heterog\'enea (desde
-\emph{ninguna} hasta \emph{avanzada}), al igual que la familiaridad con agentes de IA (de
-\emph{baja} a \emph{alta}). La homogeneidad de g\'enero y el reclutamiento por conveniencia se
-discuten como limitaciones (Secci\'on~\ref{sec:discussion}).
+La muestra piloto fue de $N=10$ participantes reclutados por conveniencia (6 en la Fase~1
+entre-sujetos ---3 por condici\'on--- y 4 en la Fase~2 \emph{crossover}), con edad media de
+24{,}9 a\~nos (DE${}=10{,}3$; rango 19--53) y composici\'on de 9 hombres y 1 mujer. La experiencia
+previa en programaci\'on fue marcadamente heterog\'enea (5 \emph{ninguna}, 2 \emph{principiante},
+3 \emph{avanzada}), al igual que la familiaridad con agentes de IA. Combinando ambas fases, el
+contraste por condici\'on cuenta con 7 observaciones en A y 7 en B. La homogeneidad de g\'enero, el
+\'unico participante at\'ipico de mayor edad y el reclutamiento por conveniencia se discuten como
+limitaciones (Secci\'on~\ref{sec:discussion}).
 
 \subsection{Instrumentos y m\'etricas}
-La Tabla~\ref{tab:instruments} resume la bater\'ia. Las medidas de auto-reporte (todas
+La Tabla~\ref{tab:instruments} resume los instrumentos. Las medidas de auto-reporte (todas
 administradas una sola vez al final) se complementan con m\'etricas conductuales capturadas
 autom\'aticamente del flujo de mensajes, sin interrumpir al participante: latencia
 (\emph{time-to-first-token} medio y percentil 95), turnos, tiempo por tarea, \emph{think-time}
@@ -247,7 +426,16 @@ entre turnos, verbosidad (caracteres/palabras), uso de voz vs.\ teclado y anillo
 combinaci\'on es deliberada: las medidas de auto-reporte y las conductuales suelen correlacionar
 d\'ebilmente~\cite{dang2020selfreport}, por lo que ante una muestra peque\~na se prioriza la
 evidencia conductual y un an\'alisis cualitativo de las conversaciones (codificaci\'on tem\'atica)
-sobre los puntajes de cuestionarios.
+sobre los puntajes de cuestionarios. La Figura~\ref{fig:quest} muestra un \'item del conjunto de
+cuestionarios tal como lo responde el participante en la aplicaci\'on.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/questionnaire.png}
+  \caption{Ejemplo de instrumento (Godspeed) administrado en la aplicaci\'on al final de la
+  interacci\'on, con barra de progreso del conjunto de cuestionarios.}
+  \label{fig:quest}
+\end{figure}
 
 \paragraph{Verificaci\'on de la manipulaci\'on}
 La condici\'on se aplica en el servidor y determina de forma determinista la interfaz: la
@@ -257,7 +445,7 @@ As\'i, cualquier diferencia observada es atribuible al \emph{embodiment} y no al
 tutor.
 
 \begin{table}[t]
-  \caption{Bater\'ia de instrumentos. En el piloto entre-sujetos se aplica una
+  \caption{Conjunto de instrumentos. En el piloto entre-sujetos se aplica una
   sola vez al final; en el dise\~no \emph{crossover} refinado, los instrumentos
   espec\'ificos de condici\'on (Godspeed, apoyo pedag\'ogico, SUS, NASA-TLX,
   PANAS-SF) se aplican una vez por bloque y los dem\'as una sola vez.}
@@ -284,35 +472,89 @@ tutor.
 Protocolo ejecutado en el piloto (entre-sujetos): (1) el participante pulsa \emph{PRESS START} y el
 servidor asigna condici\'on e identificador an\'onimo; (2) resuelve la Tarea~1 (m\'ax.\ 10~min)
 interactuando por texto (ambas condiciones) o voz (Condici\'on~A); (3) mini-juego de transici\'on;
-(4) resuelve la Tarea~2 (m\'ax.\ 10~min); (5) completa la bater\'ia \'unica final. El tutor aplica
+(4) resuelve la Tarea~2 (m\'ax.\ 10~min); (5) completa los cuestionarios finales. El tutor aplica
 andamiaje de tres niveles y env\'ia mensajes proactivos tras 60~s de inactividad, sin entregar
 c\'odigo. En el protocolo \emph{crossover} refinado, este ciclo de dos tareas se repite en la
-condici\'on opuesta (con las variantes de tarea) y la bater\'ia espec\'ifica de condici\'on se
+condici\'on opuesta (con las variantes de tarea) y el conjunto de cuestionarios espec\'ifico de la
+condici\'on se
 responde al final de cada bloque.
 
 \subsection{Recolecci\'on de datos}
-Cada sesi\'on se persiste en una base de datos SQLite local bajo un identificador an\'onimo
-(\texttt{P-001}, \dots), sin nombre ni correo. El sistema exporta un CSV con una fila por
-participante (ver el diccionario de datos del repositorio), un JSON de fidelidad completa y las
-transcripciones de conversaci\'on en JSONL para la codificaci\'on cualitativa. El an\'alisis
-descriptivo por condici\'on est\'a disponible en vivo en el panel del facilitador; el an\'alisis
-inferencial (Mann--Whitney $U$, $\delta$ de Cliff, $d$ de Cohen) se ejecuta sobre el CSV con el
-script de an\'alisis incluido en el repositorio.
+El flujo de recolecci\'on (Fig.~\ref{fig:flow}) es totalmente automatizado: desde la asignaci\'on
+en el servidor hasta la persistencia y exportaci\'on, sin intervenci\'on manual que introduzca
+errores de transcripci\'on. Cada sesi\'on se guarda en una base de datos SQLite local bajo un
+identificador an\'onimo (\texttt{P-001}, \dots), sin nombre ni correo. El sistema exporta un CSV con
+una fila por participante (ver el diccionario de datos del repositorio), un JSON de fidelidad
+completa y las transcripciones de conversaci\'on en JSONL para la codificaci\'on cualitativa.
+
+\begin{figure}[t]
+  \centering
+  \footnotesize
+  \begin{tikzpicture}[
+    node distance=2.4mm and 4mm,
+    step/.style={draw, rounded corners=2pt, fill=blue!7, align=center, font=\scriptsize,
+                 inner sep=3pt, text width=15mm, minimum height=8mm},
+    store/.style={draw, fill=green!10, align=center, font=\scriptsize, inner sep=3pt,
+                  text width=15mm, minimum height=8mm},
+    >={Stealth[length=1.6mm]}]
+    \node[step] (assign) {Asignaci\'on (servidor)};
+    \node[step, right=of assign] (inter) {Interacci\'on tutor + tareas};
+    \node[step, right=of inter] (quest) {Cuestionarios};
+    \node[store, right=of quest] (db) {SQLite \texttt{sonic.db}};
+    \node[step, below=6mm of db] (panel) {Panel del facilitador};
+    \node[store, left=of panel] (export) {Export CSV / JSON / JSONL};
+    \node[step, left=of export] (analysis) {An\'alisis (\emph{script})};
+    \draw[->] (assign) -- (inter);
+    \draw[->] (inter) -- (quest);
+    \draw[->] (quest) -- (db);
+    \draw[->] (db) -- (panel);
+    \draw[->] (db) -- (export);
+    \draw[->] (export) -- (analysis);
+    \draw[->] (db.north) to[out=110,in=70] node[above,font=\scriptsize] {telemetr\'ia continua} (inter.north);
+  \end{tikzpicture}
+  \caption{Flujo de recolecci\'on y an\'alisis de datos, de extremo a extremo.}
+  \label{fig:flow}
+\end{figure}
+
+El an\'alisis descriptivo por condici\'on est\'a disponible en vivo en el \textbf{panel del
+facilitador} (Fig.~\ref{fig:admin}), que muestra el balance A/B, gr\'aficos comparativos y la tabla
+de estad\'isticas; el an\'alisis inferencial (Mann--Whitney $U$, $\delta$ de Cliff, $d$ de Cohen) se
+ejecuta sobre el CSV con el \emph{script} incluido en el repositorio.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/admin.png}
+  \caption{Panel del facilitador (programa real): balance por condici\'on, gr\'aficos comparativos
+  A vs.\ B, estad\'istica descriptiva y listado de participantes; los pilotos se excluyen de los
+  estad\'isticos.}
+  \label{fig:admin}
+\end{figure}
 
 %--------------------------------------------------------------
 \section{Resultados}
 \label{sec:results}
 Se reportan estad\'isticas descriptivas por condici\'on (media, DE) y, dado el tama\~no muestral
-reducido ($n=3$ por condici\'on), se prioriza el \textbf{tama\~no de efecto} ($d$ de Cohen; $A-B$)
-sobre la significancia inferencial. La Tabla~\ref{tab:results} resume las m\'etricas principales.
-Las pruebas de Mann--Whitney no alcanzaron significancia ($p>0{,}05$ en todas las m\'etricas),
-resultado esperable con este $N$; por ello la lectura se centra en la magnitud y direcci\'on de los
-efectos y en la evidencia cualitativa.
+reducido (7 observaciones por condici\'on), se prioriza el \textbf{tama\~no de efecto} ($d$ de
+Cohen; $A-B$) sobre la significancia inferencial. La Tabla~\ref{tab:results} resume las m\'etricas
+principales. La unidad del contraste es la \emph{observaci\'on por condici\'on}: cada participante
+\emph{crossover} aporta una observaci\'on a cada condici\'on y cada participante entre-sujetos una a
+su condici\'on, totalizando 7 en A y 7 en B. La Figura~\ref{fig:results} ilustra la pantalla de
+resultados que cierra cada sesi\'on, con las cuatro corridas etiquetadas por condici\'on en el
+dise\~no \emph{crossover}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.82\columnwidth]{figures/results.png}
+  \caption{Pantalla de resultados de una sesi\'on \emph{crossover} (P-007, secuencia A$\to$B): rango
+  resumen, m\'etricas de sesi\'on y las cuatro corridas (ambas tareas en cada condici\'on) con su
+  etiqueta de condici\'on.}
+  \label{fig:results}
+\end{figure}
 
 \begin{table}[t]
-  \caption{Resultados descriptivos del piloto por condici\'on, media (DE), $n=3$ cada una.
-  $d$: tama\~no de efecto de Cohen ($A-B$). En \emph{Turnos}, \emph{Tiempo} y \emph{NASA-TLX} un
-  valor menor es mejor.}
+  \caption{Resultados descriptivos por condici\'on, media (DE), 7 observaciones cada una.
+  $d$: tama\~no de efecto de Cohen ($A-B$); ${}^{*}p<0{,}05$ (Mann--Whitney). En \emph{Turnos},
+  \emph{Tiempo} y \emph{NASA-TLX} un valor menor es mejor.}
   \label{tab:results}
   \centering
   \footnotesize
@@ -320,71 +562,83 @@ efectos y en la evidencia cualitativa.
     \toprule
     \textbf{M\'etrica} & \textbf{Cond.\ A} & \textbf{Cond.\ B} & \textbf{$d$} \\
     \midrule
-    Resoluci\'on aut\'onoma (0--1) & 0{,}33 (0{,}58) & 0{,}50 (0{,}50) & $-0{,}31$ \\
-    Turnos por tarea & 3{,}3 (1{,}5) & 9{,}3 (6{,}1) & $-1{,}35$ \\
-    Tiempo por tarea (s) & 322 (170) & 628 (420) & $-0{,}95$ \\
-    TTFT medio (ms) & 666 (624) & 462 (250) & $0{,}43$ \\
-    \% latencia $<1.5$\,s & 94 & 95 & --- \\
-    \emph{Think-time} (s) & 37{,}3 (15{,}2) & 40{,}3 (19{,}1) & $-0{,}17$ \\
-    SUS (0--100) & 66{,}7 (14{,}4) & 65{,}8 (21{,}6) & $0{,}05$ \\
-    Apoyo pedag\'ogico (1--5) & 3{,}13 (1{,}72) & 3{,}87 (0{,}70) & $-0{,}56$ \\
-    NASA-TLX (RTLX) & 42{,}6 (21{,}1) & 72{,}8 (18{,}6) & $-1{,}52$ \\
-    Godspeed global (1--5) & 4{,}37 (0{,}59) & 2{,}43 (1{,}23) & $2{,}00$ \\
-    PANAS afecto $+$ & 18{,}3 (4{,}0) & 15{,}7 (6{,}4) & $0{,}50$ \\
-    PANAS afecto $-$ & 11{,}0 (6{,}0) & 10{,}0 (4{,}4) & $0{,}19$ \\
+    Resoluci\'on aut\'onoma (0--1) & 0{,}29 (0{,}39) & 0{,}29 (0{,}39) & $0{,}00$ \\
+    Turnos por tarea & 3{,}4 (1{,}6) & 5{,}7 (5{,}1) & $-0{,}60$ \\
+    Tiempo por tarea (s) & 230 (143) & 338 (369) & $-0{,}39$ \\
+    TTFT mediano (ms) & 218 & 244 & --- \\
+    \% latencia $<1.5$\,s & 88 & 94 & --- \\
+    SUS (0--100) & 72{,}5 (11{,}9) & 65{,}0 (22{,}1) & $0{,}42$ \\
+    Apoyo pedag\'ogico (1--5) & 3{,}83 (1{,}30) & 3{,}69 (1{,}35) & $0{,}11$ \\
+    NASA-TLX (RTLX) & 57{,}9 (22{,}0) & 73{,}3 (14{,}5) & $-0{,}83$ \\
+    Godspeed global (1--5) & 4{,}24 (0{,}40) & 2{,}89 (1{,}29) & $1{,}42$ \\
+    \quad\emph{antropomorfismo} & 3{,}64 (0{,}84) & 2{,}57 (1{,}13) & $1{,}07$ \\
+    \quad\emph{agrado}${}^{*}$ & 5{,}00 (0{,}00) & 3{,}19 (1{,}54) & $1{,}66$ \\
+    \quad\emph{inteligencia} & 4{,}36 (0{,}56) & 3{,}00 (1{,}53) & $1{,}18$ \\
+    PANAS afecto $+$ & 18{,}4 (2{,}9) & 15{,}9 (4{,}0) & $0{,}73$ \\
+    PANAS afecto $-$ & 10{,}9 (4{,}5) & 10{,}3 (4{,}1) & $0{,}13$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \paragraph{Percepci\'on del agente (RQ1)} La corporizaci\'on produjo el efecto m\'as grande y
-consistente: Godspeed global fue muy superior en A (4{,}37 vs.\ 2{,}43; $d=2{,}0$; $\delta$ de
-Cliff${}=0{,}78$), con la subescala de agrado mostrando separaci\'on completa entre grupos
-($\delta=1{,}0$; $p=0{,}064$). La usabilidad (SUS) fue equivalente ($d=0{,}05$), lo que sugiere que
-la diferencia no se debe a una interfaz m\'as usable sino a la \emph{presencia social} del avatar.
-El apoyo pedag\'ogico percibido fue algo mayor en B ($d=-0{,}56$), un matiz que se retoma en la
-discusi\'on.
+consistente: Godspeed global fue muy superior en A (4{,}24 vs.\ 2{,}89; $d=1{,}42$; $p=0{,}055$),
+y la subescala de \emph{agrado} alcanz\'o significancia pese al tama\~no muestral (5{,}00 vs.\
+3{,}19; $d=1{,}66$; $\delta$ de Cliff${}=0{,}71$; $p=0{,}011$), con antropomorfismo e inteligencia
+tambi\'en favorables a A ($d=1{,}07$ y $1{,}18$). La usabilidad (SUS) fue solo ligeramente mayor en
+A ($d=0{,}42$) y el apoyo pedag\'ogico percibido fue equivalente ($d=0{,}11$), lo que sugiere que el
+efecto se concentra en la \emph{presencia social} del avatar y no en una interfaz m\'as usable ni en
+una percepci\'on distinta del andamiaje.
 
-\paragraph{Eficacia aut\'onoma (RQ2)} La tasa de resoluci\'on fue similar (A $0{,}33$ vs.\ B
-$0{,}50$; $d=-0{,}31$), dentro del ruido esperable con $n=3$. La Condici\'on~A requiri\'o
-\emph{menos} turnos por tarea (3{,}3 vs.\ 9{,}3; $d=-1{,}35$) y menos tiempo (322 vs.\ 628~s;
-$d=-0{,}95$); con esta muestra no puede separarse el efecto del \emph{embodiment} de las
-diferencias de experiencia previa entre grupos.
+\paragraph{Eficacia aut\'onoma (RQ2)} La tasa de resoluci\'on aut\'onoma fue id\'entica entre
+condiciones (0{,}29 en ambas; $d=0$). La Condici\'on~A requiri\'o algo menos de turnos por tarea
+(3{,}4 vs.\ 5{,}7; $d=-0{,}60$) y de tiempo ($d=-0{,}39$), pero con esta muestra y la heterogeneidad
+de experiencia previa no puede atribuirse causalidad al \emph{embodiment}.
 
-\paragraph{Carga cognitiva y afecto (RQ3)} La carga autopercibida (NASA-TLX) fue marcadamente
-\emph{menor} en A (42{,}6 vs.\ 72{,}8; $d=-1{,}52$), y el afecto positivo (PANAS) algo mayor
-($d=0{,}50$), sin diferencia relevante en afecto negativo. Es decir, en este piloto la
-corporizaci\'on no aument\'o la carga ---el riesgo advertido por~\cite{li2025cognitiveload}--- sino
-que acompa\~n\'o a una experiencia percibida como m\'as ligera y positiva.
+\paragraph{Carga cognitiva y afecto (RQ3)} La carga autopercibida (NASA-TLX) fue \emph{menor} en A
+(57{,}9 vs.\ 73{,}3; $d=-0{,}83$) y el afecto positivo (PANAS) mayor ($d=0{,}73$), sin diferencia
+relevante en afecto negativo. Es decir, en este piloto la corporizaci\'on no aument\'o la carga
+---el riesgo advertido por~\cite{li2025cognitiveload}--- sino que acompa\~n\'o a una experiencia
+percibida como m\'as ligera y positiva.
 
-\paragraph{Latencia (RQ4)} Sobre 71 respuestas del tutor, el \emph{time-to-first-token} se mantuvo
-bajo 1.5~s en el 94{,}4\,\% de los casos (mediana 234~ms; media 503~ms), con cumplimiento
-equivalente en ambas condiciones ($\approx94$--$95\,\%$), confirmando la viabilidad del objetivo de
-latencia con inferencia local.
+\paragraph{Latencia (RQ4)} Sobre 119 respuestas del tutor, el \emph{time-to-first-token} se mantuvo
+bajo 1.5~s en el 92\,\% de los casos (mediana 234~ms). El cumplimiento fue algo menor en la
+Condici\'on~A (88\,\% vs.\ 94\,\%), atribuible a respuestas ocasionalmente m\'as lentas en las
+sesiones con voz y avatar y en las realizadas de forma remota; aun as\'i, la mediana de A (218~ms)
+fue equivalente, confirmando la viabilidad del objetivo de latencia con inferencia local.
 
 \subsection{Hallazgos cualitativos}
 El an\'alisis tem\'atico de las respuestas abiertas (codificadas seg\'un el esquema del
 repositorio) revel\'o patrones coherentes con los cuantitativos:
 \begin{itemize}
-  \item \textbf{Demanda expl\'icita de corporizaci\'on.} Ambos participantes de la condici\'on de
-        \emph{texto} echaron en falta el avatar: \emph{``El no interactuar con un avatar como
-        Sonic''} (lo que menos gust\'o, P-003) y \emph{``No me gust\'o no ver a Sonic''} (P-005),
-        que adem\'as a\~nadi\'o \emph{``Prefiero el aprender junto con un agente virtual como
-        Sonic''}. Ning\'un participante de la condici\'on corporizada pidi\'o lo contrario.
-  \item \textbf{Presencia social y gu\'ia percibida.} En la condici\'on A se valor\'o la
-        reactividad: \emph{``poder charlar con Sonic y ver c\'omo este reaccionaba ante mis
-        comentarios. Fue una gu\'ia para m\'i''} (P-006); \emph{``es amable, amigable y divertido''}
-        (P-002).
+  \item \textbf{Preferencia por la corporizaci\'on, incluso intra-sujeto.} El testimonio m\'as
+        fuerte proviene de participantes \emph{crossover} que vivieron ambas condiciones:
+        \emph{``El chat de texto fue molesto y poco pr\'actico\ldots no veo que el sistema est\'e
+        interactuando conmigo''} y \emph{``Prefiero 100\,\% el usar la opci\'on del avatar de Sonic
+        mientras aprendo algo tan dif\'icil como\ldots\ programar''} (P-007). En la fase
+        entre-sujetos, quienes solo tuvieron texto tambi\'en pidieron el avatar:
+        \emph{``No me gust\'o no ver a Sonic''} (P-005); \emph{``Prefiero el aprender junto con un
+        agente virtual como Sonic''} (P-003). Ning\'un participante expres\'o la preferencia
+        inversa.
+  \item \textbf{Presencia social y gu\'ia percibida.} Se valor\'o la reactividad del avatar:
+        \emph{``poder charlar con Sonic y ver c\'omo este reaccionaba ante mis comentarios. Fue una
+        gu\'ia para m\'i''} (P-006); \emph{``es Sonic\ldots lo que lo hace m\'as interactivo''}
+        (P-008); \emph{``es amable, amigable y divertido''} (P-002).
   \item \textbf{El andamiaje socr\'atico se percibi\'o.} Un participante de texto destac\'o
         \emph{``que de verdad me fuera ayudando\ldots sin darme la respuesta''} (P-005),
         evidenciando que la restricci\'on de no entregar c\'odigo fue percibida como apoyo y no
         como carencia.
-  \item \textbf{Fricciones de usabilidad y prerrequisitos.} Se mencionaron el tiempo de respuesta
-        (P-002), la falta de explicaci\'on inicial de los controles (P-002) y la barrera de
-        conocimiento previo (\emph{``Me gustar\'ia saber de programaci\'on para entender los
-        ejercicios''}, P-001).
-  \item \textbf{Efecto de repetici\'on.} Un participante se\~nal\'o que repetir el mismo ejercicio
-        no aportaba (\emph{``no me gust\'o volver a hacer las mismas preguntas''}, P-006), hallazgo
-        que motiv\'o directamente las variantes de tarea del protocolo refinado.
+  \item \textbf{Presi\'on de la gamificaci\'on.} Un participante report\'o
+        \emph{``un poco de presi\'on para contestar r\'apido, porque sent\'ia que pod\'ia perder el
+        nivel''} (P-009), se\~nal de que el sistema de anillos puede a\~nadir demanda temporal ---un
+        matiz relevante para la carga cognitiva (RQ3).
+  \item \textbf{Fricciones de usabilidad y prerrequisitos.} Se mencionaron el tiempo de respuesta y
+        la falta de explicaci\'on inicial de los controles (P-002), y la barrera de conocimiento
+        previo en participantes sin experiencia (\emph{``como no s\'e nada sobre programaci\'on me
+        tom\'o m\'as tiempo entender el c\'odigo''}, P-009; similar en P-001).
+  \item \textbf{Efecto de repetici\'on.} Un participante de la Fase~1 se\~nal\'o que repetir el
+        mismo ejercicio no aportaba (\emph{``no me gust\'o volver a hacer las mismas preguntas''},
+        P-006), hallazgo que motiv\'o directamente las variantes de tarea introducidas en la
+        Fase~2.
 \end{itemize}
 
 %--------------------------------------------------------------
@@ -392,44 +646,47 @@ repositorio) revel\'o patrones coherentes con los cuantitativos:
 \label{sec:discussion}
 Los resultados del piloto, aunque preliminares, dibujan un patr\'on coherente entre las medidas
 cuantitativas y cualitativas. Respecto a \textbf{RQ1}, la corporizaci\'on elev\'o de forma
-sustancial la percepci\'on del agente (Godspeed, $d=2{,}0$) sin mejorar la usabilidad ($d=0{,}05$):
-la diferencia parece atribuible a la \emph{presencia social} del avatar y la voz, no a una interfaz
-m\'as f\'acil. Esto concuerda con los efectos de presencia social reportados en agentes
+sustancial la percepci\'on del agente (Godspeed global $d=1{,}42$; agrado $d=1{,}66$ con
+$p=0{,}011$) con solo una mejora menor de usabilidad ($d=0{,}42$) y sin diferencia en el apoyo
+pedag\'ogico percibido ($d=0{,}11$): el efecto se concentra en la \emph{presencia social} del
+avatar y la voz, no en una interfaz m\'as f\'acil ni en una percepci\'on distinta del andamiaje.
+Esto concuerda con los efectos de presencia social reportados en agentes
 corporizados~\cite{elhajji2025architecture,sonlu2024scoping} y se ve reforzado por el dato
-cualitativo m\'as llamativo: los participantes de la condici\'on de \emph{texto} pidieron
-expl\'icitamente el avatar. El apoyo pedag\'ogico percibido fue, en cambio, ligeramente mayor en la
-condici\'on de texto ($d=-0{,}56$), lo que sugiere que la corporizaci\'on influye sobre todo en la
-dimensi\'on socio-afectiva y no necesariamente en la percepci\'on del andamiaje en s\'i.
+cualitativo m\'as fuerte: participantes que experimentaron \emph{ambas} condiciones prefirieron sin
+ambig\"uedad el avatar sobre el texto.
 
 En cuanto a \textbf{RQ3}, la condici\'on corporizada se asoci\'o a una carga cognitiva
-autopercibida \emph{menor} (NASA-TLX, $d=-1{,}52$) y a un afecto positivo algo mayor. Es decir, en
-este contexto no se materializ\'o el riesgo de que el agente \emph{aumente} la carga en tareas
-densas advertido por el meta-an\'alisis de~\cite{li2025cognitiveload}; una interpretaci\'on
-plausible es que la voz y el andamiaje visual redujeron la carga \emph{extr\'inseca} de la
-interacci\'on. Para \textbf{RQ2}, la eficacia de resoluci\'on fue similar entre condiciones y la
-condici\'on A necesit\'o menos turnos y tiempo, pero la confusi\'on con la experiencia previa
-(mayor en parte de la condici\'on B) impide atribuir causalidad con esta muestra. Finalmente,
-\textbf{RQ4} se cumpli\'o con holgura: 94\,\% de las respuestas bajo 1.5~s con inferencia
-totalmente local, lo que valida la viabilidad t\'ecnica del enfoque sin nube.
+autopercibida \emph{menor} (NASA-TLX, $d=-0{,}83$) y a un afecto positivo mayor ($d=0{,}73$). Es
+decir, en este contexto no se materializ\'o el riesgo de que el agente \emph{aumente} la carga en
+tareas densas advertido por~\cite{li2025cognitiveload}; una interpretaci\'on plausible es que la
+voz y el andamiaje visual redujeron la carga \emph{extr\'inseca} de la interacci\'on. No obstante,
+un participante report\'o sentir presi\'on temporal por el sistema de anillos, lo que sugiere que la
+gamificaci\'on puede introducir demanda adicional y debe calibrarse. Para \textbf{RQ2}, la eficacia
+de resoluci\'on fue \emph{id\'entica} entre condiciones ($d=0$): la corporizaci\'on mejor\'o la
+experiencia sin penalizar (ni, en este piloto, potenciar) el desempe\~no objetivo. Finalmente,
+\textbf{RQ4} se cumpli\'o: 92\,\% de las respuestas bajo 1.5~s con inferencia totalmente local
+(mediana 234~ms), con un cumplimiento algo menor en la Condici\'on~A por respuestas puntuales m\'as
+lentas en sesiones con voz y remotas.
 
 Coherente con la d\'ebil correlaci\'on entre auto-reporte y conducta~\cite{dang2020selfreport} y
 con la recomendaci\'on de no depender de los cuestionarios ante $N$ peque\~no, la evidencia m\'as
 robusta de este piloto proviene de la \emph{convergencia} entre el efecto de percepci\'on
-(Godspeed), la se\~nal conductual (menos turnos) y la demanda expl\'icita de corporizaci\'on en las
-respuestas abiertas.
+(Godspeed, con agrado significativo), la se\~nal conductual (menos turnos) y la preferencia
+expl\'icita ---incluso intra-sujeto--- por la corporizaci\'on en las respuestas abiertas.
 
 \paragraph{Limitaciones}
-Las conclusiones son preliminares y deben leerse con cautela. (i)~\emph{Tama\~no muestral}: con
-$n=3$ por condici\'on los intervalos de confianza son amplios y ninguna prueba inferencial alcanza
-significancia; los tama\~nos de efecto, aunque grandes, son inestables y pueden variar con m\'as
-datos. (ii)~\emph{Dise\~no entre-sujetos y confusi\'on}: la experiencia previa no qued\'o
-balanceada entre grupos, por lo que las diferencias de eficacia (RQ2) no son atribuibles
-limpiamente al \emph{embodiment}; el dise\~no \emph{crossover} refinado mitiga esto en el estudio
-completo. (iii)~\emph{Homogeneidad de la muestra}: todos los participantes fueron hombres j\'ovenes,
-lo que limita la generalizaci\'on. (iv)~\emph{Efecto de novedad}: la valoraci\'on de la
-Condici\'on~A pudo inflarse por la familiaridad y el atractivo del personaje Sonic, un efecto que
-suele atenuarse con el uso repetido. (v)~\emph{Medici\'on \emph{post-only}} del afecto (sin l\'inea
-base) y \emph{dependencia del hardware} local para la latencia.
+Las conclusiones son preliminares y deben leerse con cautela. (i)~\emph{Tama\~no muestral}: con 7
+observaciones por condici\'on los intervalos de confianza son amplios; aunque la subescala de
+agrado alcanz\'o significancia, la mayor\'ia de los efectos no, y sus magnitudes pueden variar con
+m\'as datos. (ii)~\emph{Dise\~no mixto y confusi\'on}: parte de la evidencia proviene de
+comparaciones entre-sujetos donde la experiencia previa no qued\'o balanceada, por lo que las
+diferencias de eficacia (RQ2) no son atribuibles limpiamente al \emph{embodiment}; el dise\~no
+\emph{crossover} (Fase~2) mitiga esto y se propone como dise\~no principal a escala.
+(iii)~\emph{Homogeneidad de la muestra}: predominio de hombres j\'ovenes (9 de 10), lo que limita la
+generalizaci\'on. (iv)~\emph{Efecto de novedad}: la valoraci\'on de la Condici\'on~A pudo inflarse
+por la familiaridad y el atractivo del personaje Sonic, un efecto que suele atenuarse con el uso
+repetido. (v)~\emph{Medici\'on \emph{post-only}} del afecto (sin l\'inea base) y \emph{dependencia
+del hardware} y la red para la latencia.
 
 %--------------------------------------------------------------
 \section{Conclusiones y Trabajo Futuro}
@@ -437,14 +694,15 @@ base) y \emph{dependencia del hardware} local para la latencia.
 Se present\'o \emph{Sonic}, un tutor socr\'atico multimodal corporizado, completamente local y
 reproducible, junto con un dise\~no que a\'isla el \emph{embodiment} (texto de tutor id\'entico) y
 verifica la autonom\'ia con pruebas ocultas en lugar de auto-reporte. La evidencia del estudio
-piloto ($N=6$), aunque preliminar, es internamente coherente: la corporizaci\'on se asoci\'o a una
-percepci\'on del agente notablemente mejor (Godspeed, $d=2{,}0$) y a una carga cognitiva
-autopercibida menor (NASA-TLX, $d=-1{,}5$), con usabilidad y eficacia de resoluci\'on equivalentes,
-mientras la latencia local cumpli\'o el objetivo ($<1.5$~s en el 94\,\% de las respuestas). El dato
-cualitativo m\'as claro ---que los usuarios de la condici\'on de texto pidieran el avatar---
-converge con la se\~nal cuantitativa de presencia social. La principal conclusi\'on, por tanto, es
-que el \emph{embodiment} parece operar sobre la dimensi\'on socio-afectiva y de carga percibida sin
-penalizar la usabilidad, lo que justifica un estudio confirmatorio con mayor poder. El trabajo
+piloto ($N=10$), aunque preliminar, es internamente coherente: la corporizaci\'on se asoci\'o a una
+percepci\'on del agente notablemente mejor (Godspeed global $d=1{,}42$; agrado $d=1{,}66$,
+$p=0{,}011$) y a una carga cognitiva autopercibida menor (NASA-TLX, $d=-0{,}83$), con eficacia de
+resoluci\'on equivalente, mientras la latencia local cumpli\'o el objetivo ($<1.5$~s en el 92\,\%
+de las respuestas). El dato cualitativo m\'as claro ---que los participantes, incluidos quienes
+vivieron ambas condiciones, prefirieran el avatar--- converge con la se\~nal cuantitativa de
+presencia social. La principal conclusi\'on, por tanto, es que el \emph{embodiment} parece operar
+sobre la dimensi\'on socio-afectiva y de carga percibida sin penalizar la eficacia, lo que
+justifica un estudio confirmatorio con mayor poder. El trabajo
 futuro incluye la ejecuci\'on del dise\~no \emph{crossover} con variantes de tarea aqu\'i descrito,
 planificaci\'on adaptativa del di\'alogo~\cite{dong2026learning}, m\'as tareas y dominios, y una
 muestra mayor y m\'as diversa.
