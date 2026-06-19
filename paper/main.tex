@@ -23,7 +23,7 @@
 
 \begin{document}
 
-\title{Sonic: un tutor socr\'atico multimodal corporizado para el desarrollo de l\'ogica de programaci\'on en entornos STEM}
+\title{Sonic Code: un tutor socr\'atico multimodal corporizado para el desarrollo de l\'ogica de programaci\'on en entornos STEM}
 
 \author{\IEEEauthorblockN{Gabriel Isa\'ias Fallas L\'opez}
 \IEEEauthorblockA{Escuela de Ciencias de la Computaci\'on e Inform\'atica\\
@@ -37,7 +37,7 @@ gabrielfallas0803@gmail.com}}
 La integraci\'on masiva de modelos de lenguaje (LLMs) en la educaci\'on en computaci\'on
 ha generado una paradoja pedag\'ogica: el acceso inmediato a soluciones de c\'odigo erosiona
 el desarrollo del razonamiento l\'ogico y la descomposici\'on de problemas. Este art\'iculo
-presenta \emph{Sonic}, un tutor socr\'atico que gu\'ia al estudiante mediante preguntas
+presenta \emph{Sonic Code}, un tutor socr\'atico que gu\'ia al estudiante mediante preguntas
 reflexivas y andamiaje graduado (Zona de Desarrollo Pr\'oximo) sin entregar c\'odigo directo.
 El sistema se implementa sobre un LLM local (Ollama + Gemma~3 12B) y se eval\'ua mediante un
 \emph{estudio piloto} de dos condiciones: una condici\'on corporizada (A) con avatar 2D reactivo
@@ -445,10 +445,7 @@ As\'i, cualquier diferencia observada es atribuible al \emph{embodiment} y no al
 tutor.
 
 \begin{table}[t]
-  \caption{Conjunto de instrumentos. En el piloto entre-sujetos se aplica una
-  sola vez al final; en el dise\~no \emph{crossover} refinado, los instrumentos
-  espec\'ificos de condici\'on (Godspeed, apoyo pedag\'ogico, SUS, NASA-TLX,
-  PANAS-SF) se aplican una vez por bloque y los dem\'as una sola vez.}
+  \caption{Conjunto de instrumentos}
   \label{tab:instruments}
   \centering
   \footnotesize
@@ -677,7 +674,7 @@ del hardware} y la red para la latencia.
 %--------------------------------------------------------------
 \section{Conclusiones y Trabajo Futuro}
 \label{sec:conclusion}
-Se present\'o \emph{Sonic}, un tutor socr\'atico multimodal corporizado, completamente local y
+Se present\'o \emph{Sonic Code}, un tutor socr\'atico multimodal corporizado, completamente local y
 reproducible, junto con un dise\~no que a\'isla el \emph{embodiment} (texto de tutor id\'entico) y
 verifica la autonom\'ia con pruebas ocultas en lugar de auto-reporte. La evidencia del estudio
 piloto ($N=10$), aunque preliminar, es internamente coherente: la corporizaci\'on se asoci\'o a una
@@ -700,11 +697,6 @@ ampliando la muestra y su diversidad, previo sometimiento y aprobaci\'on del Com
 Cient\'ifico (CEC) de la Universidad de Costa Rica, con miras a una eventual publicaci\'on
 acad\'emica. La presente entrega constituye el piloto de viabilidad que fundamenta dicha
 proyecci\'on.
-
-%--------------------------------------------------------------
-\section*{Disponibilidad}
-El c\'odigo fuente, las instrucciones de reproducci\'on y el video de demostraci\'on est\'an
-disponibles en el repositorio del proyecto.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
