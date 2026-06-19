@@ -14,7 +14,7 @@ Repositorio del proyecto de investigación sobre un agente virtual de tutoría s
 ## 📄 Artículo Académico (Paper)
 
 > **Fuente LaTeX:** [`paper/`](paper/) (plantilla IEEE, lista para Overleaf — ver [`paper/README.md`](paper/README.md)).  
-> **PDF compilado:** `paper/paper.pdf` (Artículo científico).
+> **PDF compilado:** [📄](paper/paper.pdf) (Artículo científico).
 
 ---
 
